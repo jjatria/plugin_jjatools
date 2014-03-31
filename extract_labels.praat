@@ -43,6 +43,8 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include split.proc
+
 if praatVersion < 5363
   exitScript("This script has been written using the new syntax,
     ...not available for the version you are using.", newline$,
@@ -282,21 +284,3 @@ if new
     plusObject(extracted[i])
   endfor
 endif
-
-# Taken from http://www.ucl.ac.uk/~ucjt465/scripts/praat.html#split
-procedure split (.sep$, .str$)
-  .seplen = length(.sep$) 
-  .length = 0
-  repeat
-    .strlen = length(.str$)
-    .sep = index(.str$, .sep$)
-    if .sep > 0
-      .part$ = left$(.str$, .sep-1)
-      .str$ = mid$(.str$, .sep+.seplen, .strlen)
-    else
-      .part$ = .str$
-    endif
-    .length = .length+1
-    .array$[.length] = .part$
-  until .sep = 0
-endproc
