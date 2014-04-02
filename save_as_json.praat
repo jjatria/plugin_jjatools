@@ -15,10 +15,10 @@ include check_directory.proc
 include json.proc
 
 form Save as JSON...
-  sentence Save_to
-  optionmenu Format: 1
-    option Pretty printed
-    option Minified
+	sentence Save_to
+	optionmenu Format: 1
+		option Pretty printed
+		option Minified
 endform
 
 @checkDirectory(save_to$, "Save JSON to...")
@@ -27,26 +27,26 @@ directory$ = checkDirectory.name$
 total_objects = numberOfSelected()
 
 for i to total_objects
-  myobj[i] = selected(i)
+	myobj[i] = selected(i)
 endfor
 
 if format$ = "Pretty printed"
-  n$ = newline$
-  t$ = tab$
-  s$ = " "
+	n$ = newline$
+	t$ = tab$
+	s$ = " "
 elsif format$ = "Minified"
-  n$ = ""
-  t$ = n$
-  s$ = n$
+	n$ = ""
+	t$ = n$
+	s$ = n$
 endif
 
 for i to total_objects
-  selectObject(myobj[i])
-  type$ = extractWord$(selected$(), "")
-  name$ = selected$(type$)
+	selectObject(myobj[i])
+	type$ = extractWord$(selected$(), "")
+	name$ = selected$(type$)
 	start = Get start time
 	end = Get end time
-  output_file$ = directory$ + "/" + name$ + ".json"
+	output_file$ = directory$ + "/" + name$ + ".json"
 
   if type$ = "TextGrid"
 		json_type$ = "textgrid"
@@ -155,8 +155,8 @@ for i to total_objects
 endfor
 
 if total_objects
-  selectObject(myobj[1])
-  for i from 2 to total_objects
-    plusObject(myobj[i])
-  endfor
+	selectObject(myobj[1])
+	for i from 2 to total_objects
+		plusObject(myobj[i])
+	endfor
 endif

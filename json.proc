@@ -64,33 +64,33 @@ endproc
 
 # Write TextGrid interval to JSON file
 procedure writeJsonIntervalWithLabel (.out$, .start, .end, .label$, .last)
-  @startJsonObject(.out$)
-  @writeJsonNumber(.out$, "start", .start, 0)
-  @writeJsonNumber(.out$, "end", .end, 0)
-  @writeJsonString(.out$, "label", .label$, 1)
-  @endJsonObject(.out$, .last)
+	@startJsonObject(.out$)
+	@writeJsonNumber(.out$, "start", .start, 0)
+	@writeJsonNumber(.out$, "end", .end, 0)
+	@writeJsonString(.out$, "label", .label$, 1)
+	@endJsonObject(.out$, .last)
 endproc
 
 # Write [Pitch]Tier Point to JSON file
 procedure writeJsonPointWithNumber (.out$, .time, .value, .last)
 	@startJsonObject(.out$)
-  @writeJsonNumber(.out$, "time", .time, 0)
-  @writeJsonNumber(.out$, "number", .value, 1)
-  @endJsonObject(.out$, .last)
+	@writeJsonNumber(.out$, "time", .time, 0)
+	@writeJsonNumber(.out$, "number", .value, 1)
+	@endJsonObject(.out$, .last)
 endproc
 
 # Write TextGrid point to JSON file
 procedure writeJsonPointWithLabel (.out$, .time, .label$, .last)
 	@startJsonObject(.out$)
-  @writeJsonNumber(.out$, "time", .time, 0)
-  @writeJsonString(.out$, "label", .label$, 1)
-  @endJsonObject(.out$, .last)
+	@writeJsonNumber(.out$, "time", .time, 0)
+	@writeJsonString(.out$, "label", .label$, 1)
+	@endJsonObject(.out$, .last)
 endproc
 
 # Append to list in JSON file
 procedure pushToJsonList (.out$, .n, .last)
 	.e$ = if .last then "" else "," fi
-  appendFile(.out$, json_indent$, .n, .e$, n$)
+	appendFile(.out$, json_indent$, .n, .e$, n$)
 endproc
 
 # Write string attribute to JSON file
@@ -98,23 +98,23 @@ procedure writeJsonString (.out$, .name$, .value$, .last)
 	.closing$ = if .last then "" else "," fi
 	@sanitizeJsonString(.value$)
 	.value$ = sanitizeJsonString.str$
-  appendFile(.out$,
-    ...json_indent$, """", .name$, """:", s$, """", .value$, """", .closing$, n$)
+	appendFile(.out$,
+		...json_indent$, """", .name$, """:", s$, """", .value$, """", .closing$, n$)
 endproc
 
 # Write numeric attribute to json file
 procedure writeJsonNumber (.out$, .name$, .value, .last)
 	.closing$ = if .last then "" else "," fi
-  appendFile(.out$,
-    ...json_indent$, """", .name$, """:", s$, .value, .closing$, n$)
+	appendFile(.out$,
+		...json_indent$, """", .name$, """:", s$, .value, .closing$, n$)
 endproc
 
 # Write boolean attribute to JSON file
 procedure writeJsonBoolean (.out$, .name$, .value, .last)
 	.closing$ = if .last then "" else "," fi
 	.value$ = if .value = 1 then "true" else "false" fi
-  appendFile(.out$,
-    ...json_indent$, """", .name$, """:", s$, .value$, .closing$, n$)
+	appendFile(.out$,
+		...json_indent$, """", .name$, """:", s$, .value$, .closing$, n$)
 endproc
 
 # Write an empty list to JSON file
@@ -161,9 +161,9 @@ endproc
 
 # Set indent level
 procedure setJsonIndent (.n)
-  json_indent_level = .n
-  .indent$ = ""
-  if format$ != "Minified"
+	json_indent_level = .n
+	.indent$ = ""
+	if format$ != "Minified"
 		for .i to .n
 			.indent$ = .indent$ + tab$
 		endfor
@@ -172,5 +172,5 @@ endproc
 
 # Sanitise string for JSON output
 procedure sanitizeJsonString (.str$)
-  .str$ = replace$(.str$, """", "\""", 0)
+	.str$ = replace$(.str$, """", "\""", 0)
 endproc
