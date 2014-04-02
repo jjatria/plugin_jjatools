@@ -48,7 +48,7 @@ for i to total_objects
 	end = Get end time
 	output_file$ = directory$ + "/" + name$ + ".json"
 
-  if type$ = "TextGrid"
+	if type$ = "TextGrid"
 		json_type$ = "textgrid"
 	elsif type$ = "PointProcess"
 		json_type$ = "points"
