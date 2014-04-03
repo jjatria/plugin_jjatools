@@ -32,7 +32,7 @@ To do this you can use the `include` directive in `Praat`, but you'll need to ha
 
 I don't recommend using full paths, since then your script will not be portable (`include` does not allow variables in its argument).
     
-Instalation
+Installation
 -----------
 
 If you are using Linux, and have `git` installed, you can run
