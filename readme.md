@@ -26,7 +26,7 @@ Scripts and procedures
 
 Files that have self-contained scripts have the `.praat` extension, while those that have procedures to be included into other scripts have the `.proc` extension. Some of these are included as helper scripts (eg. `checkDirectory.proc`), and you are welcome to use them in your own scripts if you want.
 
-To do this you can use the `include` directive in `Praat`, but you'll need to have the full path to the procedure definition, or somewhere where it can reach the definiton using a relative path. If your own scripts are in a plugin, then they should be able to use the procedures by running this line:
+To do this you can use the `include` directive in `Praat`, but you'll need to have the full path to the procedure definition, or save the script somewhere where it can reach the definiton using a relative path. If your own scripts are in a plugin, then they should be able to use the procedures by running this line:
 
     include ../plugin_jjatools/some_procedure_name.proc
 
