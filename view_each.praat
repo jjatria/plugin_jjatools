@@ -19,55 +19,55 @@ n_sound    = numberOfSelected("Sound")
 n_textgrid = numberOfSelected("TextGrid")
 
 if n_textgrid and n_textgrid != n_sound
-  exitScript("Different number of Sounds and TextGrids selected")
+	exitScript("Different number of Sounds and TextGrids selected")
 endif
 
 for i to n_sound
-  sound[i] = selected("Sound", i)
-  if n_textgrid
-    textgrid[i] = selected("TextGrid", i)
-  endif
+	sound[i] = selected("Sound", i)
+	if n_textgrid
+		textgrid[i] = selected("TextGrid", i)
+	endif
 endfor
 
 for i to n_sound
-  selectObject(sound[i])
-  name$ = selected$("Sound")
-  if n_textgrid
-    plusObject(textgrid[i])
-  endif
-  
-  View & Edit
-  
-  beginPause("Viewing " + name$)
-  
-  if i > 1
-    button = endPause("Stop", "Previous", if i = n_sound then "Finish" else "Next" fi, 3, 1)
-  else
-    button = endPause("Stop", if i = n_sound then "Finish" else "Next" fi, 2, 1)  
-  endif
-  
-  editor_name$ = if n_textgrid then "TextGrid " else "Sound " fi + name$
-  nocheck editor 'editor_name$'
-    nocheck Close
-  nocheck endeditor
- 
-  if button = 1
-    goto END
-  elsif button = 2 and i > 1
-    i -= 2
-  endif
+	selectObject(sound[i])
+	name$ = selected$("Sound")
+	if n_textgrid
+		plusObject(textgrid[i])
+	endif
+	
+	View & Edit
+	
+	beginPause("Viewing " + name$)
+	
+	if i > 1
+		button = endPause("Stop", "Previous", if i = n_sound then "Finish" else "Next" fi, 3, 1)
+	else
+		button = endPause("Stop", if i = n_sound then "Finish" else "Next" fi, 2, 1)  
+	endif
+	
+	editor_name$ = if n_textgrid then "TextGrid " else "Sound " fi + name$
+	nocheck editor 'editor_name$'
+		nocheck Close
+	nocheck endeditor
+
+	if button = 1
+		goto END
+	elsif button = 2 and i > 1
+		i -= 2
+	endif
 endfor
 
 label END
 if n_sound
-  selectObject(sound[1])
-  if n_textgrid
-    plusObject(textgrid[1])
-  endif
-  for i from 2 to n_sound
-    plusObject(sound[i])
-    if n_textgrid
-      plusObject(textgrid[i])
-    endif
-  endfor
+	selectObject(sound[1])
+	if n_textgrid
+		plusObject(textgrid[1])
+	endif
+	for i from 2 to n_sound
+		plusObject(sound[i])
+		if n_textgrid
+			plusObject(textgrid[i])
+		endif
+	endfor
 endif

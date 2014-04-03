@@ -1,8 +1,8 @@
 procedure checkFilename (.name$, .label$)
-  if .name$ = "" and praatVersion >= 5142 
-    .name$ = chooseReadFile$(.label$)
-  endif
-  if .name$ = ""
-    exit
-  endif
+	if .name$ = "" and praatVersion >= 5142 
+		.name$ = chooseReadFile$(.label$)
+	endif
+	if .name$ = ""
+		exit
+	endif
 endproc

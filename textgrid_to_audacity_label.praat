@@ -33,7 +33,7 @@ for i to total_textgrids
 endfor
 
 if print_to_Info and total_textgrids
-  clearinfo
+	clearinfo
 endif
 
 for i to total_textgrids
@@ -71,8 +71,8 @@ endfor
 
 # Restore original selection
 if total_textgrids
-  selectObject(tg[1])
-  for i from 2 to total_textgrids
-    plusObject(tg[i])
-  endfor
+	selectObject(tg[1])
+	for i from 2 to total_textgrids
+		plusObject(tg[i])
+	endfor
 endif

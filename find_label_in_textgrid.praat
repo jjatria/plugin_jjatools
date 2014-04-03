@@ -18,19 +18,19 @@
 # <http://www.gnu.org/licenses/>.
 
 form Find label...
-  word Label
-  integer Index
-  integer Tier 1
+	word Label
+	integer Index
+	integer Tier 1
 endform
 
 counter = 0
 n = Get number of intervals: tier
 for i to n
-  lab$ = Get label of interval: tier, i
-  if lab$ = label$
-    counter += 1
-    if index and counter = index
-      printline 'i'
-    endif
-  endif
+	lab$ = Get label of interval: tier, i
+	if lab$ = label$
+		counter += 1
+		if index and counter = index
+			printline 'i'
+		endif
+	endif
 endfor

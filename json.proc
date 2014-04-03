@@ -27,7 +27,7 @@ procedure writeJsonTgTier (.out$, .tier, .last_tier)
 	else
 		.items = Get number of points: .tier
 	endif
-	
+
 	# Empty tier
 	if !.items
 		if .interval

@@ -21,11 +21,11 @@
 # <http://www.gnu.org/licenses/>.
 
 form Fix selected samples...
-  comment Filter options
-  boolean Stop_Hann_band 1
-  real left_Frequency_band 0
-  real right_max_frequency 100
-  boolean Subtract_mean 1
+	comment Filter options
+	boolean Stop_Hann_band 1
+	real left_Frequency_band 0
+	real right_max_frequency 100
+	boolean Subtract_mean 1
 endform
 
 minfreq = left_Frequency_band
@@ -34,31 +34,31 @@ fixed = 0
 n = numberOfSelected("Sound")
 
 for i to n
-  sound[i] = selected("Sound", i)
+	sound[i] = selected("Sound", i)
 endfor
 
 for i to n
-  select sound[i]
-  old = selected()
-  max = Get maximum: 0, 0, "Sinc70"
-  min = Get minimum: 0, 0, "Sinc70"
-  min *= -1
-  if max(min,max)>0.99
-    Remove
-  else
-    name$ = selected$("Sound")
-    Filter (stop Hann band): minfreq, maxfreq, 100
-    Subtract mean
-    Rename: name$
-    fixed += 1
-    new[fixed] = selected()
-    removeObject(old)
-  endif
+	select sound[i]
+	old = selected()
+	max = Get maximum: 0, 0, "Sinc70"
+	min = Get minimum: 0, 0, "Sinc70"
+	min *= -1
+	if max(min,max)>0.99
+		Remove
+	else
+		name$ = selected$("Sound")
+		Filter (stop Hann band): minfreq, maxfreq, 100
+		Subtract mean
+		Rename: name$
+		fixed += 1
+		new[fixed] = selected()
+		removeObject(old)
+	endif
 endfor
 
 if fixed
-  selectObject(new[1])
-  for i from 2 to fixed
-    plusObject(new[i])
-  endfor
+	selectObject(new[1])
+	for i from 2 to fixed
+		plusObject(new[i])
+	endfor
 endif

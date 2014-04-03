@@ -1,9 +1,9 @@
 procedure checkDirectory (.name$, .label$)
-  if .name$ = "" and praatVersion >= 5204
-    .name$ = chooseDirectory$(.label$)
-  endif
-  if .name$ = ""
-    exit
-  endif
-  .name$ = if right$(.name$, 1) != "/" then .name$ + "/" else .name$ fi
+	if .name$ = "" and praatVersion >= 5204
+		.name$ = chooseDirectory$(.label$)
+	endif
+	if .name$ = ""
+		exit
+	endif
+	.name$ = if right$(.name$, 1) != "/" then .name$ + "/" else .name$ fi
 endproc
