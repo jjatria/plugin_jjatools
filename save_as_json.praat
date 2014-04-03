@@ -1,4 +1,4 @@
-# TextGrid to JSON converter
+# Praat object to JSON converter
 #
 # Written by Jose J. Atria (27 February 2014)
 # Version 0.1
@@ -13,6 +13,7 @@
 
 include check_directory.proc
 include json.proc
+include split.proc
 
 form Save as JSON...
 	sentence Save_to
@@ -46,7 +47,8 @@ for i to total_objects
 	name$ = selected$(type$)
 	start = Get start time
 	end = Get end time
-	output_file$ = directory$ + "/" + name$ + ".json"
+	output_file$ = directory$ + "/" +
+		...name$ + "_" + replace_regex$(type$, "(.)", "\L\1", 0) + ".json"
 
 	if type$ = "TextGrid"
 		json_type$ = "textgrid"
@@ -54,16 +56,16 @@ for i to total_objects
 		json_type$ = "points"
 	elsif type$ = "PitchTier" or
 		... type$ = "DurationTier"
-		json_type$ = "points_with_numbers"
+		json_type$ = "points with numbers"
 	else
 		json_type$ = "unsupported"
 	endif
-	
+
 	if json_type$ != "unsupported"
 		if fileReadable(output_file$)
 			deleteFile: output_file$
 		endif
-		
+
 		@startJsonObject(output_file$)
 		@writeJsonString(output_file$, "File type", "json", 0)
 		@writeJsonString(output_file$, "Object class", type$, 0)
@@ -79,32 +81,32 @@ for i to total_objects
 				last = if t = tiers then 1 else 0 fi
 				@writeJsonTgTier(output_file$, t, last)
 			endfor
-			
+
 			@endJsonList(output_file$, 1)
 
-		elsif left$(json_type$, 6) = "points"
-		
+		elsif extractWord$(json_type$, "") = "points"
+
 			points = Get number of points
 			list_name$ = "points"
-			
+
 			if points
-			
+
 				# Hack for DurationTier objects
 				if type$ = "DurationTier"
 					dtfull = Copy: "full"
 					dtblank = Copy: "blank"
+					for p to points
+						time = Get time from index: p
+						selectObject(dtblank)
+						Remove point: p
+						Add point: p, 1
+						selectObject(myobj[i])
+					endfor
 				endif
-				for p to points
-					time = Get time from index: p
-					selectObject(dtblank)
-					Remove point: p
-					Add point: p, 1
-					selectObject(myobj[i])
-				endfor
 				# End of hack
-			
+
 				@startJsonList(output_file$, list_name$)
-				
+
 				for p to points
 					last = if p = points then 1 else 0 fi
 					time = Get time from index: p
@@ -112,7 +114,7 @@ for i to total_objects
 						if type$ = "PitchTier"
 							value = Get value at index: p
 						elsif type$ = "DurationTier"
-						
+
 							# Hack for DurationTier objects
 							selectObject(dtfull)
 							new_duration = Get target duration: 0, time
@@ -123,29 +125,31 @@ for i to total_objects
 							Remove point: 1
 							selectObject(myobj[i])
 							# End of hack
-							
+
 						endif
 						@writeJsonPointWithNumber(output_file$, time, value, last)
 					elsif json_type$ = "points"
 						@pushToJsonList(output_file$, time, last) 
 					endif
 				endfor
-				
+
 				# Hack for DurationTier objects
-				removeObject(dtfull)
-				removeObject(dtblank)
-				selectObject(myobj[i])
+				if type$ = "DurationTier"
+					removeObject(dtfull)
+					removeObject(dtblank)
+					selectObject(myobj[i])
+				endif
 				# End of hack
-				
+
 				@endJsonList(output_file$, 1)
-				
+
 			else
-			
+
 				@writeJsonEmptyList(output_file$, list_name$, 1)
-				
+
 			endif
 		else
-			writeInfoLine(left$(json_type$, 6))
+			# Unsupported object
 		endif
 
 		@endJsonObject(output_file$, 1)

@@ -75,7 +75,7 @@ endproc
 procedure writeJsonPointWithNumber (.out$, .time, .value, .last)
 	@startJsonObject(.out$)
 	@writeJsonNumber(.out$, "time", .time, 0)
-	@writeJsonNumber(.out$, "number", .value, 1)
+	@writeJsonNumber(.out$, "value", .value, 1)
 	@endJsonObject(.out$, .last)
 endproc
 
