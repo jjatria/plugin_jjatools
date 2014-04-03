@@ -20,12 +20,13 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-form Fix selected samples...
+form Filter and center...
 	comment Filter options
 	boolean Stop_Hann_band 1
 	real left_Frequency_band 0
 	real right_max_frequency 100
 	boolean Subtract_mean 1
+	comment NOTE: This script works inline
 endform
 
 minfreq = left_Frequency_band
