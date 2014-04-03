@@ -110,7 +110,7 @@ for i to total_objects
 				for p to points
 					last = if p = points then 1 else 0 fi
 					time = Get time from index: p
-					if json_type$ = "points_with_numbers"
+					if json_type$ = "points with numbers"
 						if type$ = "PitchTier"
 							value = Get value at index: p
 						elsif type$ = "DurationTier"
