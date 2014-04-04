@@ -28,17 +28,5 @@ if n
 	@checkDirectory(save_to$, "Save to...")
 	path$ = checkDirectory.name$
 
-	for i to n
-		myobject[i] = selected(i)
-	endfor
-
-	for i to n
-		selectObject(myobject[i])
-		runScript: "save_as_json.praat", path$, format$
-	endfor
-
-	selectObject(myobject[1])
-	for i from 2 to n
-		plusObject(myobject[i])
-	endfor
+	runScript: "save_as_json.praat", path$, format$
 endif

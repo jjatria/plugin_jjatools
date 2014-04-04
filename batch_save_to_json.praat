@@ -16,11 +16,15 @@ include check_directory.proc
 
 form Batch convert to JSON...
 	sentence Directory
+	comment Leave blank for GUI selector
 	optionmenu Convert: 1
+		option All supported
 		option TextGrid
 		option DurationTier
 		option PitchTier
-	comment Leave blank for GUI selector
+		option Intensity
+		option IntensityTier
+		option AmplitudeTier
 	optionmenu Format: 1
 		option Pretty printed
 		option Minified
@@ -29,6 +33,7 @@ endform
 @checkDirectory(directory$, "Read objects from...")
 path$ = checkDirectory.name$
 
+convert$ = if convert$ = "All supported" then "" fi
 files = Create Strings as file list: "files", path$ + "*" + convert$
 
 n = Get number of strings

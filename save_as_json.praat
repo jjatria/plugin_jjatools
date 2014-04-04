@@ -42,8 +42,27 @@ elsif format$ = "Minified"
 endif
 
 for i to total_objects
+	# Reset fallback flag for this object
+	# If this object requires a fallback, then this will
+	# be set somewhere else in the loop
+	fallback = 0
+
 	selectObject(myobj[i])
 	type$ = extractWord$(selected$(), "")
+
+	if type$ = "AmplitudeTier"
+		@warning("AmplitudeTierAsIntensityTier")
+		fallback_to = selected()
+		fallback = To IntensityTier: -10000
+	endif
+	# If an objects requires a fallback, this is selected
+	if fallback
+		selectObject(fallback)
+		type$ = extractWord$(selected$(), "")
+	else
+		selectObject(myobj[i])
+	endif
+
 	name$ = selected$(type$)
 	start = Get start time
 	end = Get end time
@@ -55,8 +74,12 @@ for i to total_objects
 	elsif type$ = "PointProcess"
 		json_type$ = "points"
 	elsif type$ = "PitchTier" or
-		... type$ = "DurationTier"
+		... type$ = "DurationTier" or
+		... type$ = "AmplitudeTier" or
+		... type$ = "IntensityTier"
 		json_type$ = "points with numbers"
+	elsif type$ = "Intensity"
+		json_type$ = "frames"
 	else
 		json_type$ = "unsupported"
 	endif
@@ -85,25 +108,18 @@ for i to total_objects
 			@endJsonList(output_file$, 1)
 
 		elsif extractWord$(json_type$, "") = "points"
+			...
 
 			points = Get number of points
 			list_name$ = "points"
 
 			if points
 
-				# Hack for DurationTier objects
-				if type$ = "DurationTier"
-					dtfull = Copy: "full"
-					dtblank = Copy: "blank"
-					for p to points
-						time = Get time from index: p
-						selectObject(dtblank)
-						Remove point: p
-						Add point: p, 1
-						selectObject(myobj[i])
-					endfor
+				# DurationTier objects had no query methods prior to 5.3.70
+				# We need to hack our way to the value of the duration points
+				if praatVersion < 5370 and type$ = "DurationTier"
+					@setUpDurationTierHack(selected())
 				endif
-				# End of hack
 
 				@startJsonList(output_file$, list_name$)
 
@@ -111,35 +127,23 @@ for i to total_objects
 					last = if p = points then 1 else 0 fi
 					time = Get time from index: p
 					if json_type$ = "points with numbers"
-						if type$ = "PitchTier"
+
+						if type$ = "DurationTier" and praatVersion < 5370
+							@queryDurationTierHack(selected(), time)
+							value = queryDurationTierHack.value
+						else
 							value = Get value at index: p
-						elsif type$ = "DurationTier"
-
-							# Hack for DurationTier objects
-							selectObject(dtfull)
-							new_duration = Get target duration: 0, time
-							Remove point: 1
-							selectObject(dtblank)
-							old_duration = Get target duration: 0, time
-							value = new_duration / old_duration
-							Remove point: 1
-							selectObject(myobj[i])
-							# End of hack
-
 						endif
+
 						@writeJsonPointWithNumber(output_file$, time, value, last)
 					elsif json_type$ = "points"
 						@pushToJsonList(output_file$, time, last) 
 					endif
 				endfor
 
-				# Hack for DurationTier objects
-				if type$ = "DurationTier"
-					removeObject(dtfull)
-					removeObject(dtblank)
-					selectObject(myobj[i])
+				if praatVersion < 5370 and type$ = "DurationTier"
+					@cleanUpDurationTierHack(selected())
 				endif
-				# End of hack
 
 				@endJsonList(output_file$, 1)
 
@@ -148,19 +152,122 @@ for i to total_objects
 				@writeJsonEmptyList(output_file$, list_name$, 1)
 
 			endif
+		elsif json_type$ = "frames"
+			# This type is really a subset of the "points" type.
+			# Annoyingly, method names are different. Maybe a more
+			# general approach can be found?
+			frames = Get number of frames
+			list_name$ = "frames"
+			if frames
+				@startJsonList(output_file$, list_name$)
+				for f to frames
+					last = if f = frames then 1 else 0 fi
+					value = Get value in frame: f
+					@pushToJsonList(output_file$, value, last) 
+				endfor
+				@endJsonList(output_file$, 1)
+			else
+				@writeJsonEmptyList(output_file$, list_name$, 1)
+			endif
 		else
 			# Unsupported object
 		endif
 
 		@endJsonObject(output_file$, 1)
 	else
-		appendInfoLine("JSON: ", type$, " not yet supported")
+		@warning(type$ + "Unsupported")
 	endif
+
+	if fallback
+		removeObject(fallback)
+		selectObject(myobj[i])
+	endif
+
 endfor
 
 if total_objects
-	selectObject(myobj[1])
-	for i from 2 to total_objects
+	# Clear selection
+	nocheck selectObject(undefined)
+	# Recover original selection
+	for i to total_objects
 		plusObject(myobj[i])
 	endfor
 endif
+
+@issueWarnings()
+
+# @issueWarnings() will check to see if any warning flags have been
+# set, and if so, issue them. The benefit of this approach is that
+# similar warnings are only issued once.
+procedure issueWarnings ()
+	if variableExists("warning.table")
+		nocheck selectObject(warning.table)
+		.exists = nocheck selected()
+		if .exists
+			Remove column: "placeholder"
+			.n = Get number of columns
+			for .i to .n
+				.c$ = Get column label: .i
+				.w$ = nocheck Get value: 1, .c$
+				if .w$ != ""
+					appendInfoLine(.w$)
+				endif
+			endfor
+			removeObject(warning.table)
+		endif
+	else
+	endif
+endproc
+
+# @warning(code) sets a flag for a specific warning
+procedure warning (.w$)
+	.selected = selected()
+	if .w$ = "AmplitudeTierAsIntensityTier"
+		.text$ = "W: AmplitudeTier objects saved as IntensityTier objects"
+	elsif index_regex(.w$, "Unsupported$")
+		.text$ = "W: " +
+			...replace_regex$(.w$, "(.*)Unsupported", "\1", 0) + 
+			... " objects not yet supported"
+	endif
+	if variableExists("warning.table")
+		selectObject(.table)
+	else
+		.table = Create Table with column names: "warnings", 1, "placeholder"
+	endif
+	.column_exists$ = nocheck Get value: 1, .w$
+	if .column_exists$ = "" ;column does not exist (or has empty value)
+		Append column: .w$
+		Set string value: 1, .w$, .text$
+	endif
+	selectObject(.selected)
+endproc
+
+# Hack to query DurationTier objects for Praat <5.3.70
+procedure setUpDurationTierHack (.id)
+	.full = Copy: "full"
+	.blank = Copy: "blank"
+	.points = Get number of points
+	for .p to .points
+		.time = Get time from index: .p
+		selectObject(.blank)
+		Remove point: .p
+		Add point: .p, 1
+		selectObject(.id)
+	endfor
+endproc
+
+procedure queryDurationTierHack (.id, .time)
+	selectObject(setUpDurationTierHack.full)
+	.new_duration = Get target duration: 0, .time
+	Remove point: 1
+	selectObject(setUpDurationTierHack.blank)
+	.old_duration = Get target duration: 0, .time
+	.value = .new_duration / .old_duration
+	Remove point: 1
+	selectObject(.id)
+endproc
+
+procedure cleanUpDurationTierHack (.id)
+	removeObject(setUpDurationTierHack.full, setUpDurationTierHack.blank)
+	selectObject(.id)
+endproc
