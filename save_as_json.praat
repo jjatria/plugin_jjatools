@@ -108,7 +108,6 @@ for i to total_objects
 			@endJsonList(output_file$, 1)
 
 		elsif extractWord$(json_type$, "") = "points"
-			...
 
 			points = Get number of points
 			list_name$ = "points"

@@ -1,11 +1,13 @@
-# View each selected Sound object in turn.
+# View each selected Sound (and TextGrid) object in turn
 #
 # The script allows for easy navigation between selected Sound
 # objects, which is particularly useful when comparing specific
-# features in each of them.
+# features in each of them. If an equal number of TextGrid and
+# Sound objects have been selected, they will be paired by name
+# and viewed in unison.
 #
 # Written by Jose J. Atria (October 14, 2012)
-# Last revision: February 20, 2014)
+# Last revision: April 4, 2014)
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -15,59 +17,59 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-n_sound    = numberOfSelected("Sound")
-n_textgrid = numberOfSelected("TextGrid")
+total_sounds    = numberOfSelected("Sound")
+total_textgrids = numberOfSelected("TextGrid")
 
-if n_textgrid and n_textgrid != n_sound
+if total_textgrids and total_textgrids != total_sounds
 	exitScript("Different number of Sounds and TextGrids selected")
 endif
 
-for i to n_sound
+for i to total_sounds
 	sound[i] = selected("Sound", i)
-	if n_textgrid
+	if total_textgrids
 		textgrid[i] = selected("TextGrid", i)
 	endif
 endfor
 
-for i to n_sound
+for i to total_sounds
 	selectObject(sound[i])
 	name$ = selected$("Sound")
-	if n_textgrid
+	if total_textgrids
 		plusObject(textgrid[i])
 	endif
-	
+
 	View & Edit
-	
+
 	beginPause("Viewing " + name$)
-	
+
 	if i > 1
-		button = endPause("Stop", "Previous", if i = n_sound then "Finish" else "Next" fi, 3, 1)
+		button = endPause("Stop", "Previous", if i = total_sounds then "Finish" else "Next" fi, 3, 1)
 	else
-		button = endPause("Stop", if i = n_sound then "Finish" else "Next" fi, 2, 1)  
+		button = endPause("Stop", if i = total_sounds then "Finish" else "Next" fi, 2, 1)  
 	endif
-	
-	editor_name$ = if n_textgrid then "TextGrid " else "Sound " fi + name$
+
+	editor_name$ = if total_textgrids then "TextGrid " else "Sound " fi + name$
 	nocheck editor 'editor_name$'
 		nocheck Close
 	nocheck endeditor
 
 	if button = 1
-		goto END
+		@endScript()
 	elsif button = 2 and i > 1
 		i -= 2
 	endif
 endfor
 
-label END
-if n_sound
-	selectObject(sound[1])
-	if n_textgrid
-		plusObject(textgrid[1])
+procedure endScript ()
+	if total_sounds
+		# Clear selection
+		nocheck selectObject(undefined)
+		# Recover original selection
+		for i to total_sounds
+			plusObject(sound[i])
+			if total_textgrids
+				plusObject(textgrid[i])
+			endif
+		endfor
 	endif
-	for i from 2 to n_sound
-		plusObject(sound[i])
-		if n_textgrid
-			plusObject(textgrid[i])
-		endif
-	endfor
-endif
+endproc
