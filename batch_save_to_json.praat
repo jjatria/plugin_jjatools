@@ -13,6 +13,8 @@
 # <http://www.gnu.org/licenses/>.
 
 include check_directory.proc
+include require.proc
+@require("5.3.44")
 
 form Batch convert to JSON...
 	sentence Directory

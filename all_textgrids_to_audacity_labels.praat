@@ -14,6 +14,8 @@
 # <http://www.gnu.org/licenses/>.
 
 include check_directory.proc
+include require.proc
+@require("5.3.44")
 
 form TextGrids in directory to Audacity labels...
 	comment Leave blank for GUI selector

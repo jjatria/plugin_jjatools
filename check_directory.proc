@@ -1,5 +1,8 @@
+include require.proc
+@require("5.2.04")
+
 procedure checkDirectory (.name$, .label$)
-	if .name$ = "" and praatVersion >= 5204
+	if .name$ = ""
 		.name$ = chooseDirectory$(.label$)
 	endif
 	if .name$ = ""

@@ -14,6 +14,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include require.proc
+@require("5.3.44")
+
 form Sort strings (generic)...
 	boolean Numeric_first yes
 	boolean Case_sensitive yes

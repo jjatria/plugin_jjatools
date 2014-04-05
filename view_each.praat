@@ -17,6 +17,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include require.proc
+@require("5.3.44")
+
 total_sounds    = numberOfSelected("Sound")
 total_textgrids = numberOfSelected("TextGrid")
 

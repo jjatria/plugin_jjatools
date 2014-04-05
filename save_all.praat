@@ -18,6 +18,8 @@
 # <http://www.gnu.org/licenses/>.
 
 include check_directory.proc
+include require.proc
+@require("5.3.63")
 
 form Save selected objects...
 	sentence Save_to
@@ -27,12 +29,6 @@ form Save selected objects...
 	boolean Overwrite no
 	boolean Quiet yes
 endform
-
-if praatVersion < 5363
-	exitScript("This script has been written using the new syntax,
-		...not available for the version you are using.", newline$,
-		..."Please upgrade to 5.3.63 or higher.", newline$)
-endif
 
 verbose = if quiet then 0 else 1 fi
 cleared_info = 0

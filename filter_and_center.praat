@@ -20,6 +20,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include require.proc
+@require("5.3.44")
+
 form Filter and center...
 	comment Filter options
 	boolean Stop_Hann_band 1

@@ -1,3 +1,6 @@
+include require.proc
+@require("5.3.44")
+
 json_indent_level = 0
 json_indent$ = ""
 

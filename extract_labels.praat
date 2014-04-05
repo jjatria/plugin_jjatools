@@ -44,12 +44,8 @@
 # <http://www.gnu.org/licenses/>.
 
 include split.proc
-
-if praatVersion < 5363
-	exitScript("This script has been written using the new syntax,
-		...not available for the version you are using.", newline$,
-		..."Please upgrade to 5.3.63 or higher.", newline$)
-endif
+include require.proc
+@require("5.3.63")
 
 form Extract sounds...
 	positive Tier 2
