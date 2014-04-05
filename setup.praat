@@ -1,7 +1,7 @@
 Add menu command:   "Objects", "Praat", "JJATools",                         "",                 0, ""
 Add menu command:   "Objects", "Praat", "File conversions",                 "JJATools",         1, ""
 Add menu command:   "Objects", "Praat", "Save selected objects as text...", "JJATools",         1, "save_all.praat"
-Add menu command:   "Objects", "Praat", "Save selected objects to JSON...", "JJATools",         1, "save_selected_to_json.praat"
+Add menu command:   "Objects", "Praat", "Save selected objects to JSON...", "JJATools",         1, "save_as_json.praat"
 Add menu command:   "Objects", "Praat", "TextGrids to Audacity labels...",  "File conversions", 2, "all_textgrids_to_audacity_labels.praat"
 Add menu command:   "Objects", "Praat", "Batch convert to JSON...",         "File conversions", 2, "batch_save_to_json.praat"
 
