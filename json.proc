@@ -175,5 +175,8 @@ endproc
 
 # Sanitise string for JSON output
 procedure sanitizeJsonString (.str$)
-	.str$ = replace$(.str$, """", "\""", 0)
+	.str$ = replace$(.str$, """",     "\""", 0)
+	.str$ = replace$(.str$, "\",      "\\",  0)
+	.str$ = replace$(.str$, tab$,     "\t",  0)
+	.str$ = replace$(.str$, newline$, "\n",  0)
 endproc
