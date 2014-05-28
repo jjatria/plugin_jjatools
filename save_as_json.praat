@@ -221,6 +221,8 @@ endproc
 # @warning(code) sets a flag for a specific warning
 procedure warning (.w$)
 	.selected = selected()
+	
+	# Mapping of warning codes to messages
 	if .w$ = "AmplitudeTierAsIntensityTier"
 		.text$ = "W: AmplitudeTier objects saved as IntensityTier objects"
 	elsif index_regex(.w$, "Unsupported$")
@@ -228,6 +230,7 @@ procedure warning (.w$)
 			...replace_regex$(.w$, "(.*)Unsupported", "\1", 0) + 
 			... " objects not yet supported"
 	endif
+	
 	if variableExists("warning.table")
 		selectObject(.table)
 	else

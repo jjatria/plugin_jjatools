@@ -35,7 +35,7 @@ endform
 @checkDirectory(directory$, "Read objects from...")
 path$ = checkDirectory.name$
 
-convert$ = if convert$ = "All supported" then "" fi
+convert$ = if convert$ = "All supported" then "" else convert$ fi
 files = Create Strings as file list: "files", path$ + "*" + convert$
 
 n = Get number of strings

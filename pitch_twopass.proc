@@ -1,0 +1,26 @@
+include require.proc
+@require("5.3.44")
+
+# Generate Pitch object using utterance-specific thresholds
+# Using Hirst's two-pass method
+procedure makePitch ()
+  # As per Hirst, 2011. JoSS 1(1):55-83
+  # Source: http://uk.groups.yahoo.com/neo/groups/praat-users/conversations/topics/6199
+  .sound = selected("Sound")
+  .first_pass = noprogress To Pitch: 0.01, 60, 700
+  .q1 = Get quantile: 0, 0, 0.25, "Hertz"
+  .q3 = Get quantile: 0, 0, 0.75, "Hertz"
+  select .first_pass
+  Remove
+
+  .floor = .q1 * 0.75
+  .ceiling = .q3 * 2
+
+  select .sound
+  .ragged = noprogress To Pitch: 0.01, .floor, .ceiling
+  .id = Smooth: 10
+  select .ragged
+  Remove
+
+  select .id
+endproc
