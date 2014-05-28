@@ -9,6 +9,8 @@
 #
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
+#
+# TODO: set sounds to specified RMS
 
 include check_directory.proc
 include require.proc
@@ -34,7 +36,9 @@ files = Create Strings as file list: "files",
   ...read_from$ + "*" + sound_extension$
   
 mindb = 70
-absmax = 0
+
+# Make sure a temporary directory exists in the plugin root
+Create directory: "tmp"
 
 n = Get number of strings
 
