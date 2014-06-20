@@ -12,64 +12,79 @@
 #
 # TODO: set sounds to specified RMS
 
+include check_directory.proc
 include require.proc
 @require("5.3.63")
 
 form RMS normalisation...
-  positive Peak_to 0.9
+  sentence Read_from
+  sentence Save_to
+  comment Normalised sounds will be saved in specified directory. Leave empty for GUI selector
+  word Sound_extension wav
   boolean Keep_conversion_table no
-  boolean Make_changes_inline no
 endform
+
+@checkDirectory(read_from$, "Read sounds from...")
+read_from$ = checkDirectory.name$
+
+@checkDirectory(save_to$, "Save sounds to...")
+save_to$ = checkDirectory.name$
 
 stopwatch
 
-n = numberOfSelected("Sound")
-for i to n
-  sound[i] = selected("Sound", i)
-endfor
-
+files = Create Strings as file list: "files",
+  ...read_from$ + "*" + sound_extension$
+  
 mindb = 70
+
+# Make sure a temporary directory exists in the plugin root
+Create directory: "tmp"
+
+n = Get number of strings
 
 if n
   table = Create Table with column names: "conversions", 0,
-    ..."name rms_pre max_pre rms_post max_post"
+    ..."filename rms_pre max_pre rms_post max_post"
 
   for i to n
-    sound = sound[i]
-    selectObject(sound)
-    name$ = selected$("Sound")
+    selectObject(files)
+    filename$ = Get string: i
+    sound = Read from file: read_from$ + "/" + filename$
 
     @rms_and_max()
 
     selectObject(table)
     Append row
-    Set string value:  i, "name",    name$
-    Set numeric value: i, "rms_pre", rms
-    Set numeric value: i, "max_pre", max
+    Set string value:  i, "filename", filename$
+    Set numeric value: i, "rms_pre",  rms
+    Set numeric value: i, "max_pre",  max
     
     selectObject(sound)
-    if !make_changes_inline
-      norm[i] = Copy: name$ + "_normalised"
-    else
-      norm[i] = sound
-    endif
     
     Scale intensity: mindb
 
     @rms_and_max()
 
     selectObject(table)
-    Set numeric value: i, "rms_post", rms
-    Set numeric value: i, "max_post", max
+    Set numeric value: i, "rms_post",  rms
+    Set numeric value: i, "max_post",  max
+    
+    selectObject(sound)
+    Save as binary file: "tmp/" + (filename$ - "wav" + "Sound")
+    
+    removeObject(sound)
   endfor
 
   selectObject(table)
   max = Get maximum: "max_post"
-  factor = peak_to / max
+  factor = 0.999 / max
 
   for i to n
-    selectObject(norm[i])
-    name$ = selected$("Sound")
+    selectObject(files)
+    filename$ = Get string: i
+    sound = Read from file: "tmp/" + (filename$ - "wav" + "Sound")
+    
+    deleteFile("tmp/" + (filename$ - "wav" + "Sound"))
     
     Formula: "self*" + string$(factor)
     
@@ -79,9 +94,12 @@ if n
     Set numeric value: i, "rms_post",  rms
     Set numeric value: i, "max_post",  max
     
-    selectObject(norm[i])
+    selectObject(sound)
+    Save as WAV file: save_to$ + "/" + filename$
+    removeObject(sound)
   endfor
 
+  removeObject(files)
   if !keep_conversion_table
     removeObject(table)
   endif
@@ -90,6 +108,8 @@ if n
 
   writeInfoLine: "Processed " + string$(n) + " files in " + fixed$(time, 2) + " seconds"
   appendInfoLine: "All processed files set to a RMS of " + fixed$(rms, 2) + " Pascal"
+else
+  writeInfoLine: "No objects to process"
 endif
 
 procedure rms_and_max ()

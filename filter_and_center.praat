@@ -29,40 +29,56 @@ form Filter and center...
 	real left_Frequency_band 0
 	real right_max_frequency 100
 	boolean Subtract_mean 1
-	comment NOTE: This script works inline
+	boolean Make_changes_inline yes
 endform
 
-minfreq = left_Frequency_band
-maxfreq = right_max_frequency
-fixed = 0
-n = numberOfSelected("Sound")
+use_filter = stop_Hann_band
 
-for i to n
-	sound[i] = selected("Sound", i)
-endfor
+if use_filter + subtract_mean > 0
 
-for i to n
-	select sound[i]
-	old = selected()
-	max = Get maximum: 0, 0, "Sinc70"
-	min = Get minimum: 0, 0, "Sinc70"
-	min *= -1
-	if max(min,max)>0.99
-		Remove
-	else
-		name$ = selected$("Sound")
-		Filter (stop Hann band): minfreq, maxfreq, 100
-		Subtract mean
-		Rename: name$
-		fixed += 1
-		new[fixed] = selected()
-		removeObject(old)
-	endif
-endfor
+  minfreq = left_Frequency_band
+  maxfreq = right_max_frequency
+  fixed = 0
+  n = numberOfSelected("Sound")
 
-if fixed
-	selectObject(new[1])
-	for i from 2 to fixed
-		plusObject(new[i])
-	endfor
+  for i to n
+    sound[i] = selected("Sound", i)
+  endfor
+
+  for i to n
+    select sound[i]
+    old = selected()
+    max = Get maximum: 0, 0, "None"
+    min = Get minimum: 0, 0, "None"
+    min *= -1
+    name$ = selected$("Sound")
+    
+    if !make_changes_inline
+      new[i] = Copy: name$
+    else
+      new[i] = sound[i]
+    endif
+    
+    if use_filter
+      r = selected()
+      new[i] = Filter (stop Hann band): minfreq, maxfreq, 100
+      removeObject(r)
+    endif
+    
+    if subtract_mean
+      Subtract mean
+    endif
+    
+    if !make_changes_inline
+      Rename: name$ + "_filtered"
+    endif
+    
+  endfor
+
+  nocheck Copy: ""
+  Remove
+  for i to n
+    plusObject(new[i])
+  endif
+  
 endif
