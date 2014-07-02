@@ -1,0 +1,172 @@
+# Check selection for unbalance: returns 1 if there is an equal
+# number of selected objects of each type; 0 if not; and -1 if there
+# is no selection.
+#
+# Usage:
+#	include /path/to/this/script
+#	[code]
+#	call checksel KEEP
+#	if checkSelection.result > 0
+#		# Selection is balanced
+#	elsif checksel.result = 0
+#		exit Selection is unbalanced
+#	elsif checksel.result < 0
+#		exit There is no active selection
+#	endif
+#	[code]
+#
+# Depending on the boolean value of KEEP, a Table object with the
+# amount of objects of each type that were selected will remain
+# upon completion.
+#
+# Written by Jose J. Atria (28 February 2012)
+#
+# This script is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# A copy of the GNU General Public License is available at
+# <http://www.gnu.org/licenses/>.
+
+procedure saveSelection (.clean)
+  .n = numberOfSelected()
+  for .i to .n
+    .id[.i] = selected(.i)
+  endfor
+  
+  if .n
+    .table = Create Table with column names: "selected_objects", .n, "type name n id"
+  endif
+  
+  for .i to .n
+    selectObject: .id[.i]
+    .type$ = extractWord$(selected$(), "")
+    .name$ = extractWord$(selected$(), .type$)
+    
+    selectObject: .table
+    Set string value:  .i, "type", .type$
+    Set string value:  .i, "name", .name$
+    Set numeric value: .i, "n",    1
+    Set numeric value: .i, "id",   .id[.i]
+  endfor
+  
+  @restoreLastSelection()
+  
+  if .clean and .n
+    removeObject(.table)
+  endif
+endproc
+
+procedure restoreLastSelection ()
+  if variableExists("saveSelection.n")
+    @clearSelection()
+    for .i to saveSelection.n
+      plusObject: saveSelection.id[.i]
+    endfor
+  else
+    exitScript: "No selection saved"
+  endif
+endproc
+
+procedure restoreSelection (.id)
+  @isSelectionTable(.id)
+  if isSelectionTable.return
+    selectObject: .id
+      
+    .n = Get number of rows
+    if .n
+      for .i to .n
+        .id[.i] = Get value: .i, "id"
+      endfor
+      
+      @clearSelection()
+      for .i to .n
+        plusObject: .id[.i]
+      endfor
+    else
+      exitScript: "Selection table is empty"
+    endif
+    
+  else
+    exitScript: "Table ", .id, " is not a selection table"
+  endif
+endproc
+
+procedure clearSelection ()
+  .n = numberOfSelected()
+  for .i to .n
+    minus selected(.i)
+  endfor
+endproc
+
+procedure checkSelection (.clean)
+  .n = numberOfSelected()
+
+  if .n
+    @saveSelection(0)
+    .raw_table = saveSelection.table
+    
+    selectObject: .raw_table
+    .object_table = Collapse rows: "type", "n", "", "", "", ""
+    selectObject: .object_table
+
+    .variance = Get standard deviation: "n"
+    .result = if .variance = 0 then 1 else 0 fi
+
+    if .clean
+      removeObject: .raw_table, .object_table
+    endif
+
+    # Restore original selection
+    @clearSelection()
+    for .i to .n
+      plusObject: saveSelection.id[.i]
+    endfor
+  else
+    .result = -1
+  endif
+endproc
+
+procedure isSelectionTable (.id)
+  .return = 0
+  @objectExists(.id)
+  if numberOfSelected("Table")
+    columns$ = List: 0
+    columns$ = left$(columns$, index(columns$, newline$) - 1)
+    if columns$ = "type'tab$'name'tab$'n'tab$'id"
+      .return = 1
+    endif
+  endif
+endproc
+
+procedure isObjectTypeTable (.id)
+  .return = 0
+  @objectExists(.id)
+  if numberOfSelected("Table")
+    columns$ = List: 0
+    columns$ = left$(columns$, index(columns$, newline$) - 1)
+    if columns$ = "type'tab$'n"
+      .return = 1
+    endif
+  endif
+endproc
+
+procedure countObjects (.id, .type$)
+  @isObjectTypeTable(.id)
+  if isObjectTypeTable.return
+  
+    selectObject: .id
+    .row = nowarn Search column: "type", .type$
+    if .row
+      .n = Get value: .row, "n"
+    else
+      .n = .row
+    endif
+  endif
+endproc
+
+procedure objectExists (.id)
+  nocheck selectObject: .id
+  .return = if numberOfSelected() = 1 then 1 else 0 fi
+endproc
