@@ -1,0 +1,7 @@
+procedure pwgen (.length)
+  .char$ = "abcdefghijkmlnopqrstuvwxyz0123456789"
+  .return$ = ""
+  for .i to .length
+    .return$ = .return$ + mid$(.char$, randomInteger(1, length(.char$)), 1)
+  endfor
+endproc

@@ -1,25 +1,14 @@
-# Check selection for unbalance: returns 1 if there is an equal
-# number of selected objects of each type; 0 if not; and -1 if there
-# is no selection.
+# Selection tools
 #
-# Usage:
-#	include /path/to/this/script
-#	[code]
-#	call checksel KEEP
-#	if checkSelection.result > 0
-#		# Selection is balanced
-#	elsif checksel.result = 0
-#		exit Selection is unbalanced
-#	elsif checksel.result < 0
-#		exit There is no active selection
-#	endif
-#	[code]
+# For a program in which command options are so dependant on the
+# current selection, support for common used selection actions is
+# notably lacking in Praat. This is a first attempt at solving this.
 #
-# Depending on the boolean value of KEEP, a Table object with the
-# amount of objects of each type that were selected will remain
-# upon completion.
+# This is a set of procedure that make it easy to save and restore
+# any number of object selections, as well as perform other related
+# tasks (clear the selection, count types of objects, etc).
 #
-# Written by Jose J. Atria (28 February 2012)
+# Written by Jose J. Atria (3 July 2014)
 #
 # This script is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +18,29 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-procedure saveSelection (.clean)
+#
+# Procedures
+#
+
+# Save the active selection
+#
+# The selection is saved in the internal pseudo-array .id unless .keep is set
+# true. In that case, a selection table with the current selection is kept
+# and its id saved in the internal variable .table. This can then be used to
+# restore this particular selection, in the case multiple selections need to
+# be saved
+#
+# Using this table it is easy to create per-type sub-sets of the current
+# selection, by using the Extract rows where...-like commands:
+#
+#     @saveSelection(1)
+#     table = saveSelection.table
+#     sounds = Extract rows where column (text): "type", "is equal to", "Sound"
+#     selectObject: table
+#     pitchs = Extract rows where column (text): "type", "is equal to", "Pitch"
+#
+#
+procedure saveSelection (.keep)
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
@@ -51,14 +62,19 @@ procedure saveSelection (.clean)
     Set numeric value: .i, "id",   .id[.i]
   endfor
   
-  @restoreLastSelection()
+  @restoreSelection()
   
-  if .clean and .n
+  if .n and !.keep
     removeObject(.table)
   endif
 endproc
 
-procedure restoreLastSelection ()
+# Restores the last saved selection
+#
+# Upon being called, this will restore the selection available in the internal
+# variables of @saveSelection.
+#
+procedure restoreSelection ()
   if variableExists("saveSelection.n")
     @clearSelection()
     for .i to saveSelection.n
@@ -69,7 +85,13 @@ procedure restoreLastSelection ()
   endif
 endproc
 
-procedure restoreSelection (.id)
+# Restores a selection using a selection table
+#
+# When called with the id of a previously generated selection table (by
+# calling @saveSelection(1), for example), it will restore the selection saved
+# in that table.
+#
+procedure restoreSavedSelection (.id)
   @isSelectionTable(.id)
   if isSelectionTable.return
     selectObject: .id
@@ -87,24 +109,29 @@ procedure restoreSelection (.id)
     else
       exitScript: "Selection table is empty"
     endif
-    
   else
-    exitScript: "Table ", .id, " is not a selection table"
+    exitScript: "Object ", .id, " is not a selection table"
   endif
 endproc
 
+# Safely and silently clears the selection
+#
 procedure clearSelection ()
-  .n = numberOfSelected()
-  for .i to .n
-    minus selected(.i)
-  endfor
+  nocheck selectObject(undefined)
 endproc
 
-procedure checkSelection (.clean)
+# Generate a table with information about the current selection
+#
+# This procedure generates a table with the types of objects selected and the
+# number of selected objects per type. This can then be used to check for
+# parity between multiple object types (for instance, for pairing Sounds and
+# TextGrids).
+#
+procedure checkSelection ()
   .n = numberOfSelected()
 
   if .n
-    @saveSelection(0)
+    @saveSelection(1)
     .raw_table = saveSelection.table
     
     selectObject: .raw_table
@@ -114,23 +141,24 @@ procedure checkSelection (.clean)
     .variance = Get standard deviation: "n"
     .result = if .variance = 0 then 1 else 0 fi
 
-    if .clean
-      removeObject: .raw_table, .object_table
-    endif
-
-    # Restore original selection
-    @clearSelection()
-    for .i to .n
-      plusObject: saveSelection.id[.i]
-    endfor
+    @restoreSelection()
   else
     .result = -1
   endif
 endproc
 
+# Checks if the object with a specific id is a (or looks like a) valid
+# selection table
+#
+# Mostly for internal use
+#
 procedure isSelectionTable (.id)
   .return = 0
   @objectExists(.id)
+  if !objectExists.return
+    exitScript: "Object ", .id, " does not exist"
+  endif
+  
   if numberOfSelected("Table")
     columns$ = List: 0
     columns$ = left$(columns$, index(columns$, newline$) - 1)
@@ -140,6 +168,60 @@ procedure isSelectionTable (.id)
   endif
 endproc
 
+# Selects all existing selection tables
+#
+# This procedure will select all existing tables that look like selection
+# tables. This is mostly for use with @removeSelectionTables(), which makes it
+# safer.
+#
+procedure selectSelectionTables ()
+  select all
+  .t = 0
+  .n = numberOfSelected()
+  for .i to .n
+    .o[.i] = selected(.i)
+  endfor
+  for .i to .n
+    @isSelectionTable(.o[.i])
+    if isSelectionTable.return
+      .t = .t + 1
+      .tables[.t] = .o[.i]
+    endif
+  endfor
+  if .t
+    @clearSelection()
+    for .i to .t
+      plusObject(.tables[.t])
+    endfor
+  endif
+endproc
+
+# Erases all existing selection tables
+#
+# Use with extreme care! This procedure will remove all existing tables that
+# look like selection tables. The detection is specific enough to avoid errors
+# in most cases, but anything that uses `select all` should be mistrusted.
+#
+# This procedure uses @saveSelection() internally, so it will clear the last
+# saved selection!
+#
+procedure removeSelectionTables ()
+  @saveSelection(0)
+  
+  @selectSelectionTables()
+  .n = numberOfSelected()
+  if .n
+    Remove
+  endif
+  
+  @restoreSelection()
+endproc
+
+# Checks if the object with a specific id is a (or looks like a) valid
+# object table
+#
+# Mostly for internal use
+#
 procedure isObjectTypeTable (.id)
   .return = 0
   @objectExists(.id)
@@ -152,6 +234,47 @@ procedure isObjectTypeTable (.id)
   endif
 endproc
 
+# Selects all existing object tables
+#
+# This procedure will select all existing tables that look like object tables.
+# This is mostly for use with @removeSelectionTables(), which makes it safer.
+#
+procedure selectObjectTables ()
+  select all
+  .n = numberOfSelected()
+  for .i to .n
+    .o[.i] = selected(.i)
+  endfor
+  for .i to .n
+    @isObjectTable(.o[.i])
+    if !isObjectTable.return
+      minusObject(.o[.i])
+    endif
+  endfor
+endproc
+
+# Erases all existing object tables
+#
+# Use with extreme care! This procedure will remove all existing tables that
+# look like object tables. The detection is specific enough to avoid errors
+# in most cases, but anything that uses `select all` should be mistrusted.
+#
+procedure removeObjectTables ()
+  @saveSelection(0)
+  
+  @selectObjectTables()
+  .n = numberOfSelected()
+  if .n
+    Remove
+  endif
+  
+  @restoreSelection()
+endproc
+
+# Counts the type of objects from an object table
+#
+# Provide the id of the object table and the name of the object type to count
+#
 procedure countObjects (.id, .type$)
   @isObjectTypeTable(.id)
   if isObjectTypeTable.return
@@ -166,6 +289,8 @@ procedure countObjects (.id, .type$)
   endif
 endproc
 
+# Checks if an object exists in the object list
+#
 procedure objectExists (.id)
   nocheck selectObject: .id
   .return = if numberOfSelected() = 1 then 1 else 0 fi
