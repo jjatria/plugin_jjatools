@@ -17,6 +17,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include selection_tools.proc
 include check_directory.proc
 include require.proc
 @require("5.3.63")
@@ -37,18 +38,15 @@ cleared_info = 0
 directory$ = checkDirectory.name$
 
 # Save selection
-selected_objects = numberOfSelected()
-for i to selected_objects
-	my_object[i] = selected(i)
-endfor
+@saveSelection()
 
 # Create Table to store object data
-object_data = Create Table with column names: "objects", selected_objects,
+object_data = Create Table with column names: "objects", saveSelection.n,
 	..."id type name extension num"
 
 # Populate Table with data
-for i to selected_objects
-	selectObject(my_object[i])
+for i to saveSelection.n
+	selectObject(saveSelection.id[i])
 	type$ = extractWord$(selected$(), "")
 	name$ = selected$(type$)
 
@@ -59,7 +57,7 @@ for i to selected_objects
 	endif
 		
 	selectObject(object_data)
-	Set numeric value: i, "id",        my_object[i]
+	Set numeric value: i, "id",        saveSelection.id[i]
 	Set string value:  i, "type",      type$
 	Set string value:  i, "name",      name$
 	Set string value:  i, "extension", extension$
@@ -82,7 +80,7 @@ if !overwrite
 		pad$ = ""
 		repeat
 			file_name$ = name$ + pad$ + extension$
-			full_name$ = directory$ + "/" + file_name$
+			full_name$ = directory$ + file_name$
 			
 			pad$ = pad$ + pad_name_with$
 			new_name$ = file_name$ - extension$
@@ -103,7 +101,7 @@ used_names = Create Table with column names: "used_names", 0, "name n"
 saved_files = 0
 
 # Loop through objects, for saving
-for i to selected_objects
+for i to saveSelection.n
 	selectObject(object_data)
 	id         = Get value: i, "id"
 	type$      = Get value: i, "type"
@@ -138,7 +136,7 @@ for i to selected_objects
 	selectObject(id)
 
 	file_name$ = name$ + counter$ + extension$
-	full_name$ = directory$ + "/" + file_name$
+	full_name$ = directory$ + file_name$
 	if type$ = "Sound"
 		Save as WAV file: full_name$
 	elsif type$ != "LongSound"
@@ -157,9 +155,4 @@ endfor
 
 removeObject(object_data, conversion_table, used_names)
 
-if selected_objects
-	selectObject(my_object[1])
-	for i from 2 to selected_objects
-		plusObject(my_object[i])
-	endfor
-endif
+@restoreSelection()

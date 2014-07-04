@@ -5,3 +5,45 @@ procedure pwgen (.length)
     .return$ = .return$ + mid$(.char$, randomInteger(1, length(.char$)), 1)
   endfor
 endproc
+
+# Split .str$ on .sep$ and store each found element in .array$ and
+# length of .array$ in .length
+#
+# Usage:
+#  include /path/to/this/script.praat
+#  [code]
+#  @split (SEPARATOR, STRING)
+#  for i to split.length
+#    str$[i] = split.return$[i]
+#  endfor
+#
+# where SEPARATOR is a separator string and STRING is a string to
+# separate.
+#
+# If string$ = "hello world", then after
+# @split (" ", string$)
+# split.return$[1] contains "hello" and split.return$[2] contains "world"
+#
+# Since .length stores the number of items separated by a string, it is always
+# larger than the amount of occurences of that string by one, which means
+# it can be used to count occurences as well.
+#
+procedure split (.sep$, .str$)
+  .seplen = length(.sep$) 
+  .length = 0
+  repeat
+    .strlen = length(.str$)
+    .sep = index(.str$, .sep$)
+    if .sep > 0
+      .part$ = left$(.str$, .sep-1)
+      .str$ = mid$(.str$, .sep+.seplen, .strlen)
+    else
+      .part$ = .str$
+    endif
+    .length = .length+1
+    .return$[.length] = .part$
+    
+    # For backwards compatibility only! Will disappear!
+    .array$[.length] = .part$
+  until .sep = 0
+endproc

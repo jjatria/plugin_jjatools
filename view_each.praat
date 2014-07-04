@@ -23,7 +23,7 @@ include selection_tools.proc
 
 # Generate a table with object types and number of selected
 # objects of each type
-@checkSelection(0)
+@checkSelection()
 object_table = checkSelection.object_table
 selection_table = checkSelection.raw_table
 

@@ -20,7 +20,7 @@ procedure pitchTwoPass (.floor_factor, .ceiling_factor)
 
   if .floor >= .ceiling
     .name$ = 
-    appendInfoLine: "W: while processing object #", .sound, " (, .name$, "), estimated floor >= estimated ceiling (", .floor, " >= ", .ceiling, "). Object will be empty"
+    appendInfoLine: "W: while processing object #", .sound, " (, .name$, ")", estimated floor >= estimated ceiling (", .floor, " >= ", .ceiling, "). Object will be empty"
   endif
   
   .id = noprogress To Pitch: 0.01, .floor, .ceiling

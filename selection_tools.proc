@@ -24,31 +24,55 @@
 
 # Save the active selection
 #
-# The selection is saved in the internal pseudo-array .id unless .keep is set
-# true. In that case, a selection table with the current selection is kept
-# and its id saved in the internal variable .table. This can then be used to
-# restore this particular selection, in the case multiple selections need to
-# be saved
+# The selection is saved in the internal pseudo-array .id,
+# which is accessed internally by @restoreSelection() to
+# restore this anonymous selection.
 #
-# Using this table it is easy to create per-type sub-sets of the current
-# selection, by using the Extract rows where...-like commands:
-#
-#     @saveSelection(1)
-#     table = saveSelection.table
-#     sounds = Extract rows where column (text): "type", "is equal to", "Sound"
-#     selectObject: table
-#     pitchs = Extract rows where column (text): "type", "is equal to", "Pitch"
-#
-#
-procedure saveSelection (.keep)
+procedure saveSelection ()
+#   appendInfoLine: "saveSelection"
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
   endfor
   
-  if .n
-    .table = Create Table with column names: "selected_objects", .n, "type name n id"
-  endif
+  @restoreSelection()
+endproc
+
+# Saves the active selection to a selection table
+#
+# Selection tables are used by these procedures to represent
+# a selection and store its data. This procedure is used
+# to create a table representing the current selection.
+#
+# Using this table it is easy to create per-type sub-sets of the current
+# selection, by using the Extract rows where...-like commands:
+#
+#     @saveSelectionTable()
+#     table = saveSelectionTable.table
+#     sounds = Extract rows where column (text): "type", "is equal to", "Sound"
+#     selectObject: table
+#     pitchs = Extract rows where column (text): "type", "is equal to", "Pitch"
+#
+# Although this is probably done more quickly by using the
+# @selectType(type$) or @refineToType(type$) procedures
+# depending on whether the entire object list or only the
+# current selection should be considered (note that these
+# do not alter the current selection):
+#
+#     @saveSelection()
+#     @selectType("Sound")
+#     @saveSelectionTable()
+#     sounds = saveSelectionTable.table
+#     @restoreSelection()
+#
+procedure saveSelectionTable ()
+#   appendInfoLine: "saveSelectionTable"
+  .n = numberOfSelected()
+  for .i to .n
+    .id[.i] = selected(.i)
+  endfor
+  
+  .table = Create Table with column names: "selection_table", .n, "type name n id"
   
   for .i to .n
     selectObject: .id[.i]
@@ -62,11 +86,7 @@ procedure saveSelection (.keep)
     Set numeric value: .i, "id",   .id[.i]
   endfor
   
-  @restoreSelection()
-  
-  if .n and !.keep
-    removeObject(.table)
-  endif
+  @restoreSavedSelection(.table)
 endproc
 
 # Restores the last saved selection
@@ -75,8 +95,9 @@ endproc
 # variables of @saveSelection.
 #
 procedure restoreSelection ()
+#   appendInfoLine: "restoreSelection"
   if variableExists("saveSelection.n")
-    @clearSelection()
+    nocheck selectObject: undefined
     for .i to saveSelection.n
       plusObject: saveSelection.id[.i]
     endfor
@@ -92,23 +113,20 @@ endproc
 # in that table.
 #
 procedure restoreSavedSelection (.id)
+#   appendInfoLine: "restoreSavedSelection"
   @isSelectionTable(.id)
   if isSelectionTable.return
     selectObject: .id
       
     .n = Get number of rows
-    if .n
-      for .i to .n
-        .id[.i] = Get value: .i, "id"
-      endfor
-      
-      @clearSelection()
-      for .i to .n
-        plusObject: .id[.i]
-      endfor
-    else
-      exitScript: "Selection table is empty"
-    endif
+    for .i to .n
+      .id[.i] = Get value: .i, "id"
+    endfor
+    
+    nocheck selectObject: undefined
+    for .i to .n
+      plusObject: .id[.i]
+    endfor
   else
     exitScript: "Object ", .id, " is not a selection table"
   endif
@@ -117,6 +135,7 @@ endproc
 # Safely and silently clears the selection
 #
 procedure clearSelection ()
+#   appendInfoLine: "clearSelection"
   nocheck selectObject(undefined)
 endproc
 
@@ -128,41 +147,40 @@ endproc
 # TextGrids).
 #
 procedure checkSelection ()
+#   appendInfoLine: "checkSelection"
   .n = numberOfSelected()
 
   if .n
-    @saveSelection(1)
-    .raw_table = saveSelection.table
+    @saveSelectionTable()
+    .raw_table = saveSelectionTable.table
     
     selectObject: .raw_table
     .object_table = Collapse rows: "type", "n", "", "", "", ""
     selectObject: .object_table
 
     .variance = Get standard deviation: "n"
-    .result = if .variance = 0 then 1 else 0 fi
+    .return = if .variance = 0 then 1 else 0 fi
 
-    @restoreSelection()
+    @restoreSavedSelection(.raw_table)
+    removeObject: .raw_table
   else
-    .result = -1
+    .return = -1
   endif
 endproc
 
 # Checks if the object with a specific id is a (or looks like a) valid
 # selection table
 #
-# Mostly for internal use
+# Mostly for internal use. This procedure modifies the current selection!
 #
 procedure isSelectionTable (.id)
+#   appendInfoLine: "isSelectionTable"
   .return = 0
   @objectExists(.id)
-  if !objectExists.return
-    exitScript: "Object ", .id, " does not exist"
-  endif
-  
   if numberOfSelected("Table")
-    columns$ = List: 0
-    columns$ = left$(columns$, index(columns$, newline$) - 1)
-    if columns$ = "type'tab$'name'tab$'n'tab$'id"
+    .columns$ = List: 0
+    .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
+    if columns$ = "type" + tab$ + "name" + tab$ + "n" + tab$ + "id"
       .return = 1
     endif
   endif
@@ -175,6 +193,7 @@ endproc
 # safer.
 #
 procedure selectSelectionTables ()
+#   appendInfoLine: "selectSelectionTables"
   select all
   .t = 0
   .n = numberOfSelected()
@@ -184,14 +203,15 @@ procedure selectSelectionTables ()
   for .i to .n
     @isSelectionTable(.o[.i])
     if isSelectionTable.return
-      .t = .t + 1
+      .t += 1
       .tables[.t] = .o[.i]
     endif
   endfor
+  
   if .t
     @clearSelection()
     for .i to .t
-      plusObject(.tables[.t])
+      plusObject(.tables[.i])
     endfor
   endif
 endproc
@@ -206,6 +226,7 @@ endproc
 # saved selection!
 #
 procedure removeSelectionTables ()
+#   appendInfoLine: "removeSelectionTables"
   @saveSelection(0)
   
   @selectSelectionTables()
@@ -220,17 +241,54 @@ endproc
 # Checks if the object with a specific id is a (or looks like a) valid
 # object table
 #
-# Mostly for internal use
+# Mostly for internal use. This procedure modifies the current selection!
 #
 procedure isObjectTypeTable (.id)
+#   appendInfoLine: "isObjectTypeTable"
   .return = 0
   @objectExists(.id)
   if numberOfSelected("Table")
-    columns$ = List: 0
-    columns$ = left$(columns$, index(columns$, newline$) - 1)
-    if columns$ = "type'tab$'n"
+    .columns$ = List: 0
+    .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
+    if .columns$ = "type" + tab$ + "n"
       .return = 1
     endif
+  endif
+endproc
+
+# Checks if a string represents a valid object type
+#
+procedure isValidType (.type$)
+#   appendInfoLine: "isValidType"
+  .objects$ = List readable types of objects
+  .objects$ = replace_regex$(.objects$, ".*\t(.*)$", "\1", 0)
+  .objects$ = replace$(.objects$, newline$, " ", 0)
+  .objects$ = " " + .objects$ + " "
+  .return = if index(.objects$, " " + .type$ + " ") then 1 else 0 fi
+endproc
+
+# Selects only one type from the entire object list
+#
+procedure selectType (.type$)
+#   appendInfoLine: "selectType"
+  @isValidType(.type$)
+  select all
+  @refineToType(.type$)
+endproc
+
+# Selects only one type from the active selection
+#
+procedure refineToType (.type$)
+#   appendInfoLine: "refineToType"
+  @isValidType(.type$)
+  if isValidType.return
+    @saveSelectionTable()
+    selectObject: saveSelectionTable.table
+    .per_type = nowarn Extract rows where column (text): "type", "is equal to", .type$
+    @restoreSavedSelection(.per_type)
+    removeObject: saveSelectionTable.table, .per_type
+  else
+    exitScript: """", .type$, """ is not a valid Praat type"
   endif
 endproc
 
@@ -240,7 +298,8 @@ endproc
 # This is mostly for use with @removeSelectionTables(), which makes it safer.
 #
 procedure selectObjectTables ()
-  select all
+#   appendInfoLine: "selectObjectTables"
+  @selectType("Table")
   .n = numberOfSelected()
   for .i to .n
     .o[.i] = selected(.i)
@@ -260,15 +319,16 @@ endproc
 # in most cases, but anything that uses `select all` should be mistrusted.
 #
 procedure removeObjectTables ()
-  @saveSelection(0)
+#   appendInfoLine: "removeObjectTables"
+  @saveSelectionTable()
+  .selected = saveSelectionTable.table
   
   @selectObjectTables()
-  .n = numberOfSelected()
-  if .n
-    Remove
-  endif
+  minusObject(.selected)
+  nocheck Remove
   
-  @restoreSelection()
+  @restoreSavedSelection(.selected)
+  removeObject(.selected)
 endproc
 
 # Counts the type of objects from an object table
@@ -276,6 +336,7 @@ endproc
 # Provide the id of the object table and the name of the object type to count
 #
 procedure countObjects (.id, .type$)
+#   appendInfoLine: "countObjects"
   @isObjectTypeTable(.id)
   if isObjectTypeTable.return
   
@@ -290,6 +351,8 @@ procedure countObjects (.id, .type$)
 endproc
 
 # Checks if an object exists in the object list
+#
+# This procedure changes the current selection!
 #
 procedure objectExists (.id)
   nocheck selectObject: .id
