@@ -113,7 +113,23 @@ endproc
 # in that table.
 #
 procedure restoreSavedSelection (.id)
-#   appendInfoLine: "restoreSavedSelection"
+  appendInfoLine: "restoreSavedSelection"
+  nocheck selectObject: undefined
+  @plusSavedSelection(.id)
+endproc
+
+procedure plusSavedSelection (.id)
+  appendInfoLine: "plusSavedSelection"
+  @_loadSelectionTable(.id, 1)
+endproc
+
+procedure minusSavedSelection (.id)
+  appendInfoLine: "minusSavedSelection"
+  @_loadSelectionTable(.id, -1)
+endproc
+
+procedure _loadSelectionTable (.id, .plus)
+  appendInfoLine: "_loadSelectionTable"
   @isSelectionTable(.id)
   if isSelectionTable.return
     selectObject: .id
@@ -123,10 +139,15 @@ procedure restoreSavedSelection (.id)
       .id[.i] = Get value: .i, "id"
     endfor
     
-    nocheck selectObject: undefined
     for .i to .n
-      plusObject: .id[.i]
+      if .plus
+        plusObject: .id[.i]
+      else
+        minusObject: .id[.i]
+      endif
     endfor
+    
+    minusObject: .id
   else
     exitScript: "Object ", .id, " is not a selection table"
   endif
@@ -152,17 +173,17 @@ procedure checkSelection ()
 
   if .n
     @saveSelectionTable()
-    .raw_table = saveSelectionTable.table
+    .selected = saveSelectionTable.table
     
-    selectObject: .raw_table
-    .object_table = Collapse rows: "type", "n", "", "", "", ""
-    selectObject: .object_table
+    selectObject: .selected
+    .table = Collapse rows: "type", "n", "", "", "", ""
+    Rename: "object_table"
 
     .variance = Get standard deviation: "n"
     .return = if .variance = 0 then 1 else 0 fi
 
-    @restoreSavedSelection(.raw_table)
-    removeObject: .raw_table
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
   else
     .return = -1
   endif
@@ -180,7 +201,7 @@ procedure isSelectionTable (.id)
   if numberOfSelected("Table")
     .columns$ = List: 0
     .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
-    if columns$ = "type" + tab$ + "name" + tab$ + "n" + tab$ + "id"
+    if .columns$ = "type" + tab$ + "name" + tab$ + "n" + tab$ + "id"
       .return = 1
     endif
   endif
