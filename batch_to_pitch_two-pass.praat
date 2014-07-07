@@ -42,10 +42,10 @@ n = Get number of strings
 for i to n
   selectObject: files
   filename$ = Get string: i
-  myobject = Read from file: path$ + filename$
+  source = Read from file: path$ + filename$
   runScript: "to_pitch_two-pass.praat", floor_factor, ceiling_factor
   new[i] = selected("Pitch")
-  removeObject: myobject
+  removeObject: source
   
   if batch_mode
     # In batch mode, generated pitch objects are saved to disk and
