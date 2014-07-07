@@ -114,22 +114,7 @@ endproc
 #
 procedure restoreSavedSelection (.id)
   appendInfoLine: "restoreSavedSelection"
-  nocheck selectObject: undefined
-  @plusSavedSelection(.id)
-endproc
-
-procedure plusSavedSelection (.id)
-  appendInfoLine: "plusSavedSelection"
-  @_loadSelectionTable(.id, 1)
-endproc
-
-procedure minusSavedSelection (.id)
-  appendInfoLine: "minusSavedSelection"
-  @_loadSelectionTable(.id, -1)
-endproc
-
-procedure _loadSelectionTable (.id, .plus)
-  appendInfoLine: "_loadSelectionTable"
+  
   @isSelectionTable(.id)
   if isSelectionTable.return
     selectObject: .id
@@ -140,17 +125,45 @@ procedure _loadSelectionTable (.id, .plus)
     endfor
     
     for .i to .n
-      if .plus
-        plusObject: .id[.i]
-      else
-        minusObject: .id[.i]
-      endif
+      plusObject: .id[.i]
     endfor
     
     minusObject: .id
   else
     exitScript: "Object ", .id, " is not a selection table"
   endif
+endproc
+
+procedure plusSavedSelection (.id)
+  appendInfoLine: "plusSavedSelection"
+  @saveSelectionTable
+  .table = saveSelectionTable.table
+  plusObject: .id
+  .new = Append
+  removeObject: .table
+  @restoreSavedSelection(.new)
+endproc
+
+procedure minusSavedSelection (.id)
+  appendInfoLine: "minusSavedSelection"
+  @saveSelectionTable
+  .table = saveSelectionTable.table
+  selectObject: .id
+
+  .n = Get number of rows
+  for .y from 0 to .n-1
+    .i = .n - .y
+    selectObject: .id
+    .remove = Get value: .i, "id"
+    selectObject: .table
+    .remove = Search column: "id", .remove
+    if .remove
+      Remove row: .remove
+    endif
+  endfor
+  
+  @restoreSavedSelection(.table)
+  removeObject: .table
 endproc
 
 # Safely and silently clears the selection
@@ -262,19 +275,25 @@ endproc
 # Checks if the object with a specific id is a (or looks like a) valid
 # object table
 #
-# Mostly for internal use. This procedure modifies the current selection!
+# Mostly for internal use.
 #
 procedure isObjectTypeTable (.id)
 #   appendInfoLine: "isObjectTypeTable"
   .return = 0
+  @saveSelectionTable()
+  .selected = saveSelectionTable.table
+  
   @objectExists(.id)
-  if numberOfSelected("Table")
+  if objectExists.return
+    selectObject: .id
     .columns$ = List: 0
     .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
     if .columns$ = "type" + tab$ + "n"
       .return = 1
     endif
   endif
+  
+  @restoreSavedSelection(.selected)
 endproc
 
 # Checks if a string represents a valid object type
@@ -373,9 +392,28 @@ endproc
 
 # Checks if an object exists in the object list
 #
-# This procedure changes the current selection!
-#
 procedure objectExists (.id)
-  nocheck selectObject: .id
-  .return = if numberOfSelected() = 1 then 1 else 0 fi
+  @isSelected(.id)
+  
+  if isSelected.plus = isSelected.minus
+    # Object does not exist
+    .return = 0
+  else
+    .return = 1
+    if isSelected.return
+      plusObject: .id
+    else
+      minusObject: id
+    endif
+  endif
+endproc
+
+procedure isSelected (.id)
+  .n = numberOfSelected()
+  .return = 0
+  for .i to .n
+    if selected(.i) = .id
+      .return = 1
+    endif
+  endfor
 endproc
