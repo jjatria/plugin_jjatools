@@ -56,14 +56,17 @@ endproc
 # Although this is probably done more quickly by using the
 # @selectType(type$) or @refineToType(type$) procedures
 # depending on whether the entire object list or only the
-# current selection should be considered (note that these
-# do not alter the current selection):
+# current selection should be considered (note that the example below
+# does not alter the current selection):
 #
 #     @saveSelection()
 #     @selectType("Sound")
 #     @saveSelectionTable()
 #     sounds = saveSelectionTable.table
 #     @restoreSelection()
+#
+# After that, the variable "sounds" holds the id of a table representing
+# the selection of all Sound objects in the object list.
 #
 procedure saveSelectionTable ()
 #   appendInfoLine: "saveSelectionTable"
@@ -97,7 +100,7 @@ endproc
 procedure restoreSelection ()
 #   appendInfoLine: "restoreSelection"
   if variableExists("saveSelection.n")
-    nocheck selectObject: undefined
+    @clearSelection()
     for .i to saveSelection.n
       plusObject: saveSelection.id[.i]
     endfor
@@ -109,11 +112,11 @@ endproc
 # Restores a selection using a selection table
 #
 # When called with the id of a previously generated selection table (by
-# calling @saveSelection(1), for example), it will restore the selection saved
-# in that table.
+# calling @saveSelection(my_selection), for example), it will restore the
+# selection saved in that table.
 #
 procedure restoreSavedSelection (.id)
-  appendInfoLine: "restoreSavedSelection"
+#   appendInfoLine: "restoreSavedSelection"
   
   @isSelectionTable(.id)
   if isSelectionTable.return
@@ -134,19 +137,23 @@ procedure restoreSavedSelection (.id)
   endif
 endproc
 
+# Adds the selection in a selection table to the current selection
+#
 procedure plusSavedSelection (.id)
-  appendInfoLine: "plusSavedSelection"
-  @saveSelectionTable
+#   appendInfoLine: "plusSavedSelection"
+  @saveSelectionTable()
   .table = saveSelectionTable.table
-  plusObject: .id
+  selectObject: .table, .id
   .new = Append
-  removeObject: .table
   @restoreSavedSelection(.new)
+  removeObject: .table, .new
 endproc
 
+# Removes the selection in a selection table from the current selection
+#
 procedure minusSavedSelection (.id)
-  appendInfoLine: "minusSavedSelection"
-  @saveSelectionTable
+#   appendInfoLine: "minusSavedSelection"
+  @saveSelectionTable()
   .table = saveSelectionTable.table
   selectObject: .id
 
@@ -156,7 +163,7 @@ procedure minusSavedSelection (.id)
     selectObject: .id
     .remove = Get value: .i, "id"
     selectObject: .table
-    .remove = Search column: "id", .remove
+    .remove = nowarn Search column: "id", string$(.remove)
     if .remove
       Remove row: .remove
     endif
@@ -205,19 +212,33 @@ endproc
 # Checks if the object with a specific id is a (or looks like a) valid
 # selection table
 #
-# Mostly for internal use. This procedure modifies the current selection!
+# Mostly for internal use.
 #
 procedure isSelectionTable (.id)
 #   appendInfoLine: "isSelectionTable"
   .return = 0
+  
+  .n = numberOfSelected()
+  for .i to .n
+    .id[.i] = selected(.i)
+  endfor
+  
   @objectExists(.id)
-  if numberOfSelected("Table")
-    .columns$ = List: 0
-    .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
-    if .columns$ = "type" + tab$ + "name" + tab$ + "n" + tab$ + "id"
-      .return = 1
+  if objectExists.return
+    selectObject: .id
+    if numberOfSelected("Table")
+      .columns$ = List: 0
+      .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
+      if .columns$ = "type" + tab$ + "name" + tab$ + "n" + tab$ + "id"
+        .return = 1
+      endif
     endif
   endif
+  
+  @clearSelection()
+  for .i to .n
+    plusObject: .id[.i]
+  endfor
 endproc
 
 # Selects all existing selection tables
@@ -395,15 +416,21 @@ endproc
 procedure objectExists (.id)
   @isSelected(.id)
   
-  if isSelected.plus = isSelected.minus
+  .start = numberOfSelected()
+  nocheck plusObject: .id
+  .plus = numberOfSelected()
+  nocheck minusObject: .id
+  .minus = numberOfSelected()
+  
+  if .plus = .minus
     # Object does not exist
     .return = 0
   else
     .return = 1
-    if isSelected.return
-      plusObject: .id
+    if .start < .plus
+      minusObject: .id
     else
-      minusObject: id
+      plusObject: .id
     endif
   endif
 endproc
