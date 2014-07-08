@@ -8,7 +8,7 @@ include selection_tools.proc
 # set, and if so, issue them. The benefit of this approach is that
 # similar warnings are only issued once.
 procedure issueWarnings ()
-#   appendInfoLine: "issued"
+#   appendInfoLine: "Issuing warnings"
   .new = 1
   if variableExists("issueWarnings.selected")
     @isSelectionTable(issueWarnings.selected)
@@ -20,7 +20,6 @@ procedure issueWarnings ()
   if .new
     @saveSelectionTable()
     .selected = saveSelectionTable.table
-#     appendInfoLine: "selected in issue", .selected
   endif
 
   
@@ -37,7 +36,6 @@ procedure issueWarnings ()
       removeObject(warning.table, .issued)
     endif
   else
-#     appendInfoLine: "no table!"
     @addWarning("NoWarningTable", "Warning table not found, created with this warning")
     @warning("NoWarningTable")
     @issueWarnings()
@@ -46,7 +44,6 @@ procedure issueWarnings ()
   @restoreSavedSelection(.selected)
   if .new
     removeObject(.selected)
-#     appendInfoLine: "removed ", .selected
   else
     .new = 1 - .new
   endif
@@ -54,7 +51,7 @@ endproc
 
 # Add warning codes and text to warning table
 procedure addWarning (.code$, .text$)
-#   appendInfoLine: "add warning"
+#   appendInfoLine: "Added ", .code$, " to warning table"
   @saveSelectionTable()
   .selected = saveSelectionTable.table
 
@@ -80,22 +77,19 @@ procedure addWarning (.code$, .text$)
     Set numeric value: .row, "issued", 0
   endif
   
-#   appendInfoLine: "selected in add", .selected
   @restoreSavedSelection(.selected)
   removeObject(.selected)
-#   appendInfoLine: "removed ", .selected
 endproc
 
 # @warning(code) sets a flag for a specific warning
 procedure warning (.code$)
-#   appendInfoLine: "flag warning"
+#   appendInfoLine: "Flagged warning: ", .code$
   @saveSelectionTable()
   .selected = saveSelectionTable.table
   
   if variableExists("warning.table")
     selectObject(.table)
   else
-#     appendInfoLine: "no warning table!"
     @addWarning("NoWarningTable", "Warning table not found, created with this warning")
     @warning("NoWarningTable")
   endif
@@ -105,13 +99,10 @@ procedure warning (.code$)
   if .row
     Set numeric value: .row, "issued", 1
   else
-#     appendInfoLine: "no such warning!"
     @addWarning("NoSuchWarning", "A warning has been issued for a non-existing code")
     @warning("NoSuchWarning")
   endif
   
-#   appendInfoLine: "selected in warn", .selected
   @restoreSavedSelection(.selected)
   removeObject(.selected)
-#   appendInfoLine: "removed ", .selected
 endproc
