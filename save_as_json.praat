@@ -12,7 +12,7 @@
 # <http://www.gnu.org/licenses/>.
 
 include check_directory.proc
-include selection_tools.proc
+include selection/main.proc
 include json.proc
 include utils.proc
 include warnings.proc

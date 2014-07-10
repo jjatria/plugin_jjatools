@@ -19,7 +19,7 @@
 
 include require.proc
 @require("5.3.44")
-include selection_tools.proc
+include selection/main.proc
 
 # Generate a table with object types and number of selected
 # objects of each type
