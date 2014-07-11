@@ -347,6 +347,7 @@ procedure isObjectTypeTable (.id)
   endif
   
   @restoreSavedSelection(.selected)
+  removeObject: .selected
 endproc
 
 # Checks if a string represents a valid object type

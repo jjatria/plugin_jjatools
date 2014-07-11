@@ -1,6 +1,7 @@
 Add menu command:   "Objects", "Praat", "JJATools",                           "",                 0, ""
 Add menu command:   "Objects", "Praat", "Save selected objects...",           "JJATools",         1, "save_all.praat"
 Add menu command:   "Objects", "Praat", "Save selected objects to JSON...",   "JJATools",         1, "save_as_json.praat"
+Add menu command:   "Objects", "Praat", "View each selected",                 "JJATools",         1, "view_each.praat"
 Add menu command:   "Objects", "Praat", "Batch generate Pitch (two-pass)...", "JJATools",         1, "batch_to_pitch_two-pass.praat"
 
 Add menu command:   "Objects", "Praat", "File conversions",                   "JJATools",         1, ""
@@ -14,8 +15,7 @@ Add menu command:   "Objects", "Praat", "Invert selection",                   "O
 Add action command: "Sound",         0, "",         0, "", 0, "Filter and center...",         "Modify -",              1, "filter_and_center.praat"
 Add action command: "Sound",         0, "TextGrid", 0, "", 0, "Extract labels...",            "",                      0, "extract_labels.praat"   
 Add action command: "TextGrid",      1, "",         0, "", 0, "Find label...",                "Query -",               1, "find_label_in_textgrid.praat"
-Add action command: "Sound",         0, "",         0, "", 0, "View each...",                 "",                      0, "view_each.praat"
-Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View each...",                 "",                      0, "view_each.praat"
+Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View eachs as pairs",          "",                      0, "view_each.praat"
 Add action command: "Sound",         0, "",         0, "", 0, "To Pitch (Hirst two-pass)...", "Analyse periodicity -", 1, "to_pitch_two-pass.praat"
 Add action command: "Strings",       0, "",         0, "", 0, "Sort (generic)...",            "Modify -",              1, "sort_strings_generic.praat"
 Add action command: "TextGrid",      0, "",         0, "", 0, "Save as JSON file...",         "",                      0, "save_as_json.praat"

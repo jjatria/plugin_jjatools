@@ -7,7 +7,7 @@
 # and viewed in unison.
 #
 # Written by Jose J. Atria (October 14, 2012)
-# Last revision: July 2, 2014)
+# Last revision: July 10, 2014)
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -25,9 +25,15 @@ include selection/main.proc
 # objects of each type
 @saveSelectionTable()
 selection = saveSelectionTable.table
+selectObject: selection
+Rename: "original"
+@restoreSavedSelection(selection)
 
 @checkSelection()
 object_table = checkSelection.table
+selectObject: object_table
+Rename: "objects"
+@restoreSavedSelection(selection)
 
 n = numberOfSelected()
 
@@ -49,20 +55,27 @@ if total_types = 2
     @refineToType("Sound")
     @saveSelectionTable()
     sounds = saveSelectionTable.table
+    selectObject: sounds
     Rename: "sounds"
-    n = Get number of rows
     
     @restoreSavedSelection(selection)
     @refineToType("TextGrid")
     @saveSelectionTable()
-    sounds = saveSelectionTable.table
+    textgrids = saveSelectionTable.table
+    selectObject: textgrids
     Rename: "textgrids"
+    
+    selectObject: sounds
+    n = Get number of rows
   endif
 endif
 
+# No more use for object type table
+removeObject: object_table
+
 if paired
   base_selection = sounds
-  base_selection = textgrids
+  pair_selection = textgrids
 else
   base_selection = selection
 endif
@@ -95,11 +108,13 @@ while i <= n
 
   if i > 1
     button = endPause: "Stop", "Previous", if i = n then "Finish" else "Next" fi, 3, 1
+    finish = 3
   else
     button = endPause: "Stop", if i = n then "Finish" else "Next" fi, 2, 1
+    finish = 2
   endif
 
-  editor_name$ = if paired then "TextGrid " else "Sound " fi + base_name$
+  editor_name$ = if paired then "TextGrid " else base_type$ + " " fi + base_name$
   nocheck editor 'editor_name$'
     nocheck Close
   nocheck endeditor
@@ -111,12 +126,19 @@ while i <= n
     # Pressed back
     i -= 1
   else
-    i += 1
+    if i = n
+      @endScript()
+    else
+      i += 1
+    endif
   endif
 endwhile
 
 procedure endScript ()
   @restoreSavedSelection(selection)
-  nocheck removeObject: selection, object_table
+  removeObject: selection
+  if paired
+    removeObject: base_selection, pair_selection
+  endif
   exitScript()
 endproc
