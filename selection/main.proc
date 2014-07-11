@@ -75,7 +75,8 @@ procedure saveSelectionTable ()
     .id[.i] = selected(.i)
   endfor
   
-  .table = Create Table with column names: "selection_table", .n, "type name n id"
+  @createSelectionTable(.n)
+  .table = createSelectionTable.return
   
   for .i to .n
     selectObject: .id[.i]
@@ -90,6 +91,15 @@ procedure saveSelectionTable ()
   endfor
   
   @restoreSavedSelection(.table)
+endproc
+
+procedure createSelectionTable (.n)
+  .return = Create Table with column names: "selection_table", .n, "type name n id"
+endproc
+
+procedure createEmptySelectionTable ()
+  @createSelectionTable(0)
+  .return = createSelectionTable.return
 endproc
 
 # Restores the last saved selection
@@ -187,6 +197,28 @@ endproc
 # parity between multiple object types (for instance, for pairing Sounds and
 # TextGrids).
 #
+procedure checkSelection ()
+#   appendInfoLine: "checkSelection"
+  .n = numberOfSelected()
+
+  if .n
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+    
+    selectObject: .selected
+    .table = Collapse rows: "type", "n", "", "", "", ""
+    Rename: "object_table"
+
+    .variance = Get standard deviation: "n"
+    .return = if .variance = 0 then 1 else 0 fi
+
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
+  else
+    .return = -1
+  endif
+endproc
+
 procedure checkSelection ()
 #   appendInfoLine: "checkSelection"
   .n = numberOfSelected()

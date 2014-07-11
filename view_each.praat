@@ -23,7 +23,9 @@ include selection/main.proc
 
 # Generate a table with object types and number of selected
 # objects of each type
-@saveSelection()
+@saveSelectionTable()
+selection = saveSelectionTable.table
+
 @checkSelection()
 object_table = checkSelection.table
 
@@ -32,98 +34,89 @@ n = numberOfSelected()
 ## Paired object types
 selectObject: object_table
 
-# Sound + TextGrid
-@countObjects(object_table, "Sound")
-sounds    = countObjects.n
-
-@countObjects(object_table, "TextGrid")
-textgrids = countObjects.n
-
-if sounds = textgrids
-  selectObject: selection_table
-  textgrid_table = Extract rows where column (text): "type", "is equal to", "TextGrid"
+# Check if Sound and TextGrid objects are the only types
+# and if they are in the same number, for pairing.
+paired = 0
+total_types = Get number of rows
+if total_types = 2
+  @countObjects(object_table, "Sound")
+  sounds    = countObjects.n
+  @countObjects(object_table, "TextGrid")
+  textgrids = countObjects.n
+  if sounds = textgrids
+    paired = 1
+    @restoreSavedSelection(selection)
+    @refineToType("Sound")
+    @saveSelectionTable()
+    sounds = saveSelectionTable.table
+    Rename: "sounds"
+    n = Get number of rows
+    
+    @restoreSavedSelection(selection)
+    @refineToType("TextGrid")
+    @saveSelectionTable()
+    sounds = saveSelectionTable.table
+    Rename: "textgrids"
+  endif
 endif
 
-for i to n
-#   pair = 0
-#   # We use the selection table to iterate through the selection
-#   selectObject: selection_table
-#   id = Get value: i, "id"
-#   
+if paired
+  base_selection = sounds
+  base_selection = textgrids
+else
+  base_selection = selection
+endif
+
+i = 1
+while i <= n
+  # We use the selection table to iterate through the selection
+  selectObject: base_selection
+  base       = Get value: i, "id"
+  base_type$ = Get value: i, "type"
+  base_name$ = Get value: i, "name"
+
 #   # id might be flagged to negative, if we are to skip that object
 #   # (in case it has been paired)
 #   if id > 0
-#     selectObject: id
-# 
-#     type$ = extractWord$(selected$(), "")
-#     name$ = selected$(type$)
-#     
-#     if type$ = "Sound"
-#       # If current object is a Sound
-#       if sounds = textgrids
-#         # and an equal number of Sounds and TextGrids
-#         # are selected, they might be paired, so we check
-#         sound_duration = Get total duration
-#         
-#         # We check the corresponding TextGrid by number from the selection
-#         selectObject: textgrid_table
-#         pair = Get value: i, "id"
-#         
-#         selectObject: pair
-#         textgrid_duration = Get total duration
-#         
-#         # If durations match, they are likely paired
-#         if sound_duration = textgrid_duration
-#           # and we set a flag on that object's id if it has been paired
-#           selectObject: selection_table
-#           pair_row = Search column: "id", string$(pair)
-#           Set numeric value: pair_row, "id", pair * -1
-#           
-#           # Since they match, we select both
-#           selectObject: id, pair
-#         else
-#           # Objects do not match
-#         endif
-#       endif
-#     endif
-# 
-#     View & Edit
-# 
-#     beginPause("Viewing " + name$)
-# 
-#     if i > 1
-#       button = endPause("Stop", "Previous", if i = n then "Finish" else "Next" fi, 3, 1)
-#     else
-#       button = endPause("Stop", if i = n then "Finish" else "Next" fi, 2, 1)  
-#     endif
-# 
-#     editor_name$ = if textgrids then "TextGrid " else "Sound " fi + name$
-#     nocheck editor 'editor_name$'
-#       nocheck Close
-#     nocheck endeditor
-# 
-#     if button = 1
-#       # Pressed stop
-#       @endScript()
-#     elsif button = 2 and i > 1
-#       # Pressed back
-#       if pair
-# #        printline reverting flag
-#         # If we are paired we need to unset the "skip" flag on the pair
-#         selectObject: selection_table
-#         pair_row = Search column: "id", string$(pair * -1)
-#         Set numeric value: pair_row, "id", pair
-#       else
-# #        printline No pair
-#       endif
-#       
-#       i -= 2
-#       
-#     endif
-#     
-#   endif
-endfor
+  if paired
+    selectObject: pair_selection
+    pair       = Get value: i, "id"
+    pair_type$ = Get value: i, "type"
+    pair_name$ = Get value: i, "name"
+  endif
+  selectObject: base
+  if paired
+    plusObject: pair
+  endif
+
+  View & Edit
+
+  beginPause: "Viewing " + base_name$
+
+  if i > 1
+    button = endPause: "Stop", "Previous", if i = n then "Finish" else "Next" fi, 3, 1
+  else
+    button = endPause: "Stop", if i = n then "Finish" else "Next" fi, 2, 1
+  endif
+
+  editor_name$ = if paired then "TextGrid " else "Sound " fi + base_name$
+  nocheck editor 'editor_name$'
+    nocheck Close
+  nocheck endeditor
+
+  if button = 1
+    # Pressed stop
+    @endScript()
+  elsif button = 2 and i > 1
+    # Pressed back
+    i -= 1
+  else
+    i += 1
+  endif
+endwhile
 
 procedure endScript ()
-  @restoreLastSelection()
+  @restoreSavedSelection(selection)
+  nocheck removeObject: selection, object_table
+  exitScript()
 endproc
