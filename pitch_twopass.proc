@@ -3,24 +3,25 @@ include require.proc
 
 # Generate Pitch object using utterance-specific thresholds
 # Using Hirst's two-pass method
-procedure makePitch ()
+procedure pitchTwoPass (.floor_factor, .ceiling_factor)
   # As per Hirst, 2011. JoSS 1(1):55-83
   # Source: http://uk.groups.yahoo.com/neo/groups/praat-users/conversations/topics/6199
+
   .sound = selected("Sound")
+  .name$ = selected$("Sound")
   .first_pass = noprogress To Pitch: 0.01, 60, 700
   .q1 = Get quantile: 0, 0, 0.25, "Hertz"
   .q3 = Get quantile: 0, 0, 0.75, "Hertz"
-  select .first_pass
-  Remove
+  removeObject: .first_pass
+  selectObject: .sound
 
-  .floor = .q1 * 0.75
-  .ceiling = .q3 * 2
+  .floor = .q1 * .floor_factor
+  .ceiling = .q3 * .ceiling_factor
 
-  select .sound
-  .ragged = noprogress To Pitch: 0.01, .floor, .ceiling
-  .id = Smooth: 10
-  select .ragged
-  Remove
-
-  select .id
+  if .floor >= .ceiling
+    .name$ = 
+    appendInfoLine: "W: while processing object #", .sound, " (, .name$, ")", estimated floor >= estimated ceiling (", .floor, " >= ", .ceiling, "). Object will be empty"
+  endif
+  
+  .id = noprogress To Pitch: 0.01, .floor, .ceiling
 endproc

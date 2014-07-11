@@ -37,7 +37,7 @@ if textgrid = 1
 
 		n = Get number of intervals... tier
 		for i to n
-			label$ = Get label of interval... tier, i
+			label$ = Get label of interval: tier, i
 			if label$ = target_label$
 				counter += 1
 				if index and counter = index
