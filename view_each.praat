@@ -19,7 +19,7 @@
 
 include require.proc
 @require("5.3.44")
-include selection/main.proc
+include selection.proc
 
 # Generate a table with object types and number of selected
 # objects of each type
@@ -108,13 +108,23 @@ while i <= n
 
   if i > 1
     button = endPause: "Stop", "Previous", if i = n then "Finish" else "Next" fi, 3, 1
-    finish = 3
   else
     button = endPause: "Stop", if i = n then "Finish" else "Next" fi, 2, 1
-    finish = 2
   endif
 
-  editor_name$ = if paired then "TextGrid " else base_type$ + " " fi + base_name$
+  # If objects are renamed while viewing each, editors are
+  # editors are not closed properly. Attempted to solve
+  # this, but it didn't work. Why?
+
+  if paired
+    selectObject: pair
+    editor_name$ = pair_type$ + " " + selected$(pair_type$)
+  else
+    editor_name$ = base_type$ + " " + selected$(base_type$)
+  endif
+  
+#   appendInfoLine: "Tried closing ", editor_name$
+
   nocheck editor 'editor_name$'
     nocheck Close
   nocheck endeditor

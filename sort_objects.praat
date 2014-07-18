@@ -10,7 +10,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include split.proc
+include utils.proc
 include require.proc
 @require("5.3.44")
 

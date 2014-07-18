@@ -1,4 +1,4 @@
-include main.proc
+include selection.proc
 
 @saveSelectionTable()
 selection = saveSelectionTable.table

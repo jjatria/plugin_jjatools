@@ -1,8 +1,8 @@
 # To use these procedures as a standalone set (not as part
 # of the plugin) replace the following line:
-include selection/main.proc
+include selection.proc
 # with one like this one:
-# include .praat-dir/plugin_jjatools/selection/main.proc
+# include .praat-dir/plugin_jjatools/selection.proc
 
 # @issueWarnings() will check to see if any warning flags have been
 # set, and if so, issue them. The benefit of this approach is that

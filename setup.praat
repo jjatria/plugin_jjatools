@@ -3,7 +3,6 @@ Add menu command:   "Objects", "Praat", "Save selected objects...",           "J
 Add menu command:   "Objects", "Praat", "View each selected",                 "JJATools",         1, "view_each.praat"
 Add menu command:   "Objects", "Praat", "Sort selected objects...",           "JJATools",         1, "sort_objects.praat"
 Add menu command:   "Objects", "Praat", "Batch generate Pitch (two-pass)...", "JJATools",         1, "batch_to_pitch_two-pass.praat"
-Add menu command:   "Objects", "Praat", "Normalise selected sounds (RMS)...", "JJATools",         1, "batch_rms_normalize.praat"
 
 Add menu command:   "Objects", "Praat", "Formats -",                          "JJATools",         1, ""
 Add menu command:   "Objects", "Praat", "TextGrids to Audacity labels...",    "Formats -",        2, "all_textgrids_to_audacity_labels.praat"

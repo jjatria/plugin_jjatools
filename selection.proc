@@ -18,6 +18,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+jja.config$ = readFile$("config.ini")
+jja.debug = extractNumber(jja.config$, "DEBUG=")
+
 #
 # Procedures
 #
@@ -29,7 +32,10 @@
 # restore this anonymous selection.
 #
 procedure saveSelection ()
-#   appendInfoLine: "saveSelection"
+  if jja.debug
+    appendInfoLine: "saveSelection()"
+  endif
+  
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
@@ -69,37 +75,82 @@ endproc
 # the selection of all Sound objects in the object list.
 #
 procedure saveSelectionTable ()
-#   appendInfoLine: "saveSelectionTable"
+  if jja.debug
+    appendInfoLine: "saveSelectionTable()"
+  endif
+  
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
   endfor
   
-  @createSelectionTable(.n)
-  .table = createSelectionTable.return
+  @createEmptySelectionTable(.n)
+  .table = createEmptySelectionTable.table
   
   for .i to .n
-    selectObject: .id[.i]
-    .type$ = extractWord$(selected$(), "")
-    .name$ = extractWord$(selected$(), .type$)
-    
-    selectObject: .table
-    Set string value:  .i, "type", .type$
-    Set string value:  .i, "name", .name$
-    Set numeric value: .i, "n",    1
-    Set numeric value: .i, "id",   .id[.i]
+    @_AppendToSelectionTable(.table, .id[.i])
   endfor
   
   @restoreSavedSelection(.table)
 endproc
 
 procedure createSelectionTable (.n)
-  .return = Create Table with column names: "selection_table", .n, "type name n id"
+  if jja.debug
+    appendInfoLine: "createSelectionTable(", .n, ")"
+  endif
+  
+  .table = Create Table with column names: "selection_table", .n, "type name n id"
 endproc
 
 procedure createEmptySelectionTable ()
+  if jja.debug
+    appendInfoLine: "createEmptySelectionTable()"
+  endif
+
   @createSelectionTable(0)
-  .return = createSelectionTable.return
+  .table = createSelectionTable.table
+endproc
+
+procedure addToSelectionTable (.table, .id)
+  if jja.debug
+    appendInfoLine: "addToSelectionTable(", .table, ", ", .id, ")"
+  endif
+
+  @isSelectionTable(.table)
+  @objectExists(.id)
+  if isSelectionTable.return and objectExists.return
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+
+    @restoreSavedSelection(.table)
+    @isSelected(.id)
+    if !isSelected.return
+      @_AppendToSelectionTable(.table, .id)
+    else  
+      appendInfoLine: "append failed"
+    endif
+    
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
+  endif
+endproc
+
+procedure _AppendToSelectionTable (.table, .id)
+  if jja.debug
+    appendInfoLine: "_AppendToSelectionTable(", .table, ", ", .id, ")"
+  endif
+
+  selectObject: .id
+  .type$ = extractWord$(selected$(), "")
+  .name$ = extractWord$(selected$(), .type$)
+
+  selectObject: .table
+  Append row
+  .r = Get number of rows
+  Set string value:  .r, "type", .type$
+  Set string value:  .r, "name", .name$
+  Set numeric value: .r, "n",    1
+  Set numeric value: .r, "id",   .id
 endproc
 
 # Restores the last saved selection
@@ -108,7 +159,10 @@ endproc
 # variables of @saveSelection.
 #
 procedure restoreSelection ()
-#   appendInfoLine: "restoreSelection"
+  if jja.debug
+    appendInfoLine: "restoreSelection()"
+  endif
+
   if variableExists("saveSelection.n")
     @clearSelection()
     for .i to saveSelection.n
@@ -126,7 +180,9 @@ endproc
 # selection saved in that table.
 #
 procedure restoreSavedSelection (.id)
-#   appendInfoLine: "restoreSavedSelection"
+  if jja.debug
+    appendInfoLine: "restoreSavedSelection (", .id, ")"
+  endif
   
   @isSelectionTable(.id)
   if isSelectionTable.return
@@ -150,7 +206,10 @@ endproc
 # Adds the selection in a selection table to the current selection
 #
 procedure plusSavedSelection (.id)
-#   appendInfoLine: "plusSavedSelection"
+  if jja.debug
+    appendInfoLine: "plusSavedSelection(", .id, ")"
+  endif
+
   @saveSelectionTable()
   .table = saveSelectionTable.table
   selectObject: .table, .id
@@ -162,7 +221,10 @@ endproc
 # Removes the selection in a selection table from the current selection
 #
 procedure minusSavedSelection (.id)
-#   appendInfoLine: "minusSavedSelection"
+  if jja.debug
+    appendInfoLine: "minusSavedSelection(", .id, ")"
+  endif
+
   @saveSelectionTable()
   .table = saveSelectionTable.table
   selectObject: .id
@@ -186,7 +248,10 @@ endproc
 # Safely and silently clears the selection
 #
 procedure clearSelection ()
-#   appendInfoLine: "clearSelection"
+  if jja.debug
+    appendInfoLine: "clearSelection()"
+  endif
+
   nocheck selectObject(undefined)
 endproc
 
@@ -198,7 +263,10 @@ endproc
 # TextGrids).
 #
 procedure checkSelection ()
-#   appendInfoLine: "checkSelection"
+  if jja.debug
+    appendInfoLine: "checkSelection()"
+  endif
+
   .n = numberOfSelected()
 
   if .n
@@ -219,26 +287,25 @@ procedure checkSelection ()
   endif
 endproc
 
-procedure checkSelection ()
-#   appendInfoLine: "checkSelection"
-  .n = numberOfSelected()
+procedure makeObjectTable (.id)
+  if jja.debug
+    appendInfoLine: "makeObjectTable(", .id, ")"
+  endif
 
-  if .n
-    @saveSelectionTable()
-    .selected = saveSelectionTable.table
+  @saveSelectionTable()
+  .selected = saveSelectionTable.table
+
+  @isSelectionTable(.id)
+  if isSelectionTable.return
+    selectObject: .id
     
-    selectObject: .selected
     .table = Collapse rows: "type", "n", "", "", "", ""
     Rename: "object_table"
 
-    .variance = Get standard deviation: "n"
-    .return = if .variance = 0 then 1 else 0 fi
-
-    @restoreSavedSelection(.selected)
-    removeObject: .selected
-  else
-    .return = -1
   endif
+  
+  @restoreSavedSelection(.selected)
+  removeObject: .selected
 endproc
 
 # Checks if the object with a specific id is a (or looks like a) valid
@@ -246,18 +313,22 @@ endproc
 #
 # Mostly for internal use.
 #
-procedure isSelectionTable (.id)
-#   appendInfoLine: "isSelectionTable"
+procedure isSelectionTable (.table)
+  if jja.debug
+    appendInfoLine: "isSelectionTable(", .table, ")"
+  endif
+
   .return = 0
   
+  # Hack to restore selection avoiding procedure-call loop
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
   endfor
   
-  @objectExists(.id)
+  @objectExists(.table)
   if objectExists.return
-    selectObject: .id
+    selectObject: .table
     if numberOfSelected("Table")
       .columns$ = List: 0
       .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
@@ -267,6 +338,7 @@ procedure isSelectionTable (.id)
     endif
   endif
   
+  # Hack to restore selection avoiding procedure-call loop
   @clearSelection()
   for .i to .n
     plusObject: .id[.i]
@@ -280,7 +352,10 @@ endproc
 # safer.
 #
 procedure selectSelectionTables ()
-#   appendInfoLine: "selectSelectionTables"
+  if jja.debug
+    appendInfoLine: "selectSelectionTables()"
+  endif
+
   select all
   .t = 0
   .n = numberOfSelected()
@@ -313,8 +388,11 @@ endproc
 # saved selection!
 #
 procedure removeSelectionTables ()
-#   appendInfoLine: "removeSelectionTables"
-  @saveSelection(0)
+  if jja.debug
+    appendInfoLine: "removeSelectionTables()"
+  endif
+
+  @saveSelection()
   
   @selectSelectionTables()
   .n = numberOfSelected()
@@ -331,7 +409,10 @@ endproc
 # Mostly for internal use.
 #
 procedure isObjectTypeTable (.id)
-#   appendInfoLine: "isObjectTypeTable"
+  if jja.debug
+    appendInfoLine: "isObjectTypeTable(", .id, ")"
+  endif
+
   .return = 0
   @saveSelectionTable()
   .selected = saveSelectionTable.table
@@ -353,7 +434,10 @@ endproc
 # Checks if a string represents a valid object type
 #
 procedure isValidType (.type$)
-#   appendInfoLine: "isValidType"
+  if jja.debug
+    appendInfoLine: "isValidType(", .type$, ")"
+  endif
+
   .objects$ = List readable types of objects
   .objects$ = replace_regex$(.objects$, ".*\t(.*)$", "\1", 0)
   .objects$ = replace$(.objects$, newline$, " ", 0)
@@ -364,7 +448,10 @@ endproc
 # Selects only one type from the entire object list
 #
 procedure selectType (.type$)
-#   appendInfoLine: "selectType"
+  if jja.debug
+    appendInfoLine: "selectType(", .type$, ")"
+  endif
+
   @isValidType(.type$)
   select all
   @refineToType(.type$)
@@ -373,7 +460,10 @@ endproc
 # Selects only one type from the active selection
 #
 procedure refineToType (.type$)
-#   appendInfoLine: "refineToType"
+  if jja.debug
+    appendInfoLine: "refineToType(", .type$, ")"
+  endif
+
   @isValidType(.type$)
   if isValidType.return
     @saveSelectionTable()
@@ -392,7 +482,10 @@ endproc
 # This is mostly for use with @removeSelectionTables(), which makes it safer.
 #
 procedure selectObjectTables ()
-#   appendInfoLine: "selectObjectTables"
+  if jja.debug
+    appendInfoLine: "selectObjectTables()"
+  endif
+
   @selectType("Table")
   .n = numberOfSelected()
   for .i to .n
@@ -413,9 +506,12 @@ endproc
 # in most cases, but anything that uses `select all` should be mistrusted.
 #
 procedure removeObjectTables ()
-#   appendInfoLine: "removeObjectTables"
+  if jja.debug
+    appendInfoLine: "removeObjectTables()"
+  endif
+
   @saveSelectionTable()
-  .selected = saveSelectionTable.table
+  .selected = saveSelectionTable.tale
   
   @selectObjectTables()
   minusObject(.selected)
@@ -430,7 +526,10 @@ endproc
 # Provide the id of the object table and the name of the object type to count
 #
 procedure countObjects (.id, .type$)
-#   appendInfoLine: "countObjects"
+  if jja.debug
+    appendInfoLine: "countObjects(", .id, ", ", .type$, ")"
+  endif
+
   @isObjectTypeTable(.id)
   if isObjectTypeTable.return
   
@@ -447,8 +546,10 @@ endproc
 # Checks if an object exists in the object list
 #
 procedure objectExists (.id)
-  @isSelected(.id)
-  
+  if jja.debug
+    appendInfoLine: "objectExists(", .id, ")"
+  endif
+
   .start = numberOfSelected()
   nocheck plusObject: .id
   .plus = numberOfSelected()
@@ -469,6 +570,10 @@ procedure objectExists (.id)
 endproc
 
 procedure isSelected (.id)
+  if jja.debug
+    appendInfoLine: "isSelected(", .id, ")"
+  endif
+
   .n = numberOfSelected()
   .return = 0
   for .i to .n

@@ -11,7 +11,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include selection/main.procs
+include selection.procs
 include check_directory.proc
 include json.proc
 include utils.proc

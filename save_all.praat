@@ -17,7 +17,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include selection/main.proc
+include selection.proc
 include check_directory.proc
 include require.proc
 @require("5.3.63")

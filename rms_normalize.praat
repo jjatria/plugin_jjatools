@@ -12,6 +12,7 @@
 #
 # TODO: set sounds to specified RMS
 
+include selection.proc
 include require.proc
 @require("5.3.63")
 
@@ -19,39 +20,46 @@ form RMS normalisation...
   positive Peak_to 0.9
   boolean Keep_conversion_table no
   boolean Make_changes_inline no
+  boolean Verbose no
 endform
 
 stopwatch
 
-n = numberOfSelected("Sound")
-for i to n
-  sound[i] = selected("Sound", i)
-endfor
+@saveSelection()
+all = numberOfSelected()
+@refineToType("Sound")
+sounds = numberOfSelected("Sound")
 
 mindb = 70
 
-if n
+if sounds and sounds = all
+  
   table = Create Table with column names: "conversions", 0,
     ..."name rms_pre max_pre rms_post max_post"
 
-  for i to n
-    sound = sound[i]
-    selectObject(sound)
+  @createEmptySelectionTable()
+  normalised = createEmptySelectionTable.table
+  Rename: "normalised"
+  
+  for i to sounds
+    sound = saveSelection.id[i]
+    selectObject: sound
     name$ = selected$("Sound")
 
     @rms_and_max()
 
-    selectObject(table)
+    selectObject: table
     Append row
     Set string value:  i, "name",    name$
     Set numeric value: i, "rms_pre", rms
     Set numeric value: i, "max_pre", max
     
-    selectObject(sound)
-    if !make_changes_inline
-      norm[i] = Copy: name$ + "_normalised"
+    selectObject: sound
+    if make_changes_inline
+      @addToSelectionTable(normalised, sound)
     else
-      norm[i] = sound
+      Copy: name$ + "_normalised"
+      @addToSelectionTable(normalised, selected())
     endif
     
     Scale intensity: mindb
@@ -67,19 +75,20 @@ if n
   max = Get maximum: "max_post"
   factor = peak_to / max
 
-  for i to n
-    selectObject(norm[i])
-    name$ = selected$("Sound")
+  for i to sounds
+    selectObject: normalised
+    id = Get value: i, "id"
+    name$ = Get value: i, "name"
+
+    selectObject: id
     
     Formula: "self*" + string$(factor)
     
     @rms_and_max()
     
-    selectObject(table)
+    selectObject: table
     Set numeric value: i, "rms_post",  rms
     Set numeric value: i, "max_post",  max
-    
-    selectObject(norm[i])
   endfor
 
   if !keep_conversion_table
@@ -88,8 +97,13 @@ if n
 
   time = stopwatch
 
-  writeInfoLine: "Processed " + string$(n) + " files in " + fixed$(time, 2) + " seconds"
-  appendInfoLine: "All processed files set to a RMS of " + fixed$(rms, 2) + " Pascal"
+  if verbose
+    writeInfoLine: "Processed " + string$(n) + " files in " + fixed$(time, 2) + " seconds"
+    appendInfoLine: "All processed files set to a RMS of " + fixed$(rms, 2) + " Pascal"
+  endif
+  
+  @restoreSavedSelection(normalised)
+  removeObject: normalised
 endif
 
 procedure rms_and_max ()

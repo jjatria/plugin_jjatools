@@ -20,6 +20,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include selection.proc
 include require.proc
 @require("5.3.44")
 
@@ -33,52 +34,54 @@ form Filter and center...
 endform
 
 use_filter = stop_Hann_band
+minfreq = left_Frequency_band
+maxfreq = right_max_frequency
+fixed = 0
 
 if use_filter + subtract_mean > 0
 
-  minfreq = left_Frequency_band
-  maxfreq = right_max_frequency
-  fixed = 0
-  n = numberOfSelected("Sound")
-
-  for i to n
-    sound[i] = selected("Sound", i)
-  endfor
-
-  for i to n
-    select sound[i]
-    old = selected()
-    max = Get maximum: 0, 0, "None"
-    min = Get minimum: 0, 0, "None"
-    min *= -1
-    name$ = selected$("Sound")
-    
-    if !make_changes_inline
-      new[i] = Copy: name$
-    else
-      new[i] = sound[i]
-    endif
-    
-    if use_filter
-      r = selected()
-      new[i] = Filter (stop Hann band): minfreq, maxfreq, 100
-      removeObject(r)
-    endif
-    
-    if subtract_mean
-      Subtract mean
-    endif
-    
-    if !make_changes_inline
-      Rename: name$ + "_filtered"
-    endif
-    
-  endfor
-
-  nocheck Copy: ""
-  Remove
-  for i to n
-    plusObject(new[i])
+  @saveSelection()
+  @checkSelection()
+  objects = checkSelection.table
+  selectObject: objects
+  types = Get number of rows
+  
+  sounds = numberOfSelected("Sound")
+  
+  if types = 1 and sounds
+    for i to sounds
+      selectObject: saveSelection.id[i]
+      
+      old = selected()
+      max = Get maximum: 0, 0, "None"
+      min = Get minimum: 0, 0, "None"
+      min *= -1
+      name$ = selected$("Sound")
+      
+      if make_changes_inline
+        new[i] = saveSelection.id[i]
+      else
+        new[i] = Copy: name$
+      endif
+      
+      if use_filter
+        r = selected()
+        new[i] = Filter (stop Hann band): minfreq, maxfreq, 100
+        removeObject(r)
+      endif
+      
+      if subtract_mean
+        Subtract mean
+      endif
+      
+      if !make_changes_inline
+        Rename: name$ + "_filtered"
+      endif
+      
+    endfor
   endif
+    
+  @restoreSelection()
+  removeObject: objects
   
 endif

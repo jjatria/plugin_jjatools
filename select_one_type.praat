@@ -1,4 +1,4 @@
-include main.proc
+include selection.proc
 
 form Select one type...
   optionmenu Type: 1
