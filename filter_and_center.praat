@@ -20,6 +20,8 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+jja.debug = 1
+
 include selection.proc
 include require.proc
 @require("5.3.44")
@@ -40,17 +42,24 @@ fixed = 0
 
 if use_filter + subtract_mean > 0
 
-  @saveSelection()
-  @checkSelection()
-  objects = checkSelection.table
-  selectObject: objects
-  types = Get number of rows
+  @saveSelectionTable()
+  original_selection = saveSelectionTable.table
+  total_selected = numberOfSelected()
+
+  @refineToType("Sound")
+  @saveSelectionTable()
+  sounds_selection = saveSelectionTable.table
+  selected_sounds = numberOfSelected()
   
-  sounds = numberOfSelected("Sound")
+  if selected_sounds and total_selected = selected_sounds
   
-  if types = 1 and sounds
-    for i to sounds
-      selectObject: saveSelection.id[i]
+    @createEmptySelectionTable()
+    filtered_selection = createEmptySelectionTable.table
+  
+    for i to selected_sounds
+      selectObject: sounds_selection
+      id = Get value: i, "id"
+      selectObject: id
       
       old = selected()
       max = Get maximum: 0, 0, "None"
@@ -59,16 +68,17 @@ if use_filter + subtract_mean > 0
       name$ = selected$("Sound")
       
       if make_changes_inline
-        new[i] = saveSelection.id[i]
+        new = id
       else
-        new[i] = Copy: name$
+        new = Copy: name$
       endif
       
       if use_filter
         r = selected()
-        new[i] = Filter (stop Hann band): minfreq, maxfreq, 100
+        new = Filter (stop Hann band): minfreq, maxfreq, 100
         removeObject(r)
       endif
+      @addToSelectionTable(filtered_selection, new)
       
       if subtract_mean
         Subtract mean
@@ -79,9 +89,11 @@ if use_filter + subtract_mean > 0
       endif
       
     endfor
+  else  
+    appendInfoLine: "More than one type selected"
   endif
     
-  @restoreSelection()
-  removeObject: objects
+  @restoreSavedSelection(filtered_selection)
+  @removeSelectionTables()
   
 endif
