@@ -84,7 +84,7 @@ procedure saveSelectionTable ()
     .id[.i] = selected(.i)
   endfor
   
-  @createEmptySelectionTable(.n)
+  @createEmptySelectionTable()
   .table = createEmptySelectionTable.table
   
   for .i to .n
