@@ -44,9 +44,11 @@ and you should be good to go!
 
 If not, then you can use the general instructions below:
 
-1. Download the contents of the repo (this readme is not necessary) and extract into a folder called `plugin_jjatools` in your Praat preferences directory. The exact location of this depends on your operating system, so please [check the documentation][preferences].
+1. Download [the contents of the repo][zip] (this readme is not necessary) and extract into a folder called `plugin_jjatools` in your Praat preferences directory. The exact location of this depends on your operating system, so please [check the documentation][preferences].
 
 2. Restart Praat.
 
 [praat]: www.praat.org
 [preferences]: http://www.fon.hum.uva.nl/praat/manual/preferences_directory.html
+[zip]: https://github.com/jjatria/plugin_jjatools/archive/master.zip
+
