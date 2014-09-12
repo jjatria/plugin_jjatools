@@ -88,9 +88,6 @@ while i <= n
   base_type$ = Get value: i, "type"
   base_name$ = Get value: i, "name"
 
-#   # id might be flagged to negative, if we are to skip that object
-#   # (in case it has been paired)
-#   if id > 0
   if paired
     selectObject: pair_selection
     pair       = Get value: i, "id"
@@ -105,6 +102,7 @@ while i <= n
   View & Edit
 
   beginPause: "Viewing " + base_name$
+    ... + " (" + string$(i) + " of " + string$(n) + ")"
 
   if i > 1
     button = endPause: "Stop", "Previous", if i = n then "Finish" else "Next" fi, 3, 1
@@ -113,7 +111,7 @@ while i <= n
   endif
 
   # If objects are renamed while viewing each, editors are
-  # editors are not closed properly. Attempted to solve
+  # not closed properly. Attempted to solve
   # this, but it didn't work. Why?
 
   if paired
