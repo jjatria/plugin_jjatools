@@ -10,8 +10,8 @@ Add menu command:   "Objects", "Praat", "Batch convert to JSON...",           "F
 Add menu command:   "Objects", "Praat", "Save selected objects to JSON...",   "Formats -",        2, "save_as_json.praat"
 
 Add menu command:   "Objects", "Praat", "Object selection",                   "JJATools",         1, ""
-Add menu command:   "Objects", "Praat", "Select one type...",                 "Object selection", 2, "selection/select_one_type.praat"
-Add menu command:   "Objects", "Praat", "Invert selection",                   "Object selection", 2, "selection/invert_selection.praat"
+Add menu command:   "Objects", "Praat", "Select one type...",                 "Object selection", 2, "select_one_type.praat"
+Add menu command:   "Objects", "Praat", "Invert selection",                   "Object selection", 2, "invert_selection.praat"
 
 Add action command: "Sound",         0, "",         0, "", 0, "Normalise (RMS)...",           "Modify -",              1, "rms_normalize.praat"
 Add action command: "Sound",         0, "",         0, "", 0, "Filter and center...",         "Filter -",              1, "filter_and_center.praat"
