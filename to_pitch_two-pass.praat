@@ -13,7 +13,7 @@
 
 include check_directory.proc
 include pitch_twopass.proc
-include clear_selection.proc
+include selection.proc
 
 form To Pitch (Hirst two-pass)...
 	positive Floor_factor 0.75
