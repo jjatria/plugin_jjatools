@@ -20,8 +20,6 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-jja.debug = 1
-
 include selection.proc
 include require.proc
 @require("5.3.44")
@@ -38,7 +36,6 @@ endform
 use_filter = stop_Hann_band
 minfreq = left_Frequency_band
 maxfreq = right_max_frequency
-fixed = 0
 
 if use_filter + subtract_mean > 0
 
@@ -89,11 +86,14 @@ if use_filter + subtract_mean > 0
       endif
       
     endfor
+    
+    @restoreSavedSelection(filtered_selection)
+    
   else  
     appendInfoLine: "More than one type selected"
+    @restoreSavedSelection(original_selection)
   endif
-    
-  @restoreSavedSelection(filtered_selection)
-  @removeSelectionTables()
   
 endif
+
+@removeSelectionTables()
