@@ -1,0 +1,12 @@
+include ../procedures/require.proc
+@require("5.2.04")
+
+procedure checkDirectory (.name$, .label$)
+  if .name$ = ""
+    .name$ = chooseDirectory$(.label$)
+  endif
+  if .name$ = ""
+    exit
+  endif
+  .name$ = if right$(.name$, 1) != "/" then .name$ + "/" else .name$ fi
+endproc

@@ -1,0 +1,11 @@
+include ../procedures/require.proc
+@require("5.1.42")
+
+procedure checkFilename (.name$, .label$)
+  if .name$ = ""
+    .name$ = chooseReadFile$(.label$)
+  endif
+  if .name$ = ""
+    exit
+  endif
+endproc
