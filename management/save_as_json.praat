@@ -13,9 +13,13 @@
 
 include ../procedures/selection.proc
 include ../procedures/check_directory.proc
-include ../procedures/json.proc
+include ../procedures/json_base.proc
 include ../procedures/utils.proc
 include ../procedures/warnings.proc
+
+# Ideally, these would only be included if necessary
+include ../procedures/json_textgrid.proc
+include ../procedures/json_points.proc
 
 form Save as JSON...
   sentence Save_to
@@ -27,28 +31,19 @@ endform
 @addWarning("AmplitudeTierAsIntensityTier",
   ..."AmplitudeTier objects saved as IntensityTier objects")
 
-#   # Mapping of warning codes to messages
-#   if .w$ = "AmplitudeTierAsIntensityTier"
-#     .text$ = "W: AmplitudeTier objects saved as IntensityTier objects"
-#   elsif index_regex(.w$, "Unsupported$")
-#     .text$ = "W: " +
-#       ...replace_regex$(.w$, "(.*)Unsupported", "\1", 0) +
-#       ... " objects not yet supported"
-#   endif
-
 @checkDirectory(save_to$, "Save JSON to...")
 directory$ = checkDirectory.name$
 
 @saveSelection()
 
 if format$ = "Pretty printed"
-  n$ = newline$
-  t$ = tab$
-  s$ = " "
+  json.n$ = newline$
+  json.t$ = tab$
+  json.s$ = " "
 elsif format$ = "Minified"
-  n$ = ""
-  t$ = n$
-  s$ = n$
+  json.n$ = ""
+  json.t$ = json.n$
+  json.s$ = json.n$
 endif
 
 for i to saveSelection.n
@@ -65,6 +60,7 @@ for i to saveSelection.n
     fallback_to = selected()
     fallback = To IntensityTier: -10000
   endif
+
   # If an objects requires a fallback, this is selected
   if fallback
     selectObject(fallback)
@@ -79,22 +75,18 @@ for i to saveSelection.n
   output_file$ = directory$ + "/" +
     ...name$ + "_" + replace_regex$(type$, "(.)", "\L\1", 0) + ".json"
 
-  if type$ = "TextGrid"
-    json_type$ = "textgrid"
-  elsif type$ = "PointProcess"
-    json_type$ = "points"
-  elsif type$ = "PitchTier" or
-    ... type$ = "DurationTier" or
-    ... type$ = "AmplitudeTier" or
-    ... type$ = "IntensityTier"
-    json_type$ = "points with numbers"
-  elsif type$ = "Intensity"
-    json_type$ = "frames"
-  else
-    json_type$ = "unsupported"
+  supported_type = 0
+  if      type$ = "TextGrid"      or
+      ... type$ = "PointProcess"  or
+      ... type$ = "PitchTier"     or
+      ... type$ = "DurationTier"  or
+      ... type$ = "AmplitudeTier" or
+      ... type$ = "IntensityTier" or
+      ... type$ = "Intensity"
+    supported_type = 1
   endif
 
-  if json_type$ != "unsupported"
+  if supported_type
     if fileReadable(output_file$)
       deleteFile: output_file$
     endif
@@ -105,81 +97,24 @@ for i to saveSelection.n
     @writeJsonNumber(output_file$, "start", start, 0)
     @writeJsonNumber(output_file$, "end", end, 0)
 
-    if json_type$ = "textgrid"
+    if type$ = "TextGrid"
 
-      @startJsonList(output_file$, "tiers")
+      @textGridToJson(output_file$)
 
-      tiers = Get number of tiers
-      for t to tiers
-        last = if t = tiers then 1 else 0 fi
-        @writeJsonTgTier(output_file$, t, last)
-      endfor
+    elsif type$ = "PointProcess"
 
-      @endJsonList(output_file$, 1)
+      @pointsToJson(output_file$)
 
-    elsif extractWord$(json_type$, "") = "points"
+    elsif type$ = "PitchTier"     or
+      ... type$ = "DurationTier"  or
+      ... type$ = "AmplitudeTier" or
+      ... type$ = "IntensityTier" or
+      ... type$ = "Intensity"
 
-      points = Get number of points
-      list_name$ = "points"
+      @pointsWithNumbersToJson(output_file$)
 
-      if points
-
-        # DurationTier objects had no query methods prior to 5.3.70
-        # We need to hack our way to the value of the duration points
-        if praatVersion < 5370 and type$ = "DurationTier"
-          @setUpDurationTierHack(selected())
-        endif
-
-        @startJsonList(output_file$, list_name$)
-
-        for p to points
-          last = if p = points then 1 else 0 fi
-          time = Get time from index: p
-          if json_type$ = "points with numbers"
-
-            if type$ = "DurationTier" and praatVersion < 5370
-              @queryDurationTierHack(selected(), time)
-              value = queryDurationTierHack.value
-            else
-              value = Get value at index: p
-            endif
-
-            @writeJsonPointWithNumber(output_file$, time, value, last)
-          elsif json_type$ = "points"
-            @pushToJsonList(output_file$, time, last)
-          endif
-        endfor
-
-        if praatVersion < 5370 and type$ = "DurationTier"
-          @cleanUpDurationTierHack(selected())
-        endif
-
-        @endJsonList(output_file$, 1)
-
-      else
-
-        @writeJsonEmptyList(output_file$, list_name$, 1)
-
-      endif
-    elsif json_type$ = "frames"
-      # This type is really a subset of the "points" type.
-      # Annoyingly, method names are different. Maybe a more
-      # general approach can be found?
-      frames = Get number of frames
-      list_name$ = "frames"
-      if frames
-        @startJsonList(output_file$, list_name$)
-        for f to frames
-          last = if f = frames then 1 else 0 fi
-          value = Get value in frame: f
-          @pushToJsonList(output_file$, value, last)
-        endfor
-        @endJsonList(output_file$, 1)
-      else
-        @writeJsonEmptyList(output_file$, list_name$, 1)
-      endif
     else
-      # Unsupported object
+      # Unsupported
     endif
 
     @endJsonObject(output_file$, 1)
@@ -199,33 +134,3 @@ endfor
 @restoreSelection()
 
 @issueWarnings()
-
-# Hack to query DurationTier objects for Praat <5.3.70
-procedure setUpDurationTierHack (.id)
-  .full = Copy: "full"
-  .blank = Copy: "blank"
-  .points = Get number of points
-  for .p to .points
-    .time = Get time from index: .p
-    selectObject(.blank)
-    Remove point: .p
-    Add point: .p, 1
-    selectObject(.id)
-  endfor
-endproc
-
-procedure queryDurationTierHack (.id, .time)
-  selectObject(setUpDurationTierHack.full)
-  .new_duration = Get target duration: 0, .time
-  Remove point: 1
-  selectObject(setUpDurationTierHack.blank)
-  .old_duration = Get target duration: 0, .time
-  .value = .new_duration / .old_duration
-  Remove point: 1
-  selectObject(.id)
-endproc
-
-procedure cleanUpDurationTierHack (.id)
-  removeObject(setUpDurationTierHack.full, setUpDurationTierHack.blank)
-  selectObject(.id)
-endproc

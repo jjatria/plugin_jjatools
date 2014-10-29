@@ -24,8 +24,8 @@ procedure issueWarnings ()
 
   
   if variableExists("warning.table")
-    @objectExists(warning.table)
-    if objectExists.return
+    @_ObjectExists(warning.table)
+    if '_ObjectExists.return'
       selectObject(warning.table)
       .issued = nowarn Extract rows where column (number): "issued", "greater than", 0
       .row = Get number of rows
@@ -56,8 +56,8 @@ procedure addWarning (.code$, .text$)
   .selected = saveSelectionTable.table
 
   if variableExists("warning.table")
-    @objectExists(warning.table)
-    if objectExists.return
+    @_ObjectExists(warning.table)
+    if '_ObjectExists.return'
       nocheck selectObject(warning.table)
     endif
   endif
