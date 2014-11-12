@@ -26,14 +26,18 @@ form Find label...
   optionmenu Direction: 1
     option   Forwards
     option   Backwards
-  integer    Start_from 0
+  integer    Start_from 1
   comment    When searching backwards, starting point is counted from end
 endform
 
-include find_label.proc
+include ../procedures/find_label.proc
 
-if direction$ = "forwards"
+if direction$ = "Forwards"
   @findFromStart(tier, target$, start_from)
-elsif direction$ = "backwards"
+  writeInfoLine: findFromStart.return
+elsif direction$ = "Backwards"
   @findFromEnd(tier, target$, start_from)
+  writeInfoLine: findFromEnd.return
+else
+  exitScript: "Error. Please contact author."
 endif

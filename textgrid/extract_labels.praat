@@ -43,12 +43,12 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include split.proc
-include require.proc
+include ../procedures/utils.proc
+include ../procedures/require.proc
 @require("5.3.63")
 
 form Extract sounds...
-  positive Tier 2
+  positive Tier 1
   integer Padding_(s) 0
   boolean Preserve_times 0
   boolean Append_TextGrid_name 1
@@ -254,7 +254,7 @@ for o to nallsounds
         if addtextgridname
             newname$ = tname$ + "_"
         endif
-        newname$ = newname$ + label$ + string$(counter)
+        newname$ = newname$ + label$ + "_" + string$(counter)
         Rename: newname$
       endif
     endfor

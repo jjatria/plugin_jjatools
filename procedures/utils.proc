@@ -111,7 +111,6 @@ procedure mktemp (.template$)
 
   .number = index_regex(.template$, "X{3}$")
   .name$ = undefined
-  printline I ran
   if .number
     .number = index_regex(.template$, "X+$")
     .attempts = 0
@@ -130,3 +129,14 @@ procedure mktemp (.template$)
     pauseScript: "Template must have at least three random placeholders at end."
   endif
 endproc
+
+procedure zeropad (.n, .length)
+  .n$ = string$(abs(.n))
+  .sign$ = if .n < 0 then "-" else "" fi
+  .pad$ = ""
+  for .i to .length
+    .pad$ = .pad$ + "0"
+  endfor
+  .return$ = .sign$ + .pad$ + n$
+endproc
+

@@ -1,3 +1,20 @@
+# Setup script for JJATools plugin
+#
+# Find the latest version of this plugin at
+# https://github.com/jjatria/plugin_jjatools
+#
+# Written by Jose J. Atria (18 November 2011)
+# Version: 1.0.0
+# Latest revision: April 4, 2014
+#
+# This script is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# A copy of the GNU General Public License is available at
+# <http://www.gnu.org/licenses/>.
+
 ## Static commands:
 
 runScript: "run_tests.praat"
@@ -27,14 +44,29 @@ Add menu command: "Objects", "Praat", "Generate Pitch (two-pass)...",         "B
 
 ## Dynamic commands
 
-Add action command: "Sound",         0, "",         0, "", 0, "Normalise (RMS)...",                   "Modify -",              1, "sound/rms_normalize.praat"
+# Sound commands
 Add action command: "Sound",         0, "",         0, "", 0, "Filter and center...",                 "Filter -",              1, "sound/filter_and_center.praat"
-Add action command: "Sound",         0, "TextGrid", 0, "", 0, "Extract labels...",                    "",                      0, "textgrid/extract_labels.praat"
-Add action command: "TextGrid",      1, "",         0, "", 0, "Find label...",                        "Query -",               1, "textgrid/find_label_in_textgrid.praat"
-Add action command: "Sound",         1, "TextGrid", 1, "", 0, "Move boundaries to zero-crossings...", "",                      0, "textgrid/move_to_zero_crossings.praat"
-Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View eachs as pairs",                  "",                      0, "management/view_each.praat"
+Add action command: "Sound",         0, "",         0, "", 0, "Normalise (RMS)...",                   "Modify -",              1, "sound/rms_normalize.praat"
 Add action command: "Sound",         0, "",         0, "", 0, "To Pitch (two-pass)...",               "Analyse periodicity -", 1, "pitch/to_pitch_two-pass.praat"
+
+# Strings commands
 Add action command: "Strings",       0, "",         0, "", 0, "Sort (generic)...",                    "Modify -",              1, "strings/sort_strings_generic.praat"
+
+# TextGrid commands
+Add action command: "TextGrid",      1, "",         0, "", 0, "Find label...",                        "Query -",               1, "textgrid/find_label_in_textgrid.praat"
+Add action command: "TextGrid",      0, "",         0, "", 0, "Save as Audacity label...",            "",                      0, "textgrid/textgrid_to_audacity_label.praat"
+
+# Combined commands
+Add action command: "Sound",         0, "TextGrid", 0, "", 0, "Extract labels...",                    "",                      0, "textgrid/extract_labels.praat"
+Add action command: "Sound",         1, "TextGrid", 1, "", 0, "Move boundaries to zero-crossings...", "",                      0, "textgrid/move_to_zero_crossings.praat"
+Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View each as pairs",                   "",                      0, "management/view_each.praat"
+
+# View each
+Add action command: "Intensity",     0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"
+Add action command: "Pitch",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"
+Add action command: "Sound",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"
+
+# JSON conversion
 Add action command: "TextGrid",      0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
 Add action command: "PointProcess",  0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
 Add action command: "DurationTier",  0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
@@ -42,4 +74,3 @@ Add action command: "IntensityTier", 0, "",         0, "", 0, "Save as JSON file
 Add action command: "Intensity",     0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
 Add action command: "AmplitudeTier", 0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
 Add action command: "PitchTier",     0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "TextGrid",      0, "",         0, "", 0, "Save as Audacity label...",            "",                      0, "textgrid/textgrid_to_audacity_label.praat"
