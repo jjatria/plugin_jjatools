@@ -99,7 +99,11 @@ while i <= n
     plusObject: pair
   endif
 
-  View & Edit
+  if base_type$ = "LongSound"
+    View
+  else
+    View & Edit
+  endif
 
   beginPause: "Viewing " + base_name$
     ... + " (" + string$(i) + " of " + string$(n) + ")"
