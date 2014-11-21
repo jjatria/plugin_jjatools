@@ -87,8 +87,6 @@ if use_filter + subtract_mean > 0
 
     endfor
 
-    @restoreSavedSelection(filtered_selection)
-
   else
     appendInfoLine: "More than one type selected"
     @restoreSavedSelection(original_selection)
@@ -96,4 +94,7 @@ if use_filter + subtract_mean > 0
 
 endif
 
-@removeSelectionTables()
+@selectSelectionTables()
+Remove
+
+@restoreSavedSelection(filtered_selection)
