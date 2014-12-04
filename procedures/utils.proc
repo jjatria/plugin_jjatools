@@ -137,6 +137,6 @@ procedure zeropad (.n, .length)
   for .i to .length
     .pad$ = .pad$ + "0"
   endfor
-  .return$ = .sign$ + .pad$ + n$
+  .return$ = .sign$ + right$(.pad$ + .n$, .length)
 endproc
 

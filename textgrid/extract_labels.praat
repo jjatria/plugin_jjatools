@@ -10,7 +10,7 @@
 #
 # For each object pair, the script looks for the intervals on the
 # specified tier and extracts them into new Sound objects. These
-# objects will be renamed as 'TGNAME'_'LABEL''COUNTER'
+# objects will be renamed as 'TGNAME'_'LABEL'_'COUNTER'
 # where TGNAME is the name of the TextGrid object, LABEL the label
 # on the interval and COUNTER a number counting the occurences of
 # that label so far. Thus, if there are two intervals labeled "a"
@@ -45,77 +45,49 @@
 
 include ../procedures/utils.proc
 include ../procedures/require.proc
+include ../procedures/selection.proc
 @require("5.3.63")
 
 form Extract sounds...
   positive Tier 1
   integer Padding_(s) 0
   boolean Preserve_times 0
-  boolean Append_TextGrid_name 1
-  boolean Count_labels_across_objects 0
   sentence Look_for
-  boolean Objects_have_same_name 1
   boolean Make_character_replacements 1
   boolean Use_external_replacement_definition 0
 endform
 
-samename = objects_have_same_name
 usedefinition = use_external_replacement_definition
 makereplacements = make_character_replacements
-addtextgridname = append_TextGrid_name
-persistentcounter = count_labels_across_objects
 
-new = 0
 cleared = 0
-total_labels = 0
 
 if !makereplacements and usedefinition
-  exitScript("Contradictory options. Replacement definitions are used for character replacements.")
+  exitScript: "Contradictory options.
+    ... Replacement definitions are used for character replacements."
 endif
 
-nsounds = numberOfSelected("Sound")
-nlongsounds = numberOfSelected("LongSound")
-nallsounds = nsounds + nlongsounds
+if numberOfSelected("Sound") or numberOfSelected("LongSound")
+  @saveTypeSelection("Sound")
+  sounds = saveTypeSelection.table
 
-ntextgrids = numberOfSelected("TextGrid")
+  @saveTypeSelection("LongSound")
+  longsounds = saveTypeSelection.table
 
-if !nallsounds
-  exitScript("No Sound object selected.")
+  @saveSelection()
+  selectObject: sounds, longsounds
+  all_sounds = Append
+  Rename: "sounds"
+  removeObject: sounds, longsounds
+  @restoreSelection()
 endif
-if !ntextgrids
-  exitScript("No TextGrid object selected.")
+if numberOfSelected("TextGrid")
+  @saveTypeSelection("TextGrid")
+  textgrids = saveTypeSelection.table
 endif
-
-if nallsounds != ntextgrids
-  exitScript("Number of Sound and TextGrid objects do not match.")
-endif
-
-for o to nsounds
-  sound[o] = selected("Sound", o)
-endfor
-for o to nlongsounds
-  longsound[o] = selected("LongSound", o)
-endfor
-
-for o to ntextgrids
-  textgrid[o] = selected("TextGrid", o)
-endfor
 
 #Clear selection
-selectObject(selected(1))
-Copy: "remove"
-Remove
-
-for o to nsounds
-  plusObject(sound[o])
-endfor
-for o to nlongsounds
-  plusObject(longsound[o])
-endfor
-for o to nallsounds
-  sound[o] = selected(o)
-  s = sound[o]
-endfor
+nocheck selectObject: undefined
 
 if usedefinition
   replacement_file$ = chooseReadFile$("Select replacement definition file")
@@ -146,137 +118,138 @@ if usedefinition
   endfor
 endif
 
-if persistentcounter
-  hash = Create Table with column names: "hash", 1, "placeholder"
-  found$ = ""
-endif
+hash = Create Table without column names: "hash", 1, 1
 
-for o to nallsounds
+@createEmptySelectionTable()
+extracted = createEmptySelectionTable.table
+Append column: "counter"
+Append column: "textgrid"
 
-  sound = sound[o]
-  textgrid = textgrid[o]
+padding_length = 1
 
-  selectObject(sound)
-  dsound = Get total duration
-  if numberOfSelected("Sound")
-    islong = 0
-    sname$ = selected$("Sound")
-  else
-    islong = 1
-    sname$ = selected$("LongSound")
-  endif
-  selectObject(textgrid)
-  dtextgrid = Get total duration
-  tname$ = selected$("TextGrid")
+for o to Object_'all_sounds'.nrow
 
-  # Check if objects are related
-  related = 1
-  if samename and sname$ != tname$
-    related = 0
-  endif
-  if dsound != dtextgrid
-    related = 0
-  endif
+  @getId(all_sounds, o)
+  sound = getId.id
+  selectObject: sound
+  sound_name$ = extractWord$(selected$(), " ")
+  @getId(textgrids, o)
+  textgrid = getId.id
+  selectObject: textgrid
+  textgrid_name$ = selected$("TextGrid")
 
-  if !persistentcounter
-    hash = Create Table with column names: "hash", 1, "placeholder"
-    found$ = ""
-  endif
+  if Object_'sound'.xmax = Object_'textgrid'.xmax
+    # Objects have same length
 
-  if related
-
-    select textgrid
-    ni = Get number of intervals: tier
-    for i to ni
-      select textgrid
+    selectObject: textgrid
+    intervals = Get number of intervals: tier
+    for i to intervals
+      selectObject: textgrid
       label$ = Get label of interval: tier, i
+
       # Perform initial label modifications here if desired
       label$ = replace$(label$, "*", "", 0)
       label$ = replace$(label$, " ", "", 0)
-      if (look_for$ = "" and label$ != "") or (label$ != "" and label$ = look_for$)
+      if   (look_for$ = "" and label$ != "") or
+        ...(label$   != "" and label$  = look_for$)
 
-        selectObject(hash)
-        if index(found$, " " + label$ + " ")
+        selectObject: hash
+        found = Get column index: label$
+        if found
           counter = Get value: 1, label$
           counter += 1
+          length = length(string$(counter))
+          padding_length = if length > padding_length
+            ... then length else padding_length fi
           Set numeric value: 1, label$, counter
         else
           counter = 1
           Append column: label$
           Set numeric value: 1, label$, counter
-          found$ = found$ + " " + label$ + " "
         endif
 
-        select textgrid
+        selectObject: textgrid
         start = Get start point: tier, i
-        end = Get end point: tier, i
+        end   = Get end point:   tier, i
 
-        select sound
-        new += 1
-        if islong
-          extracted[new] = Extract part: start-padding, end+padding, preserve_times
+        selectObject: sound
+        if index(selected$(), "Long")
+          # LongSound
+          new = Extract part: start-padding, end+padding,
+            ... preserve_times
         else
-          extracted[new] = Extract part: start-padding, end+padding, "Rectangular", 1, preserve_times
+          # Sound
+          new = Extract part: start-padding, end+padding,
+            ... "Rectangular", 1, preserve_times
         endif
+        @addToSelectionTable(extracted, new)
+        selectObject: extracted
+        Set string value:  Object_'extracted'.nrow, "name",     label$
+        Set string value:  Object_'extracted'.nrow, "textgrid", textgrid_name$
+        Set numeric value: Object_'extracted'.nrow, "counter",  counter
 
-        # Add ad-hoc character replacements
-        if makereplacements
-          if usedefinition
-            selectObject(replacement_table)
-            r = Get number of rows
-            for d to r
-              change$ = Get value: d, "replace"
-              into$   = Get value: d, "with"
-              label$  = replace$(label$, change$, into$, 0)
-            endfor
-          endif
-
-          if index_regex(label$, "\W")
-            # Perform other changes here, with lines like
-            # label$ = replace$(label$, CHANGE, INTO, 0)
-            # replacing CHANGE and INTO with whatever string
-            # substitution you prefer
-          endif
-
-          if index_regex(label$, "[^a-zA-Z0-9-]")
-            if !cleared
-              clearinfo
-              cleared = 1
-            endif
-            appendInfoLine("W: Label ", label$, " on Sound ", sname$, " still contains illegal characters.
-              ...These will be lost.")
-          endif
-
-        endif
-        selectObject(extracted[new])
-
-        newname$ = ""
-        if addtextgridname
-            newname$ = tname$ + "_"
-        endif
-        newname$ = newname$ + label$ + "_" + string$(counter)
-        Rename: newname$
       endif
     endfor
   else
-    if !cleared
-      clearinfo
-      cleared = 1
-    endif
-    appendInfoLine("W: Sound ", sname$, " and TextGrid ", tname$, " do not seem to be related. Skipping.")
-  endif
-  if !persistentcounter
-    removeObject(hash)
+    @clearOnce()
+    appendInfoLine: "W: Sound ", sound_name$, " and TextGrid ", textgrid_name$,
+      ... " do not seem to be related. Skipping."
   endif
 endfor
 
 if usedefinition
-  selectObject(replacement_table)
+  removeObject: replacement_table
 endif
 
-if new
-  selectObject(extracted[1])
-  for i from 2 to new
-    plusObject(extracted[i])
-  endfor
-endif
+for o to Object_'extracted'.nrow
+  selectObject: Object_'extracted'[o,"id"]
+
+  tg$   = Object_'extracted'$[o,"textgrid"]
+  name$ = Object_'extracted'$[o,"name"]
+  n     = Object_'extracted'[o,"counter"]
+
+  @zeropad(n, padding_length)
+
+  Rename: tg$ + "_" + name$ + "_" + zeropad.return$
+endfor
+
+removeObject: hash, all_sounds, textgrids
+
+@restoreSavedSelection(extracted)
+removeObject: extracted
+
+procedure replaceCharacters ()
+  if makereplacements
+    if usedefinition
+      selectObject: replacement_table
+      r = Get number of rows
+      for d to r
+        change$ = Get value: d, "replace"
+        into$   = Get value: d, "with"
+        label$  = replace$(label$, change$, into$, 0)
+      endfor
+    endif
+
+    if index_regex(label$, "\W")
+      # Perform other changes here, with lines like
+      # label$ = replace$(label$, CHANGE, INTO, 0)
+      # replacing CHANGE and INTO with whatever string
+      # substitution you prefer
+    endif
+
+    if index_regex(label$, "[^a-zA-Z0-9-]")
+      @clearOnce()
+      appendInfoLine: "W: Label ", label$, " on Sound ", sname$, " ",
+        ... "still contains illegal characters. ",
+        ... "These will be lost.")
+    endif
+
+  endif
+endproc
+
+procedure clearOnce ()
+  if !cleared
+    clearinfo
+    cleared = 1
+  endif
+endproc

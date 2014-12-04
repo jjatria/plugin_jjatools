@@ -151,6 +151,8 @@ procedure saveTypeSelection (.type$)
     @refineToType(.type$)
     @saveSelectionTable()
     .table = saveSelectionTable.table
+    selectObject: saveSelectionTable.table
+    Rename: .type$ + "_selection"
   endif
 
   @restoreSavedSelection(.selected)
@@ -177,9 +179,9 @@ procedure restoreSavedSelection (.id)
   if '_IsSelectionTable.return'
     selectObject: .id
 
-    .n = Get number of rows
+    .n = Object_'.id'.nrow
     for .i to .n
-      .id[.i] = Get value: .i, "id"
+      .id[.i] = Object_'.id'[.i, "id"]
     endfor
 
     for .i to .n
@@ -293,12 +295,11 @@ procedure minusSavedSelection (.table)
     .selected = saveSelectionTable.table
 
     selectObject: .table
-    .n = Get number of rows
+    .n = Object_'.table'.nrow
 
     @restoreSavedSelection(.selected)
     for .i to .n
-      @getId(.table, .i)
-      minusObject: getId.id
+      minusObject: Object_'.table'[.i, "id"]
     endfor
 
     removeObject: .selected
@@ -372,19 +373,9 @@ procedure getId (.table, .i)
     appendInfoLine: jja.tab$ - jja.tabchar$, "getId(", .table, ", ", .i, ")"
   endif
 
-  .id = undefined
-
   @_IsSelectionTable(.table)
-  if '_IsSelectionTable.return'
-    @saveSelectionTable()
-    .selected = saveSelectionTable.table
-
-    selectObject: .table
-    .id = Get value: .i, "id"
-
-    @restoreSavedSelection(.selected)
-    removeObject: .selected
-  endif
+  .id = if '_IsSelectionTable.return' then
+    ... Object_'.id'[.i, "id"] else undefined fi
 
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
@@ -521,6 +512,7 @@ procedure selectObjectTables ()
       minusObject(.o[.i])
     endif
   endfor
+
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
   endif
@@ -541,14 +533,9 @@ procedure countObjects (.id, .type$)
 
   @_IsObjectTypeTable(.id)
   if '_IsObjectTypeTable.return'
-
     selectObject: .id
     .row = nowarn Search column: "type", .type$
-    if .row
-      .n = Get value: .row, "n"
-    else
-      .n = .row
-    endif
+    .n = if .row then Object_'.id'[.row, "n"] else 0 fi
   else
     exitScript: "Not an object-type table: ", .id
   endif
@@ -627,11 +614,12 @@ procedure _AppendToSelectionTable (.table, .id)
 
   selectObject: .table
   Append row
-  .r = Get number of rows
+  .r = Object_'.table'.nrow
   Set string value:  .r, "type", .type$
   Set string value:  .r, "name", .name$
   Set numeric value: .r, "n",    1
   Set numeric value: .r, "id",   .id
+
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
   endif
@@ -658,6 +646,7 @@ procedure _RemoveFromSelectionTable (.table, .id)
   if .row
     Remove row: .row
   endif
+
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
   endif
@@ -688,8 +677,11 @@ procedure _IsSelectionTable (.table)
     selectObject: .table
     if numberOfSelected("Table")
       .columns$ = List: 0
-      .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
-      if .columns$ = "type" + tab$ + "name" + tab$ + "n" + tab$ + "id"
+      .columns$ = tab$ + left$(.columns$, index(.columns$, newline$) - 1) + tab$
+      if    index(.columns$, tab$ + "type" + tab$) and
+        ... index(.columns$, tab$ + "name" + tab$) and
+        ... index(.columns$, tab$ + "n"    + tab$) and
+        ... index(.columns$, tab$ + "id"   + tab$)
         .return = 1
       endif
     endif
@@ -734,6 +726,7 @@ procedure _IsObjectTypeTable (.id)
 
   @restoreSavedSelection(.selected)
   removeObject: .selected
+
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
   endif

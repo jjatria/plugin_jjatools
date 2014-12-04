@@ -47,7 +47,7 @@ Add menu command: "Objects", "Praat", "Generate Pitch (two-pass)...",         "B
 # Sound commands
 Add action command: "Sound",         0, "",         0, "", 0, "Filter and center...",                 "Filter -",              1, "sound/filter_and_center.praat"
 Add action command: "Sound",         0, "",         0, "", 0, "Normalise (RMS)...",                   "Modify -",              1, "sound/rms_normalize.praat"
-Add action command: "Sound",         0, "",         0, "", 0, "To Pitch (two-pass)...",               "Analyse periodicity -", 1, "pitch/to_pitch_two-pass.praat"
+Add action command: "Sound",         0, "",         0, "", 0, "To Pitch (two-pass)...",               "Analyse periodicity -", 1, "sound/to_pitch_two-pass.praat"
 
 # Strings commands
 Add action command: "Strings",       0, "",         0, "", 0, "Sort (generic)...",                    "Modify -",              1, "strings/sort_strings_generic.praat"
