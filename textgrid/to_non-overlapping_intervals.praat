@@ -24,7 +24,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include to_non-overlapping_intervals.proc
+include ../procedures/to_non-overlapping_intervals.proc
 
 textgrids = numberOfSelected("TextGrid")
 for i to textgrids

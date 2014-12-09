@@ -17,7 +17,8 @@
 
 ## Static commands:
 
-runScript: "run_tests.praat"
+# Uncomment next line to run tests at startup
+# runScript: "run_tests.praat"
 
 # Base menu
 Add menu command: "Objects", "Praat", "JJATools",                             "",                   0, ""
@@ -32,8 +33,8 @@ Add menu command: "Objects", "Praat", "Save selected objects to JSON...",     "F
 
 # Object selection menu
 Add menu command: "Objects", "Praat", "Object selection -",                   "JJATools",           1, ""
-Add menu command: "Objects", "Praat", "Select one type...",                   "Object selection",   2, "management/select_one_type.praat"
-Add menu command: "Objects", "Praat", "Invert selection",                     "Object selection",   2, "management/invert_selection.praat"
+Add menu command: "Objects", "Praat", "Select one type...",                   "Object selection -", 2, "management/select_one_type.praat"
+Add menu command: "Objects", "Praat", "Invert selection",                     "Object selection -", 2, "management/invert_selection.praat"
 
 # Batch scripts menu
 Add menu command: "Objects", "Praat", "Batch processing -",                   "JJATools",           1, ""

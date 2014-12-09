@@ -13,8 +13,8 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include check_directory.proc
-include require.proc
+include ../procedures/check_directory.proc
+include ../procedures/require.proc
 @require("5.3.44")
 
 form TextGrid to Audacity label...

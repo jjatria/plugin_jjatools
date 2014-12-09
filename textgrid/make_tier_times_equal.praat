@@ -19,7 +19,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include make_tier_times_equal.proc
+include ../procedures/make_tier_times_equal.proc
 
 textgrids = numberOfSelected("TextGrid")
 
