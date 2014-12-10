@@ -24,7 +24,8 @@
 Add menu command: "Objects", "Praat", "JJATools",                             "",                   0, ""
 Add menu command: "Objects", "Praat", "Save selected objects...",             "JJATools",           1, "management/save_all.praat"
 Add menu command: "Objects", "Praat", "Copy selected objects...",             "JJATools",           1, "management/copy_selected.praat"
-Add menu command: "Objects", "Praat", "View each selected",                   "JJATools",           1, "management/view_each.praat"
+Add menu command: "Objects", "Praat", "View each (selected)",                 "JJATools",           1, "management/view_each.opened.praat"
+Add menu command: "Objects", "Praat", "View each (from disk)",                "JJATools",           1, "management/view_each.from_disk.praat"
 Add menu command: "Objects", "Praat", "Sort selected objects...",             "JJATools",           1, "management/sort_objects.praat"
 
 # Formats menu
@@ -60,7 +61,7 @@ Add action command: "TextGrid",      0, "",         0, "", 0, "Save as Audacity 
 # Combined commands
 Add action command: "Sound",         0, "TextGrid", 0, "", 0, "Extract labels...",                    "",                      0, "textgrid/extract_labels.praat"
 Add action command: "Sound",         1, "TextGrid", 1, "", 0, "Move boundaries to zero-crossings...", "",                      0, "textgrid/move_to_zero_crossings.praat"
-Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View each as pairs",                   "",                      0, "management/view_each.praat"
+Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View each as pairs",                   "",                      0, "management/view_each.opened.praat"
 
 # View each
 Add action command: "Intensity",     0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"

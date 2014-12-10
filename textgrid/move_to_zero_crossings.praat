@@ -9,6 +9,7 @@
 # order, pairing the first Sound object with the first TextGrid
 # object and so on. This should be fine for most cases.
 #
+# Version: 1.1.0
 # Written by Jose J. Atria (April 20, 2012)
 # Latest revision: 27 October 2014
 # Requires Praat v 5.3.44
@@ -28,11 +29,6 @@ form Move boundaries to zero-crossings...
   comment Changes will be made inline
 endform
 
-# The current version of this script uses the new syntax, made available
-# with Praat v.5.3.44
-include ../procedures/require.proc
-@require("5.3.44")
-
 # If points in point tiers are to be moved as well, set this to 1.
 # Otherwise, set to 0.
 move_points = !ignore_points
@@ -40,14 +36,7 @@ move_points = !ignore_points
 # Set to true if all tiers are to be processed, false if only one
 all_tiers = !tier
 form.tier = tier
-
-verbose = 0
-
-cleared = 0
-if verbose
-  clearinfo
-  cleared = 1
-endif
+form.verbose = 0
 
 include ../procedures/selection.proc
 
@@ -70,11 +59,8 @@ include ../procedures/move_to_zero_crossings.proc
 # Object loop
 for current to total_sounds
 
-  @getId(sounds, current)
-  sound = getId.id
-
-  @getId(textgrids, current)
-  textgrid = getId.id
+  sound    = Object_'sounds'[current, "id"]
+  textgrid = Object_'textgrid'[current, "id"]
 
   selectObject: sound
   sound_length = Get total duration
@@ -85,6 +71,7 @@ for current to total_sounds
   textgrid_name$ = selected$("TextGrid")
 
   if verbose
+    @clearOnce()
     appendInfoLine: "Sound: " + sound_name$ + "; TextGrid: " + textgrid_name$
   endif
 
@@ -104,7 +91,7 @@ for current to total_sounds
       selectObject: textgrid
       interval_tier = Is interval tier: tier
 
-      if interval_tier or !interval_tier and move_points
+      if interval_tier or (!interval_tier and move_points)
 
         selectObject: sound, textgrid
         @moveToZeroCrossings(tier, maximum_shift)
@@ -142,3 +129,10 @@ endfor
 @restoreSavedSelection(sounds)
 @plusSavedSelection(textgrids)
 removeObject: sounds, textgrids
+
+procedure clearOnce ()
+  if form.verbose and !variableExists("clearOnce.cleared")
+    clearinfo
+    .cleared = 1
+  endif
+endproc

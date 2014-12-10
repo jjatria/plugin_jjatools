@@ -10,17 +10,15 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 #
-# TODO: set sounds to specified RMS
-
 include ../procedures/selection.proc
 include ../procedures/require.proc
 @require("5.3.63")
 
 form RMS normalisation...
-  positive Peak_to 0.9
-  boolean Keep_conversion_table no
-  boolean Make_changes_inline no
-  boolean Verbose no
+  positive Target_intensity_(dB) 70
+  boolean  Keep_conversion_table no
+  boolean  Make_changes_inline no
+  boolean  Verbose no
 endform
 
 stopwatch
@@ -30,7 +28,8 @@ all = numberOfSelected()
 @refineToType("Sound")
 sounds = numberOfSelected("Sound")
 
-mindb = 70
+# If normalisation causes clipping, scale peaks down to this value (in Pascal)
+scale_peak_to = 0.9
 
 if sounds and sounds = all
 
@@ -62,7 +61,7 @@ if sounds and sounds = all
       @addToSelectionTable(normalised, selected())
     endif
 
-    Scale intensity: mindb
+    Scale intensity: target_intensity
 
     @rms_and_max()
 
@@ -73,23 +72,32 @@ if sounds and sounds = all
 
   selectObject(table)
   max = Get maximum: "max_post"
-  factor = peak_to / max
+  peaks_scaled = 0
+  if max >= 1
+    peaks_scaled = 1
+    factor = scale_peak_to / max
 
-  for i to sounds
-    selectObject: normalised
-    id = Get value: i, "id"
-    name$ = Get value: i, "name"
+    for i to sounds
+      selectObject: normalised
+      id    = Get value: i, "id"
+      name$ = Get value: i, "name"
+
+      selectObject: id
+
+      Formula: "self*" + string$(factor)
+
+      @rms_and_max()
+
+      selectObject: table
+      Set numeric value: i, "rms_post",  rms
+      Set numeric value: i, "max_post",  max
+    endfor
 
     selectObject: id
-
-    Formula: "self*" + string$(factor)
-
-    @rms_and_max()
-
-    selectObject: table
-    Set numeric value: i, "rms_post",  rms
-    Set numeric value: i, "max_post",  max
-  endfor
+    intensity = Get intensity (dB)
+  else
+    intensity = target_intensity
+  endif
 
   if !keep_conversion_table
     removeObject(table)
@@ -98,8 +106,17 @@ if sounds and sounds = all
   time = stopwatch
 
   if verbose
-    writeInfoLine: "Processed " + string$(n) + " files in " + fixed$(time, 2) + " seconds"
-    appendInfoLine: "All processed files set to a RMS of " + fixed$(rms, 2) + " Pascal"
+    writeInfoLine: "Processed " + string$(n) + " files ",
+      ... "in " + fixed$(time, 2) + " seconds"
+    appendInfoLine: "All processed files set to ", fixed$(intensity, 2), "dB"
+  endif
+
+  if peaks_scaled
+    appendInfo: "W: Target intensity reduced to "
+    if !verbose
+      appendInfo: fixed$(intensity, 2), "dB to "
+    endif
+    appendInfoLine: "avoid clipping"
   endif
 
   @restoreSavedSelection(normalised)

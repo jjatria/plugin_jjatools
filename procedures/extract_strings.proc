@@ -1,0 +1,12 @@
+procedure extractStrings (.regex$)
+  .name$ = selected$("Strings")
+  .id = Copy: .name$ + "_extracted"
+  .strings = Get number of strings
+  for .j from 0 to .strings-1
+    .i = .strings - .j
+    .string$ = Get string: .i
+    if !index_regex(.string$, .regex$)
+      Remove string: .i
+    endif
+  endfor
+endproc

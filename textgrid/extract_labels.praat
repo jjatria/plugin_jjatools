@@ -53,19 +53,17 @@ form Extract sounds...
   integer Padding_(s) 0
   boolean Preserve_times 0
   sentence Look_for
-  boolean Make_character_replacements 1
-  boolean Use_external_replacement_definition 0
+  boolean Use_regular_expressions 1
+  optionmenu Replacements: 2
+    option Make no replacements
+    option Use script replacements
+    option Use external definition
 endform
 
-usedefinition = use_external_replacement_definition
-makereplacements = make_character_replacements
+make_replacements = replacements - 1
+external_replacements = if make_replacements > 1 then 1 else 0 fi
 
 cleared = 0
-
-if !makereplacements and usedefinition
-  exitScript: "Contradictory options.
-    ... Replacement definitions are used for character replacements."
-endif
 
 if numberOfSelected("Sound") or numberOfSelected("LongSound")
   @saveTypeSelection("Sound")
@@ -89,7 +87,7 @@ endif
 #Clear selection
 nocheck selectObject: undefined
 
-if usedefinition
+if external_replacements
   replacement_file$ = chooseReadFile$("Select replacement definition file")
   if replacement_file$ = ""
     exitScript("No replacement definition selected.")
@@ -147,12 +145,13 @@ for o to Object_'all_sounds'.nrow
       selectObject: textgrid
       label$ = Get label of interval: tier, i
 
-      # Perform initial label modifications here if desired
-      label$ = replace$(label$, "*", "", 0)
-      label$ = replace$(label$, " ", "", 0)
-      if   (look_for$ = "" and label$ != "") or
-        ...(label$   != "" and label$  = look_for$)
+      if use_regular_expressions
+        match = index_regex(label$, look_for$)
+      else
+        match = index(label$, look_for$)
+      endif
 
+      if match
         selectObject: hash
         found = Get column index: label$
         if found
@@ -182,12 +181,12 @@ for o to Object_'all_sounds'.nrow
           new = Extract part: start-padding, end+padding,
             ... "Rectangular", 1, preserve_times
         endif
+
         @addToSelectionTable(extracted, new)
         selectObject: extracted
         Set string value:  Object_'extracted'.nrow, "name",     label$
         Set string value:  Object_'extracted'.nrow, "textgrid", textgrid_name$
         Set numeric value: Object_'extracted'.nrow, "counter",  counter
-
       endif
     endfor
   else
@@ -197,7 +196,7 @@ for o to Object_'all_sounds'.nrow
   endif
 endfor
 
-if usedefinition
+if external_replacements
   removeObject: replacement_table
 endif
 
@@ -220,7 +219,7 @@ removeObject: extracted
 
 procedure replaceCharacters ()
   if makereplacements
-    if usedefinition
+    if external_replacements
       selectObject: replacement_table
       r = Get number of rows
       for d to r

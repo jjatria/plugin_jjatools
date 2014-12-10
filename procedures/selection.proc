@@ -375,7 +375,7 @@ procedure getId (.table, .i)
 
   @_IsSelectionTable(.table)
   .id = if '_IsSelectionTable.return' then
-    ... Object_'.id'[.i, "id"] else undefined fi
+    ... Object_'.table'[.i, "id"] else undefined fi
 
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
