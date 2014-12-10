@@ -19,12 +19,12 @@
 
 include ../../plugin_jjatools/procedures/selection.proc
 
-procedure viewEach (.base, .pair, .paired, .i, .n)
+procedure viewEach (.base, .pair, .i, .n)
   selectObject: .base
   .base_type$ = extractWord$(selected$(), "")
   .base_name$ = selected$(.base_type$)
 
-  if .paired
+  if .pair != undefined and .pair
     selectObject: .pair
     .pair_type$ = extractWord$(selected$(), "")
     .pair_name$ = selected$(.pair_type$)
@@ -52,7 +52,7 @@ procedure viewEach (.base, .pair, .paired, .i, .n)
   # not closed properly. Attempted to solve
   # this, but it didn't work. Why?
 
-  if .paired
+  if .pair != undefined and .pair
     selectObject: .pair
     .editor_name$ = .pair_type$ + " " + selected$(.pair_type$)
   else

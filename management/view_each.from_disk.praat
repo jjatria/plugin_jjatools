@@ -22,7 +22,7 @@ include ../../plugin_jjatools/procedures/view_each.from_disk.proc
 
 form View each (from disk)...
   sentence Read_from
-  sentence Filename_regex .*
+  sentence Filename_regex (wav|TextGrid)$
 endform
 
 @checkDirectory(read_from$, "Read files from...")

@@ -101,9 +101,11 @@ procedure viewEachOpened ()
     if .paired
       selectObject: .pair_selection
       .pair       = Get value: .i, "id"
+    else
+      .pair = undefined
     endif
 
-    @viewEach(.base, .pair, .paired, .i, .n)
+    @viewEach(.base, .pair, .i, .n)
 
     if viewEach_pause.button = 1
       # Pressed stop

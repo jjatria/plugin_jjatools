@@ -53,6 +53,7 @@ Add action command: "Sound",         0, "",         0, "", 0, "To Pitch (two-pas
 
 # Strings commands
 Add action command: "Strings",       0, "",         0, "", 0, "Sort (generic)...",                    "Modify -",              1, "strings/sort_strings_generic.praat"
+Add action command: "Strings",       0, "",         0, "", 0, "Extract strings...",                   "",                      0, "strings/extract_strings.praat"
 
 # TextGrid commands
 Add action command: "TextGrid",      1, "",         0, "", 0, "Find label...",                        "Query -",               1, "textgrid/find_label_in_textgrid.praat"
@@ -64,9 +65,9 @@ Add action command: "Sound",         1, "TextGrid", 1, "", 0, "Move boundaries t
 Add action command: "Sound",         0, "TextGrid", 0, "", 0, "View each as pairs",                   "",                      0, "management/view_each.opened.praat"
 
 # View each
-Add action command: "Intensity",     0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"
-Add action command: "Pitch",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"
-Add action command: "Sound",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.praat"
+Add action command: "Intensity",     0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.opened.praat"
+Add action command: "Pitch",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.opened.praat"
+Add action command: "Sound",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.opened.praat"
 
 # JSON conversion
 Add action command: "TextGrid",      0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"

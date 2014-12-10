@@ -1,6 +1,6 @@
 # Creates a Strings object which contains a subset of the strings
 # of an original Strings object. Matching of strings is done through
-# a regular expression (procedure)
+# a regular expression.
 #
 # Written by Jose J. Atria (10 December 2014)
 #
@@ -12,15 +12,10 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-procedure extractStrings (.regex$)
-  .name$ = selected$("Strings")
-  .id = Copy: .name$ + "_extracted"
-  .strings = Get number of strings
-  for .j from 0 to .strings-1
-    .i = .strings - .j
-    .string$ = Get string: .i
-    if !index_regex(.string$, .regex$)
-      Remove string: .i
-    endif
-  endfor
-endproc
+include ../../plugin_jjatools/procedures/extract_strings.proc
+
+form Extract strings...
+  sentence Match_regex .*
+endform
+
+@extractStrings(match_regex$)

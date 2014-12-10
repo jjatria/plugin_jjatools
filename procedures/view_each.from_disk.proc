@@ -39,11 +39,8 @@ procedure viewEachFromDisk (.read_from$, .file_regex$, .paired)
   removeObject: .files
   .files = extractStrings.id
   .n = Get number of strings
-  
-  appendInfoLine: "Filtered down to ", .n, " applicable files"
 
   if .paired
-    appendInfoLine: "Looking for pairs..."
     .types = Copy: "types"
     for .i to .n
       .filename$ = Get string: .i
@@ -56,7 +53,6 @@ procedure viewEachFromDisk (.read_from$, .file_regex$, .paired)
     .table = To Table: "type"
 
     if Object_'.table'.nrow = 2
-      appendInfoLine: "Two types of objects"
       .textgrid_row = Search column: "type", "TextGrid"
       .sound_row    = Search column: "type", "Sound"
 
@@ -64,7 +60,6 @@ procedure viewEachFromDisk (.read_from$, .file_regex$, .paired)
       .sounds    = Object_'.table'[.sound_row, 2]
 
       if .sounds = .textgrids
-        appendInfoLine: "Sounds = TextGrids"
         .paired = 1
 
         selectObject: .files
@@ -88,13 +83,11 @@ procedure viewEachFromDisk (.read_from$, .file_regex$, .paired)
   endif
 
   if !.paired
-    appendInfoLine: "Not pairing"
     .bases = .files
   endif
 
   selectObject: .bases
   .n = Get number of strings
-  appendInfoLine: "Looping over ", .n, " files"
 
   .i = 1
   while .i <= .n
@@ -110,7 +103,7 @@ procedure viewEachFromDisk (.read_from$, .file_regex$, .paired)
       .pair = undefined
     endif
 
-    @viewEach(.base, .pair, .paired, .i, .n)
+    @viewEach(.base, .pair, .i, .n)
 
     if viewEach_pause.button = 1
       # Pressed stop
