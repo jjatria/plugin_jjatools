@@ -153,6 +153,6 @@ for i to saveSelection.n
 
 endfor
 
-removeObject(object_data, conversion_table, used_names)
+#removeObject(object_data, conversion_table, used_names)
 
 @restoreSelection()
