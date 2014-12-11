@@ -23,7 +23,7 @@ include ../../plugin_jjatools/procedures/selection.proc
 procedure viewEach_cleanUp ()
   @restoreSavedSelection(viewEachOpened.selection)
   removeObject: viewEachOpened.selection
-  if viewEach.paired
+  if viewEachOpened.paired
     removeObject: viewEachOpened.base_selection, viewEachOpened.pair_selection
   endif
   viewEachOpened.i = viewEachOpened.n + 1
