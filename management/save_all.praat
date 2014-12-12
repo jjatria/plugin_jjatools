@@ -17,142 +17,117 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include ../procedures/selection.proc
-include ../procedures/check_directory.proc
-include ../procedures/require.proc
+include ../../plugin_jjatools/procedures/selection.proc
+include ../../plugin_jjatools/procedures/check_directory.proc
+include ../../plugin_jjatools/procedures/require.proc
 @require("5.3.63")
 
 form Save selected objects...
   sentence Save_to
   comment Leave empty for GUI selector
-  sentence Pad_name_with _
-  comment Name padding used to create unique names
   boolean Overwrite no
-  boolean Quiet yes
 endform
 
-verbose = if quiet then 0 else 1 fi
-cleared_info = 0
-
 @checkDirectory(save_to$, "Save objects to...")
-directory$ = checkDirectory.name$
+save_to$ = checkDirectory.name$
 
 # Save selection
-@saveSelection()
+@saveSelectionTable()
+original = saveSelectionTable.table
 
-# Create Table to store object data
-object_data = Create Table with column names: "objects", saveSelection.n,
-  ..."id type name extension num"
+selectObject: original
 
-# Populate Table with data
-for i to saveSelection.n
-  selectObject(saveSelection.id[i])
-  type$ = extractWord$(selected$(), "")
-  name$ = selected$(type$)
-
-  if type$ = "Sound"
-    extension$ = ".wav"
-  elsif type$ != "LongSound"
-    extension$ = "." + type$
-  endif
-
-  selectObject(object_data)
-  Set numeric value: i, "id",        saveSelection.id[i]
-  Set string value:  i, "type",      type$
-  Set string value:  i, "name",      name$
-  Set string value:  i, "extension", extension$
-  Set numeric value: i, "num",       number(name$)
-endfor
-
-# Sort Table rows,
-Sort rows: "num name"
-
-# create name conversion table
-conversion_table = Collapse rows: "name type", "", "", "", "", ""
+# LongSound objects are already on disk, so it makes no sense to save them
+writable_objects = Extract rows where column (text): "type",
+  ... "is not equal to", "LongSound"
+Append column: "extension"
 Append column: "new_name"
+Rename: "writable_objects"
+total_objects = Object_'writable_objects'.nrow
 
-if !overwrite
-  n = Get number of rows
-  for i to n
-    name$ = Get value: i, "name"
-    type$ = Get value: i, "type"
-
-    pad$ = ""
-    repeat
-      file_name$ = name$ + pad$ + extension$
-      full_name$ = directory$ + file_name$
-
-      pad$ = pad$ + pad_name_with$
-      new_name$ = file_name$ - extension$
-      converted = Search column: "new_name", new_name$
-    until !(fileReadable(full_name$) or converted)
-
-    if name$ != new_name$
-      Set string value: i, "new_name", new_name$
-    else
-      Set string value: i, "name", ""
-    endif
-  endfor
-endif
-
-# Create saved names hash
-used_names = Create Table with column names: "used_names", 0, "name n"
-
-saved_files = 0
-
-# Loop through objects, for saving
-for i to saveSelection.n
-  selectObject(object_data)
-  id         = Get value: i, "id"
-  type$      = Get value: i, "type"
-  name$      = Get value: i, "name"
-  extension$ = Get value: i, "extension"
-
-  if !overwrite
-    selectObject(conversion_table)
-    converted = Search column: "name", name$
-    if converted
-      converted_name$ = Get value: converted, "new_name"
-      name$ = converted_name$
-    endif
-  endif
-
-  selectObject(used_names)
-  used = Search column: "name", name$
-  counter = 0
-  if used
-    counter = Get value: used, "n"
-    Set numeric value: used, "n", counter+1
-  else
-    Append row
-    r = Get number of rows
-    Set numeric value: r, "n", 1
-    Set string value: r, "name", name$
-  endif
-
-  counter$ = string$(counter)
-  counter$ = if counter$ = "0" then "" else counter$ fi
-
-  selectObject(id)
-
-  file_name$ = name$ + counter$ + extension$
-  full_name$ = directory$ + file_name$
-  if type$ = "Sound"
-    Save as WAV file: full_name$
-  elsif type$ != "LongSound"
-    Save as text file: full_name$
-  endif
-
-  if verbose
-    if !cleared_info
-      clearinfo
-      cleared_info = 1
-    endif
-    appendInfoLine("Saved ", selected$(type$), " as ", full_name$)
-  endif
-
+# Determine the extension for each object type
+for row to total_objects
+  extension$ = Object_'writable_objects'$[row, "type"]
+  extension$ = if extension$ = "Sound" then "wav" else extension$ fi
+  Set string value: row, "extension", "." + extension$
 endfor
 
-removeObject(object_data, conversion_table, used_names)
+# Counters are unique per type and name, so we need to
+# determine how many types there are in the selection
+types = Collapse rows: "type extension", "", "", "", "", ""
+total_types = Object_'types'.nrow
 
-@restoreSelection()
+# For each type subset
+for type to total_types
+
+  selectObject: types
+  type$ = Object_'types'$[type, "type"]
+  extension$ = Object_'types'$[type, "extension"]
+
+  selectObject: writable_objects
+  type_subset = Extract rows where column (text): "type",
+    ... "is equal to", type$
+  Rename: type$ + "_objects"
+
+  # Find all unique names
+  unique_names = Collapse rows: "name", "", "", "", "", ""
+  Rename: "unique_names"
+
+  # And for every unique name
+  for name to Object_'unique_names'.nrow
+    this_name$ = Object_'unique_names'$[name, "name"]
+
+    selectObject: type_subset
+    same_name = Extract rows where column (text): "name",
+      ... "is equal to", this_name$
+
+    # Determine if it is repeated to see if padding is necessary
+    repeated = Object_'same_name'.nrow
+    for same to repeated
+      id = Object_'same_name'[same, "id"]
+      selectObject: writable_objects
+      row = Search column: "id", string$(id)
+      new_name$ = if repeated > 1 then 
+        ... this_name$ + "." + string$(same) else this_name$ fi
+      Set string value: row, "new_name", new_name$
+    endfor
+    removeObject: same_name
+  endfor
+  removeObject: unique_names, type_subset
+endfor
+removeObject: types
+
+# Save individual files
+for i to Object_'writable_objects'.nrow
+  selectObject: writable_objects
+  id         = Object_'writable_objects' [i, "id"]
+  name$      = Object_'writable_objects'$[i, "new_name"]
+  type$      = Object_'writable_objects'$[i, "type"]
+  extension$ = Object_'writable_objects'$[i, "extension"]
+
+  # Despite padding, that file already exists
+  # Ask for a new one, or overwrite
+  filename$ = name$ + extension$
+  if !overwrite and fileReadable(save_to$ + filename$)
+    beginPause: "File exists"
+    comment: "A new name for this object was generated, but it already exists on disk"
+    comment: "Provide a new one or overwrite this file"
+    sentence: "New_name", filename$
+    boolean: "Overwrite_all", 0
+    button = endPause: "OK", 1
+    overwrite = if overwrite_all then 1 else overwrite fi
+    filename$ = new_name$
+  endif
+
+  # Actually save the files
+  selectObject: id
+  if type$ = "Sound"
+    Save as WAV file: save_to$ + filename$
+  else
+    Save as text file: save_to$ + filename$
+  endif
+endfor
+removeObject: writable_objects
+
+@restoreSavedSelection(original)
+removeObject: original
