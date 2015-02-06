@@ -20,8 +20,10 @@ projects, and it's slowly starting to get out there.
 
 Not all scripts are thoroughly documented, and whatever documentation does exist
 is in the body of the scripts themselves. In the near future, I expect to
-document the way the plugin is to be used in the wiki pages of this repository,
+document the way the plugin is to be used in the [wiki][] pages of this repository,
 so that using it is easier for everyone interested.
+
+[wiki]: https://github.com/jjatria/plugin_jjatools/wiki
 
 For an (incomplete) list of the scripts provided in this plugin, please check
 [setup.praat][setup], which lists all the changes made to the UI.
