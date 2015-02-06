@@ -81,14 +81,14 @@ each other like so:
 
 ### Hooks (or procedure-redefinition)    
     
-Some procedures (notably [view_each.proc][view_each], but probably more in the future) make
+Some procedures (notably [`view_each.proc`][view_each], but probably more in the future) make
 use of internal procedures as hooks, which you can redefine to modify the 
 behaviour of the main procedure to a certain extent. For example, in
 `view_each.proc` this allows you to customize what happens when `each` is 
 `viewed` without having to modify the procedure itself (or make a local copy, 
 which would make me sad).
 
-[view_eahc]: https://github.com/jjatria/plugin_jjatools/blob/master/procedures/view_each.proc
+[view_each]: https://github.com/jjatria/plugin_jjatools/blob/master/procedures/view_each.proc
 
 In order to do this, you must redefine the hook (=procedure) *before* the 
 `include` call, so that when the file is read, the internal definitions are 
