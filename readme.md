@@ -114,15 +114,15 @@ If not, then you can use the general instructions below:
    
    This means that the directory structure should look like this:
 
-~~~~   
-[preferences directory]
-  ├─[other plugins]
-  ├─plugin_jjatools
-  │   ├─[other directories and files]
-  │   └─setup.praat
-  ├─buttons5
-  └─prefs5
-~~~~
+   ~~~~   
+   [preferences directory]
+     ├─[other plugins]
+     ├─plugin_jjatools
+     │   ├─[other directories and files]
+     │   └─setup.praat
+     ├─buttons5
+     └─prefs5
+   ~~~~
    
 2. Restart Praat.
 
