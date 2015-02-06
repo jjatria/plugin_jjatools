@@ -106,19 +106,21 @@ and you should be good to go!
 If not, then you can use the general instructions below:
 
 1. Download [the contents of the repo][zip] and extract into a folder called
-   `plugin_jjatools` in your Praat preferences directory. This means that the
-   directory structure should look like this:
+   `plugin_jjatools` in your Praat preferences directory. The exact location of
+   the preferences directory depends on your operating system, so please
+   [check the documentation][preferences].
    
-    [preferences directory]
-      ├─[other plugins]
-      ├─plugin_jjatools
-      │   ├─[other directories and files]
-      │   └─setup.praat
-      ├─buttons5
-      └─prefs5
-   
-   The exact location of the preferences directory depends on your operating
-   system, so please [check the documentation][preferences].
+   This means that the directory structure should look like this:
+
+~~~~   
+[preferences directory]
+  ├─[other plugins]
+  ├─plugin_jjatools
+  │   ├─[other directories and files]
+  │   └─setup.praat
+  ├─buttons5
+  └─prefs5
+~~~~
    
 2. Restart Praat.
 
