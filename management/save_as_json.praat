@@ -1,7 +1,6 @@
 # Praat object to JSON converter
 #
 # Written by Jose J. Atria (27 February 2014)
-# Version 0.1
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as

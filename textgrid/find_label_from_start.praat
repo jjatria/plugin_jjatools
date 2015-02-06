@@ -1,7 +1,6 @@
 # Find TextGrid label from start
 #
 # Author:  Jose Joaquin Atria
-# Version: 1.0.0
 # Initial release: October 24, 2014
 # Last modified:   October 24, 2014
 #

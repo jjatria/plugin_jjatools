@@ -7,7 +7,6 @@
 # until they reach the duration of the longest.
 #
 # Author: Jose Joaquin Atria
-# Version: 1.0.0
 # Initial release: October 24, 2014
 # Last modified:   October 24, 2014
 #

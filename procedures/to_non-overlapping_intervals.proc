@@ -13,7 +13,6 @@
 # Based on https://uk.groups.yahoo.com/neo/groups/praat-users/conversations/messages/6947
 #
 # Author: Jose Joaquin Atria
-# Version: 1.0.0
 # Initial release: October 24, 2014
 #
 # This script is free software: you can redistribute it and/or

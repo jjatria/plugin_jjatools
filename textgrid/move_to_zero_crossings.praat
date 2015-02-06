@@ -9,7 +9,6 @@
 # order, pairing the first Sound object with the first TextGrid
 # object and so on. This should be fine for most cases.
 #
-# Version: 1.1.0
 # Written by Jose J. Atria (April 20, 2012)
 # Latest revision: 27 October 2014
 # Requires Praat v 5.3.44

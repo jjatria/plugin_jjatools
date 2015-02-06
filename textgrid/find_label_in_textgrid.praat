@@ -9,7 +9,6 @@
 # Laboratorio de Fonetica Letras UC
 #
 # Written by Jose J. Atria (18 November 2011)
-# Version: 2.0.0
 # Latest revision: April 4, 2014
 #
 # This script is free software: you can redistribute it and/or modify

@@ -5,7 +5,6 @@
 # defined in selection.proc
 #
 # Author: Jose Joaquin Atria
-# Version: 1.0.0
 # Latest revision: October 22, 2014
 #
 # This script is free software: you can redistribute it and/or modify

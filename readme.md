@@ -1,82 +1,100 @@
 JJATools
 ========
 
-This is a plugin for [Praat][] with some of the scripts that I have written that
-I find useful to have from time to time.
+Version: 1.0.0
 
-It includes some scripts for object conversion (eg. `Save as JSON...`, `Save as
-Audacity label...`) and some general object management scripts (eg. `Save
-selected objects as text...`, which has proven to be quite popular). There's
-also a couple of oddball scritps here and there (eg. `View each...`, `Filter and
-center selected sounds...`).
+## Overview
 
-Some of them are object-specific, and those act only on the selected objects.
+This plugin for [Praat][] contains a set of some scripts that I have written
+which I find to be particularly useful, and that fill in some gaps I've found in
+the existing Praat interface.
 
-Others take a path as their argument and batch process the files in that directory. The latter ones can be identified because their names start with "Batch _verb_".
+Since it was first packaged as a plugin in April 2014, it has grown
+considerably, and it now includes a much larger set of scripts and procedures
+than I initially expected it to have. This has made organizing it a task in
+itself, but I think that it is now in a stable enough state for an slow, initial
+release. Particularly because I have started using it in a number of other side
+projects, and it's slowly starting to get out there.
 
-They all try to follow the usual conventions in `Praat` scripts:
+### Documentation
 
-1. Those that take arguments end in an ellipsis...
+Not all scripts are thoroughly documented, and whatever documentation does exist
+is in the body of the scripts themselves. In the near future, I expect to
+document the way the plugin is to be used in the wiki pages of this repository,
+so that using it is easier for everyone interested.
 
-2. If they create new objects, those are selected at the end
+For an (incomplete) list of the scripts provided in this plugin, please check
+[setup.praat][setup], which lists all the changes made to the UI.
 
-3. If they don't, they don't modify the active selection
+[setup]: https://github.com/jjatria/plugin_jjatools/blob/master/setup.praat
 
-4. Temporary objects (and only temporary objects) are removed as they become
-   unnecessary
+### Using individual scripts
 
-5. Unless otherwise stated, they do not make any inline changes in the selected
-   objects
+Unlike most plugins out there, I make _heavy_ use of procedures, to avoid
+reinventing the wheels I myself have established, and to promote code re-use
+as much as I can. This can make extracting particular scripts from this plugin
+a bit difficult, so if there's one script you are interested in, I recommend you
+install the entire plugin unless you know what you are doing.
 
-These are the bare minimum I commit myself to. I will try to correct offending
-scripts as soon as I discover them.
+### Scripts and procedures
 
-Please see `setup.praat` for the full list of scripts made available and how to
-access them.
+Scripts in this plugin are separated into three large groups, in different
+directories:
 
-Scripts and procedures
-----------------------
+*  `procedures` contains files with the `.proc` extension, which themselves
+   define procedures that can be included into other scripts.
 
-Files that have self-contained scripts have the `.praat` extension, while those
-that have procedures to be included into other scripts have the `.proc` 
-extension. Some of these are included as helper scripts (eg. 
-`checkDirectory.proc`), and you are welcome to use them in your own scripts if 
-you want.
+*  `batch` contains files with the `.praat` extension, to be used on a large
+   number of files. Some of them take their input from files that have already
+   been read into the Object list, and others (most) act on files that are
+   individually read from disk. Normally, these _batch_ scripts will just
+   provide a wrapper that calls some other script in the background.
 
-To do this you can use the `include` directive in `Praat`, but you'll need to 
-have the full path to the procedure definition, or save the script somewhere 
-where it can reach the definiton using a relative path.
+*  The remaining directories are named after individual object types, and
+   contain scripts that apply (primarily) to that type of object: scripts in the
+   `sound` directory are scripts that use (or modify, or query, etc) `Sound`
+   objects.
+   
+### Re-using code in the plugin
+   
+You are welcome to integrate any script and procedure you find here into your
+own work. You can do this by installing the plugin and then using the `include`
+directive in your own Praat scripts.
+
+You'll need to have a way to know the full path to the script or procedure
+definition, or save your script somewhere it can reach the definiton using a
+relative path. Once again, I _do not recommend_ to make external copies of
+scripts from this plugin into because that will likely break things. Try to
+`include` local versions instead.
 
 The easiest way to include them is if your own script is itself in a plugin,
 because in that case you can access the preferences directory (which is in a
 platform-dependant location) by simply traversing upwards along the directory 
 tree.
 
-A lot of the procedures that are defined in this plugin include other procedures
-to work, which might make including them in your own work a bit troublesome 
-(since relative paths in `include` directives are interpreted as relative to the
-*first* script which started the call.
-
-In order to get around this, I've come to place all my scripts in a
+To try to make this easier, all scripts and procedures are located in a
 sub-directory immediately below the plugin root directory. As long as your own
 scripts also follow this rule, then they should all happily be able to include
 each other like so:
 
     include ../../plugin_jjatools/procedures/some_procedure_name.proc
 
-Some procedures (notably `view_each.proc`, but probably more in the future) make
+### Hooks (or procedure-redefinition)    
+    
+Some procedures (notably [`view_each.proc`][view_each], but probably more in the future) make
 use of internal procedures as hooks, which you can redefine to modify the 
 behaviour of the main procedure to a certain extent. For example, in
 `view_each.proc` this allows you to customize what happens when `each` is 
 `viewed` without having to modify the procedure itself (or make a local copy, 
 which would make me sad).
 
+[view_eahc]: https://github.com/jjatria/plugin_jjatools/blob/master/procedures/view_each.proc
+
 In order to do this, you must redefine the hook (=procedure) *before* the 
 `include` call, so that when the file is read, the internal definitions are 
 ignored.
 
-Installation
------------
+## Installation
 
 If you are using GNU/Linux, and have `git` installed, you can run
 
@@ -87,8 +105,21 @@ and you should be good to go!
 
 If not, then you can use the general instructions below:
 
-1. Download [the contents of the repo][zip] (this readme is not necessary) and extract into a folder called `plugin_jjatools` in your Praat preferences directory. The exact location of this depends on your operating system, so please [check the documentation][preferences].
-
+1. Download [the contents of the repo][zip] and extract into a folder called
+   `plugin_jjatools` in your Praat preferences directory. This means that the
+   directory structure should look like this:
+   
+    [preferences directory]
+      ├─[other plugins]
+      ├─plugin_jjatools
+      │   ├─[other directories and files]
+      │   └─setup.praat
+      ├─buttons5
+      └─prefs5
+   
+   The exact location of the preferences directory depends on your operating
+   system, so please [check the documentation][preferences].
+   
 2. Restart Praat.
 
 [praat]: www.praat.org
