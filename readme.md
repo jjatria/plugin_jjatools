@@ -81,7 +81,7 @@ each other like so:
 
 ### Hooks (or procedure-redefinition)    
     
-Some procedures (notably [`view_each.proc`][view_each], but probably more in the future) make
+Some procedures (notably [view_each.proc][view_each], but probably more in the future) make
 use of internal procedures as hooks, which you can redefine to modify the 
 behaviour of the main procedure to a certain extent. For example, in
 `view_each.proc` this allows you to customize what happens when `each` is 
