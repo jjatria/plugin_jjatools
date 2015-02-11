@@ -1,0 +1,27 @@
+# Same as Create Strings as file list... but with full paths (procedure)
+#
+# Written by Jose J. Atria (17 December 2014)
+#
+# This script is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# A copy of the GNU General Public License is available at
+# <http://www.gnu.org/licenses/>.
+
+include ../../plugin_jjatools/procedures/replace_strings.proc
+
+procedure fileListFullPath (.name$, .path$, .match$, .keep)
+  .path$ = .path$ + if right$(.path$) != "/" then "/" else "" fi
+  .list = Create Strings as file list: .name$ + "_relpath", .path$ + .match$
+  @replaceStrings("^(.*)", .path$ + "\1", 1)
+  Rename: .name$
+
+  if !.keep
+    removeObject: .list
+  else
+    plusObject: .list
+  endif
+  .id = selected(1)
+endproc
