@@ -110,20 +110,21 @@ procedure mktemp (.template$)
   endif
 
   .number = index_regex(.template$, "X{3}$")
-  .name$ = undefined
+  .name$ = "--undefined--"
   if .number
     .number = index_regex(.template$, "X+$")
     .attempts = 0
     .base$ = left$(.template$, .number - 1)
     .random_length = length(.template$) - (.number - 1)
 
-    appendInfoLine: "mktemp with ", .base$, " and ", .random_length, " random characters"
+    # appendInfoLine: "mktemp with ", .base$, " and ", .random_length, " random characters"
     repeat
       .attempts += 1
       @pwgen(.random_length)
-      .name$ = .base$ + pwgen.return$
+      .name$ = preferencesDirectory$ + "/" + .base$ + pwgen.return$
     until .attempts > 100 or !fileReadable(.name$)
 
+    .name$ = if right$(.name$) != "/" then .name$ + "/" else .name$ fi
     createDirectory: .name$
   else
     pauseScript: "Template must have at least three random placeholders at end."
@@ -138,5 +139,9 @@ procedure zeropad (.n, .length)
     .pad$ = .pad$ + "0"
   endfor
   .return$ = .sign$ + right$(.pad$ + .n$, .length)
+endproc
+
+procedure tolower (.string$)
+  .return$ = replace_regex$(.string$, "(.*)", "\L\1", 0)  
 endproc
 
