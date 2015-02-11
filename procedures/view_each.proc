@@ -21,15 +21,23 @@ include ../../plugin_jjatools/procedures/selection.proc
 
 procedure viewEach (.base, .pair, .i, .n)
   selectObject: .base
-  .base_type$ = extractWord$(selected$(), "")
-  .base_name$ = selected$(.base_type$)
+  .base_type$   = extractWord$(selected$(), "")
+  .base_name$   = selected$(.base_type$)
+  .editor_name$ = selected$()
 
   if .pair != undefined and .pair
     selectObject: .pair
-    .pair_type$ = extractWord$(selected$(), "")
-    .pair_name$ = selected$(.pair_type$)
-
+    .pair_type$   = extractWord$(selected$(), "")
+    .pair_name$   = selected$(.pair_type$)
+    .editor_name$ = selected$()
     selectObject: .base, .pair
+  endif
+
+  @viewEach_atBeginIteration()
+
+  selectObject: .base
+  if .pair != undefined and .pair
+    plusObject: .pair
   endif
 
   if .base_type$ = "LongSound"
@@ -56,6 +64,7 @@ procedure viewEach (.base, .pair, .i, .n)
     selectObject: .pair
     .editor_name$ = .pair_type$ + " " + selected$(.pair_type$)
   else
+    selectObject: .base
     .editor_name$ = .base_type$ + " " + selected$(.base_type$)
   endif
 
@@ -69,6 +78,9 @@ procedure viewEach (.base, .pair, .i, .n)
 
   # Hook called after atEndEditor, which might not be in an editor
   @viewEach_afterEndEditor()
+
+  # Hook called immediately befre the end of the iteration
+  @viewEach_atEndIteration()
 endproc
 
 procedure viewEach_cleanUp ()
@@ -77,6 +89,9 @@ endproc
 # Hooks
 # A previously existing definition of these procedures
 # will get executed for every iteration of the script.
+procedure viewEach_atBeginIteration ()
+endproc
+
 procedure viewEach_atBeginEditor ()
 endproc
 
@@ -85,6 +100,9 @@ procedure viewEach_atEndEditor ()
 endproc
 
 procedure viewEach_afterEndEditor ()
+endproc
+
+procedure viewEach_atEndIteration ()
 endproc
 
 procedure viewEach_pause ()
@@ -97,6 +115,17 @@ procedure viewEach_pause ()
   else
     .button = endPause: "Stop", if viewEach.i = viewEach.n then 
       ... "Finish" else "Next" fi, 2, 1
+  endif
+
+  if .button = 1
+    # Pressed stop
+    .next = 0
+  elsif .button = 2 and viewEach.i > 1
+    # Pressed back
+    .next = -1
+  else
+    # Pressed forward
+    .next = if viewEach.i = viewEach.n then 0 else 1 fi
   endif
 endproc
 

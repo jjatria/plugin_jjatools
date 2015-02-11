@@ -1,0 +1,27 @@
+# Performs an inline, regex-based, "search and replace" a Strings object
+# (procedure)
+#
+# Written by Jose J. Atria (12 December 2014)
+#
+# This script is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# A copy of the GNU General Public License is available at
+# <http://www.gnu.org/licenses/>.
+
+procedure replaceStrings (.search$, .replace$, .regex)
+  .name$ = selected$("Strings")
+  .id = Copy: .name$ + "_replaced"
+  .strings = Get number of strings
+  for .i to .strings
+    .string$ = Get string: .i
+    if .regex
+      .string$ = replace_regex$(.string$, .search$, .replace$, 0)
+    else
+      .string$ = replace$(.string$, .search$, .replace$, 0)
+    endif
+    Set string: .i, .string$
+  endfor
+endproc

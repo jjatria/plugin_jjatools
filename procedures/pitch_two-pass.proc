@@ -29,9 +29,7 @@ procedure pitchTwoPass (.floor_factor, .ceiling_factor)
   .q3 = Get quantile: 0, 0, 0.75, "Hertz"
   removeObject: .first_pass
 
-  if .q1 != undefined
-    .floor = .q1 * .floor_factor
-  endif
+  .floor   = if .q1 != undefined then .q1 * .floor_factor   else .floor   fi
   .ceiling = if .q3 != undefined then .q3 * .ceiling_factor else .ceiling fi
 
   .error = if .floor >= .ceiling then 1 else 0 fi
