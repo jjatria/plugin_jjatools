@@ -43,9 +43,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include ../procedures/utils.proc
-include ../procedures/require.proc
-include ../procedures/selection.proc
+include ../../plugin_jjatools/procedures/utils.proc
+include ../../plugin_jjatools/procedures/require.proc
+include ../../plugin_jjatools/procedures/selection.proc
 @require("5.3.63")
 
 form Extract sounds...

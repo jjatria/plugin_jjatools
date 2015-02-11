@@ -22,6 +22,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include ../../plugin_jjatools/procedures/selection.proc
+include ../../plugin_jjatools/procedures/move_to_zero_crossings.proc
+
 form Move boundaries to zero-crossings...
   integer Tier 0 (= all)
   integer Maximum_shift_(s) 0 (= no maximum)
@@ -38,8 +41,6 @@ all_tiers = !tier
 form.tier = tier
 form.verbose = 0
 
-include ../procedures/selection.proc
-
 # Perform initial checks on original selection
 total_sounds    = numberOfSelected("Sound")
 total_textgrids = numberOfSelected("TextGrid")
@@ -54,13 +55,11 @@ sounds = saveTypeSelection.table
 @saveTypeSelection("TextGrid")
 textgrids = saveTypeSelection.table
 
-include ../procedures/move_to_zero_crossings.proc
-
 # Object loop
 for current to total_sounds
 
   sound    = Object_'sounds'[current, "id"]
-  textgrid = Object_'textgrid'[current, "id"]
+  textgrid = Object_'textgrids'[current, "id"]
 
   selectObject: sound
   sound_length = Get total duration
@@ -70,7 +69,7 @@ for current to total_sounds
   textgrid_length = Get total duration
   textgrid_name$ = selected$("TextGrid")
 
-  if verbose
+  if form.verbose
     @clearOnce()
     appendInfoLine: "Sound: " + sound_name$ + "; TextGrid: " + textgrid_name$
   endif
@@ -96,7 +95,7 @@ for current to total_sounds
         selectObject: sound, textgrid
         @moveToZeroCrossings(tier, maximum_shift)
 
-        if verbose
+        if form.verbose
           moved = moveToZeroCrossings.moved_items
           if moved
             appendInfo: "Moved ", moved

@@ -21,28 +21,31 @@
 # runScript: "run_tests.praat"
 
 # Base menu
-Add menu command: "Objects", "Praat", "JJATools",                             "",                   0, ""
-Add menu command: "Objects", "Praat", "Save selected objects...",             "JJATools",           1, "management/save_all.praat"
-Add menu command: "Objects", "Praat", "Copy selected objects...",             "JJATools",           1, "management/copy_selected.praat"
-Add menu command: "Objects", "Praat", "View each (selected)",                 "JJATools",           1, "management/view_each.opened.praat"
-Add menu command: "Objects", "Praat", "View each (from disk)",                "JJATools",           1, "management/view_each.from_disk.praat"
-Add menu command: "Objects", "Praat", "Sort selected objects...",             "JJATools",           1, "management/sort_objects.praat"
+Add menu command: "Objects", "Praat", "JJATools",                                   "",                   0, ""
+Add menu command: "Objects", "Praat", "Save selected objects...",                   "JJATools",           1, "management/save_all.praat"
+Add menu command: "Objects", "Praat", "Copy selected objects...",                   "JJATools",           1, "management/copy_selected.praat"
+Add menu command: "Objects", "Praat", "View each (selected)",                       "JJATools",           1, "management/view_each.opened.praat"
+Add menu command: "Objects", "Praat", "View each (from disk)",                      "JJATools",           1, "management/view_each.from_disk.praat"
+Add menu command: "Objects", "Praat", "Sort selected objects...",                   "JJATools",           1, "management/sort_objects.praat"
+                                                                                    
+# Formats menu                                                                      
+Add menu command: "Objects", "Praat", "Formats -",                                  "JJATools",           1, ""
+Add menu command: "Objects", "Praat", "Save selected objects to JSON...",           "Formats -",          2, "management/save_as_json.praat"
+                                                                                    
+# Object selection menu                                                             
+Add menu command: "Objects", "Praat", "Object selection -",                         "JJATools",           1, ""
+Add menu command: "Objects", "Praat", "Select one type...",                         "Object selection -", 2, "management/select_one_type.praat"
+Add menu command: "Objects", "Praat", "Invert selection",                           "Object selection -", 2, "management/invert_selection.praat"
+                                                                                    
+# Batch scripts menu                                                                
+Add menu command: "Objects", "Praat", "Batch processing -",                         "JJATools",           1, ""
+Add menu command: "Objects", "Praat", "Move boundaries to zero crossings...",       "Batch processing -", 2, "batch/move_to_zero_crossings.praat"
+Add menu command: "Objects", "Praat", "TextGrids to Audacity labels...",            "Batch processing -", 2, "batch/batch_textgrids_to_audacity_labels.praat"
+Add menu command: "Objects", "Praat", "Convert to JSON...",                         "Batch processing -", 2, "batch/batch_save_to_json.praat"
+Add menu command: "Objects", "Praat", "Generate Pitch (two-pass)...",               "Batch processing -", 2, "batch/batch_to_pitch_two-pass.praat"
 
-# Formats menu
-Add menu command: "Objects", "Praat", "Formats -",                            "JJATools",           1, ""
-Add menu command: "Objects", "Praat", "Save selected objects to JSON...",     "Formats -",          2, "management/save_as_json.praat"
-
-# Object selection menu
-Add menu command: "Objects", "Praat", "Object selection -",                   "JJATools",           1, ""
-Add menu command: "Objects", "Praat", "Select one type...",                   "Object selection -", 2, "management/select_one_type.praat"
-Add menu command: "Objects", "Praat", "Invert selection",                     "Object selection -", 2, "management/invert_selection.praat"
-
-# Batch scripts menu
-Add menu command: "Objects", "Praat", "Batch processing -",                   "JJATools",           1, ""
-Add menu command: "Objects", "Praat", "Move boundaries to zero crossings...", "Batch processing -", 2, "batch/move_to_zero_crossings.praat"
-Add menu command: "Objects", "Praat", "TextGrids to Audacity labels...",      "Batch processing -", 2, "batch/batch_textgrids_to_audacity_labels.praat"
-Add menu command: "Objects", "Praat", "Convert to JSON...",                   "Batch processing -", 2, "batch/batch_save_to_json.praat"
-Add menu command: "Objects", "Praat", "Generate Pitch (two-pass)...",         "Batch processing -", 2, "batch/batch_to_pitch_two-pass.praat"
+Add menu command: "Objects", "New",   "Create Strings as file list (full path)...", "",                   0, "strings/file_list_full_path.praat"
+Add menu command: "Objects", "New",   "Create empty Strings...",                    "",                   0, "strings/create_empty_strings.praat"
 
 ## Dynamic commands
 
@@ -53,7 +56,9 @@ Add action command: "Sound",         0, "",         0, "", 0, "To Pitch (two-pas
 
 # Strings commands
 Add action command: "Strings",       0, "",         0, "", 0, "Sort (generic)...",                    "Modify -",              1, "strings/sort_strings_generic.praat"
+Add action command: "Strings",       0, "",         0, "", 0, "Replace strings...",                   "Modify -",              1, "strings/replace_strings.praat"
 Add action command: "Strings",       0, "",         0, "", 0, "Extract strings...",                   "",                      0, "strings/extract_strings.praat"
+Add action command: "Strings",       0, "",         0, "", 0, "Find in Strings...",                   "Query -",               1, "strings/find_in_strings.praat"
 
 # TextGrid commands
 Add action command: "TextGrid",      1, "",         0, "", 0, "Find label...",                        "Query -",               1, "textgrid/find_label_in_textgrid.praat"

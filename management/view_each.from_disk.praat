@@ -17,6 +17,7 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include ../../plugin_jjatools/procedures/extract_strings.proc
 include ../../plugin_jjatools/procedures/check_directory.proc
 include ../../plugin_jjatools/procedures/view_each.from_disk.proc
 
@@ -28,4 +29,10 @@ endform
 @checkDirectory(read_from$, "Read files from...")
 read_from$ = checkDirectory.name$
 
-@viewEachFromDisk(read_from$, filename_regex$, 1)
+files = Create Strings as file list: "files", read_from$ + "*"
+
+@extractStrings(.file_regex$)
+removeObject: files
+files = extractStrings.id
+
+@viewEachFromDisk(read_from$, files, 1)

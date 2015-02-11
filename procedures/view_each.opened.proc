@@ -92,7 +92,12 @@ procedure viewEachOpened ()
     .base_selection = .selection
   endif
 
-  .i = 1
+  if !variableExists("viewEach.start_from")
+    viewEach.start_from = 1
+  endif
+  viewEach.start_from = if viewEach.start_from = undefined
+    ... then 1 else viewEach.start_from fi
+  .i = viewEach.start_from
   while .i <= .n
     # We use the selection table to iterate through the selection
     selectObject: .base_selection
@@ -107,18 +112,11 @@ procedure viewEachOpened ()
 
     @viewEach(.base, .pair, .i, .n)
 
-    if viewEach_pause.button = 1
+    if !viewEach_pause.next
       # Pressed stop
       @viewEach_cleanUp()
-    elsif viewEach_pause.button = 2 and .i > 1
-      # Pressed back
-      .i -= 1
     else
-      if .i = .n
-        @viewEach_cleanUp()
-      else
-        .i += 1
-      endif
+      .i += viewEach_pause.next
     endif
   endwhile
 endproc
