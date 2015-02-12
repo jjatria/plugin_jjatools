@@ -1,7 +1,7 @@
 JJATools
 ========
 
-Version: 1.0.1-devel
+Version: 1.0.2-devel
 
 ## Overview
 
@@ -56,9 +56,9 @@ directories:
    contain scripts that apply (primarily) to that type of object: scripts in the
    `sound` directory are scripts that use (or modify, or query, etc) `Sound`
    objects.
-   
+
 ### Re-using code in the plugin
-   
+
 You are welcome to integrate any script and procedure you find here into your
 own work. You can do this by installing the plugin and then using the `include`
 directive in your own Praat scripts.
@@ -71,7 +71,7 @@ scripts from this plugin into because that will likely break things. Try to
 
 The easiest way to include them is if your own script is itself in a plugin,
 because in that case you can access the preferences directory (which is in a
-platform-dependant location) by simply traversing upwards along the directory 
+platform-dependant location) by simply traversing upwards along the directory
 tree.
 
 To try to make this easier, all scripts and procedures are located in a
@@ -81,19 +81,19 @@ each other like so:
 
     include ../../plugin_jjatools/procedures/some_procedure_name.proc
 
-### Hooks (or procedure-redefinition)    
-    
+### Hooks (or procedure-redefinition)
+
 Some procedures (notably [`view_each.proc`][view_each], but probably more in the future) make
-use of internal procedures as hooks, which you can redefine to modify the 
+use of internal procedures as hooks, which you can redefine to modify the
 behaviour of the main procedure to a certain extent. For example, in
-`view_each.proc` this allows you to customize what happens when `each` is 
-`viewed` without having to modify the procedure itself (or make a local copy, 
+`view_each.proc` this allows you to customize what happens when `each` is
+`viewed` without having to modify the procedure itself (or make a local copy,
 which would make me sad).
 
 [view_each]: https://github.com/jjatria/plugin_jjatools/blob/master/procedures/view_each.proc
 
-In order to do this, you must redefine the hook (=procedure) *before* the 
-`include` call, so that when the file is read, the internal definitions are 
+In order to do this, you must redefine the hook (=procedure) *before* the
+`include` call, so that when the file is read, the internal definitions are
 ignored.
 
 ## Installation
@@ -111,10 +111,10 @@ If not, then you can use the general instructions below:
    `plugin_jjatools` in your Praat preferences directory. The exact location of
    the preferences directory depends on your operating system, so please
    [check the documentation][preferences].
-   
+
    This means that the directory structure should look like this:
 
-   ~~~~   
+   ~~~~
    [preferences directory]
      ├─[other plugins]
      ├─plugin_jjatools
@@ -123,7 +123,7 @@ If not, then you can use the general instructions below:
      ├─buttons5
      └─prefs5
    ~~~~
-   
+
 2. Restart Praat.
 
 [praat]: www.praat.org

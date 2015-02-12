@@ -22,7 +22,7 @@ use YAML::Tiny;
 my $input = read_file($ARGV[0]);
 
 $input =~ s/File type = "ooTextFile"\n//g;
-$input =~ s/(Object class) = "(\S+)( ([0-9]+))?"/$1: $2/g;
+$input =~ s/Object (class) = "(\S+)( ([0-9]+))?"/$1: $2/g;
 
 $input =~ s/\s*\n/\n/g;
 $input =~ s/(\S+)\? /$1: /g;
@@ -39,7 +39,7 @@ if (exists $setup{yaml}) {
 } elsif (exists $setup{json}) {
   to_json($object);
 }
-  
+
 sub to_yaml {
   my $o = shift;
   print $o->write_string();

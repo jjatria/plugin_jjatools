@@ -21,12 +21,36 @@ form Save as serialised text file...
   optionmenu Output: 1
     option JSON
     option YAML
+  optionmenu Save_as: 1
+    option Data stream
+    option Collection
   boolean Pretty_printed yes
-  
+
   comment This command requires PERL
 endform
 
-@saveSelection()
+
+
+@saveSelectionTable()
+original_selection = saveSelectionTable.table
+
+@refineToType("Sound")
+sounds = refineToType.table
+
+@restoreSavedSelection(original_selection)
+@refineToType("LongSound")
+longsounds = refineToType.table
+
+if Object_'sounds'.nrow or Object_'longsounds'.nrow
+  appendInfoLine: "W: Sound and LongSound files not supported"
+
+  @restoreSavedSelection(original_selection)
+  @minusSavedSelection(sounds)
+  @minusSavedSelection(longsounds)
+
+  @saveSelectionTable()
+  selection = saveSelectionTable.table
+endif
 
 @tolower(output$)
 output$ = tolower.return$
@@ -38,29 +62,36 @@ directory$ = checkDirectory.name$
 @mktemp: ""
 tempdir$ = mktemp.name$
 
-for i to saveSelection.n
-  type$ = extractWord$(selected$(), "")
+if save_as$ = "Data stream"
+  for i to saveSelection.n
+    type$ = extractWord$(selected$(), "")
+    if type$ != "Sound"
+  else
+  endif
 
-  if type$ != "Sound"
+  endfor
+elsif save_as$ = "Collection"
+
+
     name$ = selected$(type$)
-    
+
     infile$ = name$ + "." + type$
     Save as text file: tempdir$ + infile$
-    
+
     @tolower(type$)
     typename$ = tolower.return$
     outfile$ = name$ + "_" + typename$ + "." + output$
-    runSystem: "perl ",
-      ... preferencesDirectory$ + "/plugin_jjatools/helper/parse_praat.pl ",
-      ... "--" + output$ + " ",
-      ... "--" + format$ + " ", tempdir$ + infile$,
+    command$ = "perl " +
+      ... preferencesDirectory$ + "/plugin_jjatools/helper/parse_praat.pl " +
+      ... "--" + output$ + " " +
+      ... "--" + format$ + " " + tempdir$ + infile$ +
       ... " > " + directory$ + outfile$
+    system 'command$'
+#     appendInfoLine: command$
     deleteFile: tempdir$ + infile$
-  else
-    appendInfoLine: "W: Sound files not supported yet"
-  endif
-endfor
 
 deleteFile: tempdir$
 
-@restoreSelection()
+@restoreSavedSelection(original_selection)
+@selectSelectionTables()
+Remove
