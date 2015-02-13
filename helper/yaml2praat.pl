@@ -4,18 +4,9 @@ use warnings;
 use strict;
 use diagnostics;
 
-# Tested objects:
-# * Pitch
-# * PointProcess
-# * TextGrid
-# * Intensity
-# * Sound
-# * Harmonicity
-
 use Getopt::Long qw(:config no_ignore_case);
 use Data::Dumper;
 use File::Slurp;
-use YAML::Tiny;
 use Readonly;
 use Pod::Usage;
 use Encode qw(encode decode);
@@ -25,12 +16,10 @@ Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 
-my $TAB_LENGTH = 4;
-my $TAB        = " " x $TAB_LENGTH;
-my $LEVEL      = 0;
-my $INDENT     = set_indent();
-
 my %setup;
+my $TAB = '    ';
+my $INDENT;
+my $LEVEL = 0;
 
 $setup{'input'} = $JSON if $0 =~ /json/;
 
@@ -39,9 +28,17 @@ GetOptions (
   'json'       => sub { $setup{'input'} = $JSON },
   'encoding=s' => \$setup{'encoding'},
   'help|?'     => sub { pod2usage( -verbose => 3 ) },
+  'tab=s'      => sub {
+    shift;
+    my $val = shift;
+    $TAB = $val if $val =~ /^\s*$/;
+  },
 ) or pod2usage(2);
 
-$setup{'encoding'} = $setup{'encoding'} // 'UTF-8';
+$INDENT = set_indent();
+
+$setup{'collection'} = $setup{'collection'} // 0;
+$setup{'encoding'}   = $setup{'encoding'}   // 'UTF-8';
 
 foreach (@ARGV) {
   if (-e $_) {
@@ -51,24 +48,51 @@ foreach (@ARGV) {
     };
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
     
-    my @KEYS = ('xmin', 'xmax');
-    my $CLASS = undef;
-
-    my $YAML = YAML::Tiny->read($_);
-
-    foreach my $object (@{$YAML}) {
-      print "File type = \"ooTextFile\"\n";
-      $CLASS = $object->{'Object class'};
-      print "Object class = \"$CLASS\"\n\n";
-      delete $object->{'Object class'};
-      
-      print_object($object);
+    my $object;
+    if ($setup{'input'} eq $JSON) {
+      use JSON;
+      $object = decode_json($input);
+    } else {
+      use YAML::Tiny;
+      $object = YAML::Tiny->read_string($input);
+      $object = $object->[0];
     }
+     
+    my $size = scalar keys(%{$object});
+      
+    if ($size > 1 and !exists $object->{'Object class'}) {
+      $object = collectionise($object);
+    }
+
+    my $class = $object->{'Object class'};
+    print "File type = \"ooTextFile\"\n";
+    print "Object class = \"$class\"\n\n";
+    print_object($object);
   } else {
     die "Can't read file at $_: $!";
   }
 }
+
+sub collectionise {
+  my $serial = shift;
   
+  my @objects;
+  
+  foreach (keys %{$serial}) {
+    my $object = $serial->{$_};
+    $object->{'name'} = $_;
+    $object->{'class'} = $object->{'Object class'};
+    delete $object->{'Object class'};
+    push @objects, $object;
+  }
+  
+  return {
+    'Object class' => 'Collection',
+    'size'         => $#objects + 1,
+    'item'         => \@objects
+  };
+}
+
 sub print_object {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
@@ -80,9 +104,7 @@ sub print_object {
       if ($_ eq "tiers" and $value =~ /^<.*?>$/) {
         print $INDENT, $_, "? = ", $value, " \n";
       } else {
-        $value =~ s/^([^-0-9.e]+)$/"$1"/;
-        $value = '""' if $value eq "";
-        
+        $value = stringify($_, $value);
         print $INDENT, $_, " = ", $value, " \n";
       }
     }
@@ -97,20 +119,43 @@ sub print_object {
   }
 }
 
+# Check a key-value pair to see if the key corresponds to a known list of
+# keys whose values are strings. If so, return value between quotation marks.
+sub stringify {
+  my $key = shift;
+  my $val = shift;
+  
+  my %strings = (
+    class  => 1,
+    name   => 1,
+    text   => 1,
+    label  => 1,
+    string => 1,
+    mark   => 1,
+  );
+  
+  if (exists $strings{$key}) {
+    return '"' . $val . '"';
+  } else {
+    return $val;
+  }
+}
+
+# Print a list following the rules of Praat object serialisation
 sub print_list {
   my $name  = shift;
   my $list = shift;
   die "Not a list: $list" unless ref($list) eq 'ARRAY';
   
   if (ref($list->[0]) eq 'ARRAY') {
-  
-    print $INDENT, $_, ' [] []:', " \n";
+    # Multimensional arrays are printed differently in Praat
+    print $INDENT, "$_ [] []: \n";
     increase_indent();
-    foreach my $i (1..@{$list}) {
-      print $INDENT, $name, ' [', $i, "]:\n";
+    foreach my $x (1..@{$list}) {
+      print $INDENT, "$name [$x]:\n";
       increase_indent();
-      foreach my $ii (1..@{$list->[$i-1]}) {
-        print $INDENT, $name, ' [', $i, '] [', $ii, '] = ', $list->[$i-1]->[$ii-1], " \n";
+      foreach my $y (1..@{$list->[$x-1]}) {
+        print $INDENT, "$name [$x] [$y] = " . $list->[$x-1]->[$y-1] . " \n";
       }
       decrease_indent();
     }
@@ -118,9 +163,9 @@ sub print_list {
     
   } else {
     if ($name =~ /^(intervals|points)$/) {
-      print $INDENT, $name, ': size = ', $#{$list}, "\n";
+      print $INDENT, "$name: size = $#{$list}\n";
     } else {
-      print $INDENT, $_, ' []:', "\n";
+      print $INDENT, "$_ []:\n";
     }
     increase_indent();
     foreach my $i (1..@{$list}) {
@@ -130,28 +175,32 @@ sub print_list {
         print_object($list->[$i-1]);
         decrease_indent();
       } else {
-        print $INDENT, $name, ' [', $i, '] = ', $list->[$i-1], " \n";
+        print $INDENT, "$name [$i] = " . $list->[$i-1] . " \n";
       }
     }
 
   }
-  decrease_indent();
 }
 
+# Increase indent level
 sub increase_indent {
   $LEVEL++;
   $INDENT = set_indent();
 }
 
+# Decrease indent level
 sub decrease_indent {
   $LEVEL--;
   $INDENT = set_indent();
 }
 
+# Upadte state of indentation
 sub set_indent {
   return $TAB x $LEVEL;
 }
 
+# Praat requires keys to be in a precise order. This sub makes sure the known
+# keys match the known order in which they should appear.
 sub set_keys {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
@@ -220,7 +269,10 @@ sub set_keys {
   }
   # TextGrids
   if (exists $object->{'tiers'}) {
-    push @keys, ('tiers', 'size', 'item');
+    push @keys, ('tiers');
+  }
+  if (exists $object->{'size'}) {
+    push @keys, ('size', 'item');
   }
   # TextTiers
   if (exists $object->{'mark'}) {
@@ -254,7 +306,6 @@ sub set_keys {
   return @keys;
 }
 
-
 __END__
 
 =head1 NAME
@@ -270,7 +321,22 @@ Options:
 
     -yaml         Use YAML serialisation
     -json         Use JSON serialisation
+    -tab=TAB      Specify character(s) to be used for indentation
     -encoding     Specify encoding of input file.
+
+=head1 DESCRIPTION
+
+This script takes a serialised representation of a Praat object in either JSON
+or YAML and returns a version of the same data structure suitable to be read by
+Praat. If the input format is not specified, YAML is assumed by default.
+
+Groups of Praat objects can be serialised as either a Praat-specific
+I<Collection> object, or following the standard serialisation patterns in either
+YAML or JSON. This script correctly manages both kinds, ensuring the output can
+be read as-is in Praat (at least until a bug is found).
+
+The script can be called as B<yaml2praat> or as B<json2praat>. The only
+difference is that in the latter case, the I<-json> option is set by default.
   
 =head1 OPTIONS
 
@@ -282,7 +348,13 @@ Read serial data from YAML.
 
 =item B<-json>
 
-Read serial data from YAML.
+Read serial data from JSON.
+
+=item B<-tab=TAB>
+
+Specify character or series of characters to be used for each indent level. The
+characters provided need to match /^\s*$/, or they will be ignored. Default
+value is a series of four spaces ("    ").
 
 =item B<-encoding=CODE>
 
@@ -295,15 +367,6 @@ http://search.cpan.org/~jhi/perl-5.8.1/ext/Encode/lib/Encode/Supported.pod
 If unspecified, the script defaults to reading as UTF-8. Output is always UTF-8.
 
 =back
-
-=head1 DESCRIPTION
-
-This script takes a serialised representation of a Praat object in either JSON
-or YAML and returns a version of the same data structure suitable to be read by
-Praat. If the input format is not specified, YAML is assumed by default.
-
-The script can be called as B<yaml2praat> or as B<json2praat>. The only
-difference is that in the latter case, the I<-json> option is set by default.
 
 =head1 SEE ALSO
 

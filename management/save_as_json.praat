@@ -14,6 +14,7 @@
 
 include ../procedures/utils.proc
 include ../procedures/selection.proc
+include ../procedures/check_filename.proc
 include ../procedures/check_directory.proc
 
 form Save as serialised text file...
@@ -27,71 +28,122 @@ form Save as serialised text file...
   boolean Pretty_printed yes
 
   comment This command requires PERL
+  comment If saving multiple objects with the same name, save as Collection
 endform
 
-
-
+# Save original selection
+@saveSelection()
 @saveSelectionTable()
 original_selection = saveSelectionTable.table
 
-@refineToType("Sound")
-sounds = refineToType.table
+# De-select all incompatible objects
+@deselect_unsupported(original_selection)
 
-@restoreSavedSelection(original_selection)
-@refineToType("LongSound")
-longsounds = refineToType.table
-
-if Object_'sounds'.nrow or Object_'longsounds'.nrow
-  appendInfoLine: "W: Sound and LongSound files not supported"
-
-  @restoreSavedSelection(original_selection)
-  @minusSavedSelection(sounds)
-  @minusSavedSelection(longsounds)
-
-  @saveSelectionTable()
-  selection = saveSelectionTable.table
+if numberOfSelected() and numberOfSelected() = 1
+  # Set output directory
+  @checkDirectory(save_to$, "Save to...")
+  directory$ = checkDirectory.name$
+else
+  # Set output directory
+  @checkFilename(save_to$, "Save object(s) as one " + output$ + " file...")
+  directory$ = checkFilename.name$
 endif
 
+# Set initial options:
+# Should output be pretty-printed?
 @tolower(output$)
 output$ = tolower.return$
 format$ = if pretty_printed then "pretty" else "minified" fi
+# Should output maintain Collection structure?
+collection = if save_as$ = "Collection" then 1 else 0 fi
 
-@checkDirectory(save_to$, "Save to...")
-directory$ = checkDirectory.name$
-
+# Create temporary directory for output
 @mktemp: ""
 tempdir$ = mktemp.name$
 
-if save_as$ = "Data stream"
-  for i to saveSelection.n
-    type$ = extractWord$(selected$(), "")
-    if type$ != "Sound"
-  else
-  endif
+# Prepare for writing
+# Generate filename for Praat serialisation
+if numberOfSelected() = 1
+  type$ = extractWord$(selected$(), "")
+  name$ = selected$(type$)
+  infile$ = name$ + "." + type$
 
-  endfor
-elsif save_as$ = "Collection"
+  # Generate output filename
+  @tolower(type$)
+  outfile$ = name$ + "_" + tolower.return$ + "." + output$
+else
+  infile$ = "praat_collection.Collection"
+  
+  outfile$
+endif
 
+# Do it!
+@serialise(tempdir$ + infile$, directory$ + outfile$,
+  ... output$, format$, "write", collection)
 
-    name$ = selected$(type$)
-
-    infile$ = name$ + "." + type$
-    Save as text file: tempdir$ + infile$
-
-    @tolower(type$)
-    typename$ = tolower.return$
-    outfile$ = name$ + "_" + typename$ + "." + output$
-    command$ = "perl " +
-      ... preferencesDirectory$ + "/plugin_jjatools/helper/parse_praat.pl " +
-      ... "--" + output$ + " " +
-      ... "--" + format$ + " " + tempdir$ + infile$ +
-      ... " > " + directory$ + outfile$
-    system 'command$'
-#     appendInfoLine: command$
-    deleteFile: tempdir$ + infile$
-
+# Delete the temporary directory
 deleteFile: tempdir$
 
-@restoreSavedSelection(original_selection)
+# Restore the original selection and clean-up
 @selectSelectionTables()
 Remove
+@restoreSelection
+
+#
+# Procedures
+#
+
+# Serialise the data structure, with the help of a Perl script
+procedure serialise (.in$, .out$, .output$, .format$, .mode$)
+  Save as text file: .in$
+  command$ = "perl " +
+    ... preferencesDirectory$ + "/plugin_jjatools/helper/praat2yaml.pl " +
+    ... "--" + .output$ + " " +
+    ... "--" + .format$ + " " + .in$ +
+    ... " > " + .out$
+  appendInfoLine: command$
+  system 'command$'
+  deleteFile: tempdir$ + infile$
+endproc
+
+# Deselect unsupported objects
+procedure deselect_unsupported (.selection)
+  .unsupported$ = "LongSound Photo"
+  @split: " ", .unsupported$
+  
+  @createEmptySelectionTable()
+  .unsupported = createEmptySelectionTable.table
+  
+  .warnings = 0
+  
+  for .i to split.length
+    @restoreSavedSelection(.selection)
+    @refineToType(split.return$[.i])
+    
+    if numberOfSelected()
+      .warnings = 1
+      appendInfoLine: "W: ", split.return$[.i], " objects not supported"
+    endif
+    
+    @plusSavedSelection(.unsupported)
+    @saveSelectionTable()
+    removeObject: .unsupported
+    .unsupported = saveSelectionTable.table
+  endfor
+  
+  if .warnings
+    beginPause: "Some unsupported objects were deselected. Do you want to continue?"
+    .button = endPause: "Yes", "No", 2, 2
+    if .button = 2
+      removeObject: .unsupported
+      @restoreSavedSelection(.selection)
+      exit
+    endif
+  endif
+  
+  @restoreSavedSelection(.selection)
+  @minusSavedSelection(.unsupported)
+  removeObject: .unsupported
+endproc
+
+

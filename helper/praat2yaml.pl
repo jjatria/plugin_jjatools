@@ -41,12 +41,14 @@ GetOptions (
   'pretty'     => sub { $setup{'format'} = $PRETTY },
   'minified'   => sub { $setup{'format'} = $MINI },
   'encoding=s' => \$setup{'encoding'},
+  'collection' => \$setup{'collection'},
   'help|?'     => sub { pod2usage( -verbose => 3 ) },
 ) or pod2usage(2);
 
-$setup{'output'}   = $setup{output} // $YAML;
-$setup{'encoding'} = $setup{'encoding'} // 'UTF-8';
-$setup{'format'}   = $PRETTY unless exists $setup{'format'};
+$setup{'collection'} = $setup{'collection'} // 0;
+$setup{'output'}     = $setup{'output'}     // $YAML;
+$setup{'encoding'}   = $setup{'encoding'}   // 'UTF-8';
+$setup{'format'}     = $PRETTY unless exists $setup{'format'};
 
 foreach (@ARGV) {
   if (-e $_) {
@@ -64,6 +66,12 @@ foreach (@ARGV) {
     # remaining errors.
     my $object = YAML::Tiny->read_string($input);
 
+    if ($object->[0]->{'Object class'} eq "Collection" and
+        !$setup{'collection'}) {
+      decollectionise($object);
+    }
+#     print Dumper($object);
+    
     if ($setup{output} eq $JSON) {
       to_json($object);
     } elsif ($setup{output} eq $YAML) {
@@ -72,6 +80,21 @@ foreach (@ARGV) {
   } else {
     die "Can't read file at $_: $!";
   }
+}
+
+sub decollectionise {
+  my $object = shift;
+  $object->[0] = $object->[0]->{'item'};
+
+  my %objects;
+  foreach (@{$object->[0]}) {
+    $_->{'Object class'} = $_->{'class'};
+    $objects{$_->{'name'}} = $_;
+    delete $_->{'class'};
+    delete $_->{'name'};
+  }
+  $object->[0] = \%objects;
+  return $object;
 }
 
 sub yaml_regex {
@@ -124,6 +147,7 @@ Options:
     -pretty       Pretty print output (only used with JSON)
     -mini         Minify output (only used with JSON)
     -encoding     Specify encoding of input file.
+    -collection   Maintain Praat Collection structure
   
 =head1 OPTIONS
 
@@ -154,6 +178,15 @@ module. For a complete list, see
 http://search.cpan.org/~jhi/perl-5.8.1/ext/Encode/lib/Encode/Supported.pod
 
 If unspecified, the script defaults to reading as UTF-8. Output is always UTF-8.
+
+=item B<-collection>
+
+Preserve Praat's I<Collection> data structure.
+
+Praat has its own way to serialise collections of objects, as a single
+I<Collection> object. Since both I<YAML> and I<JSON> are made for serial data 
+formats, this script defaults to the standard way to serialise data in those
+formats. This behaviour changes when this flag is set.
 
 =back
 
