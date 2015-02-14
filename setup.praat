@@ -141,7 +141,6 @@ Add action command: "Label",                   0, "", 0, "", 0, "Save as serial 
 Add action command: "LegendreSeries",          0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
 Add action command: "LinearRegression",        0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
 Add action command: "LogisticRegression",      0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
-Add action command: "LongSound",               0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
 Add action command: "Ltas",                    0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
 Add action command: "MFCC",                    0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
 Add action command: "MSpline",                 0, "", 0, "", 0, "Save as serial text file...", "", 0, "management/save_as_json.praat"
