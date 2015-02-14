@@ -54,9 +54,12 @@ foreach (@ARGV) {
   if (-e $_) {
     my $input = read_file($ARGV[0]);
     eval {
-      $input = decode($setup{encoding}, $input, Encode::FB_QUIET);
+      $input = decode($setup{encoding}, $input, Encode::FB_WARN);
     };
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
+
+    print Dumper($input);   
+    print encode('UTF-8', $input);
     
     # The Praat output format can be converted to satisfactory YAML by means of
     # the following set of regular expressions.
@@ -65,13 +68,15 @@ foreach (@ARGV) {
     # To be sure, however, the file is then parsed as YAML anyway, to catch any
     # remaining errors.
     my $object = YAML::Tiny->read_string($input);
+    $object = $object->[0];
 
-    if ($object->[0]->{'Object class'} eq "Collection" and
-        !$setup{'collection'}) {
-      decollectionise($object);
-    }
 #     print Dumper($object);
-    
+
+    if ($object->{'Object class'} eq "Collection" and
+        !$setup{'collection'}) {
+      $object = decollectionise($object);
+    }
+
     if ($setup{output} eq $JSON) {
       to_json($object);
     } elsif ($setup{output} eq $YAML) {
@@ -83,18 +88,26 @@ foreach (@ARGV) {
 }
 
 sub decollectionise {
-  my $object = shift;
-  $object->[0] = $object->[0]->{'item'};
+  my $original = shift;
+
+  my %names;
+  foreach (@{$original->{'item'}}) {
+    if (exists $names{$_->{'name'}}) {
+      warn "W: Some object names repeated; falling back to Collection";
+      return $original;
+    } else {
+      $names{$_->{'name'}} = 1;
+    }
+  }
 
   my %objects;
-  foreach (@{$object->[0]}) {
+  foreach (@{$original->{'item'}}) {
     $_->{'Object class'} = $_->{'class'};
     $objects{$_->{'name'}} = $_;
     delete $_->{'class'};
     delete $_->{'name'};
   }
-  $object->[0] = \%objects;
-  return $object;
+  return \%objects;
 }
 
 sub yaml_regex {
@@ -105,6 +118,7 @@ sub yaml_regex {
   $input =~ s/(\S+)\? /$1: /g;
   $input =~ s/<exists>\s*?/true/g;
   $input =~ s/(\S+) = (\S*)/$1: $2/g;
+  $input =~ s/(\S+): size: 0/$1: []/g;
   $input =~ s/(\S+): size: [0-9]+/$1:/g;
   $input =~ s/(\S+) \[\](?: \[\])?:/$1:/g;
   $input =~ s/(\S+) \[[0-9]+\]( \[[0-9]+\])?:/-/g;
@@ -113,7 +127,9 @@ sub yaml_regex {
 
 sub to_yaml {
   my $o = shift;
+  $o = YAML::Tiny->new($o);
   print encode('UTF-8', $o->write_string());
+
 }
 
 sub to_json {
@@ -122,9 +138,9 @@ sub to_json {
   my $json = JSON->new->allow_nonref;
   my $output;
   if ($setup{format} eq $PRETTY) {
-    $output = $json->pretty->encode($o->[0]);
+    $output = $json->pretty->encode($o);
   } else {
-    $output = $json->encode($o->[0]);
+    $output = $json->encode($o);
   }
   print encode('UTF-8', $output);
 }
@@ -148,7 +164,7 @@ Options:
     -mini         Minify output (only used with JSON)
     -encoding     Specify encoding of input file.
     -collection   Maintain Praat Collection structure
-  
+
 =head1 OPTIONS
 
 =over 8
@@ -184,7 +200,7 @@ If unspecified, the script defaults to reading as UTF-8. Output is always UTF-8.
 Preserve Praat's I<Collection> data structure.
 
 Praat has its own way to serialise collections of objects, as a single
-I<Collection> object. Since both I<YAML> and I<JSON> are made for serial data 
+I<Collection> object. Since both I<YAML> and I<JSON> are made for serial data
 formats, this script defaults to the standard way to serialise data in those
 formats. This behaviour changes when this flag is set.
 

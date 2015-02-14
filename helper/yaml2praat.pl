@@ -47,7 +47,7 @@ foreach (@ARGV) {
       $input = decode($setup{encoding}, $input, Encode::FB_QUIET);
     };
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
-    
+
     my $object;
     if ($setup{'input'} eq $JSON) {
       use JSON;
@@ -57,9 +57,9 @@ foreach (@ARGV) {
       $object = YAML::Tiny->read_string($input);
       $object = $object->[0];
     }
-     
+
     my $size = scalar keys(%{$object});
-      
+
     if ($size > 1 and !exists $object->{'Object class'}) {
       $object = collectionise($object);
     }
@@ -75,9 +75,10 @@ foreach (@ARGV) {
 
 sub collectionise {
   my $serial = shift;
-  
+  print "Collectionise\n";
+
   my @objects;
-  
+
   foreach (keys %{$serial}) {
     my $object = $serial->{$_};
     $object->{'name'} = $_;
@@ -85,7 +86,7 @@ sub collectionise {
     delete $object->{'Object class'};
     push @objects, $object;
   }
-  
+
   return {
     'Object class' => 'Collection',
     'size'         => $#objects + 1,
@@ -96,20 +97,26 @@ sub collectionise {
 sub print_object {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
-  
+
   my @keys = set_keys($object);
+
   foreach (@keys) {
     if (!ref($object->{$_})) {
       my $value = $object->{$_};
       if ($_ eq "tiers" and $value =~ /^<.*?>$/) {
-        print $INDENT, $_, "? = ", $value, " \n";
+        print $INDENT, "$_? = $value \n";
       } else {
         $value = stringify($_, $value);
-        print $INDENT, $_, " = ", $value, " \n";
+        if ($_ eq 'tiers' and $value =~ /(true|false)/) {
+          $value = $value eq 'true' ? 'exists' : 'none?';
+          print $INDENT, "$_? <$value> \n";
+        } else {
+          print $INDENT, "$_ = $value \n";
+        }
       }
     }
   }
-  
+
   foreach (@keys) {
     if (ref($object->{$_}) eq 'HASH') {
       print_object($object->{$_});
@@ -124,7 +131,7 @@ sub print_object {
 sub stringify {
   my $key = shift;
   my $val = shift;
-  
+
   my %strings = (
     class  => 1,
     name   => 1,
@@ -133,7 +140,7 @@ sub stringify {
     string => 1,
     mark   => 1,
   );
-  
+
   if (exists $strings{$key}) {
     return '"' . $val . '"';
   } else {
@@ -146,7 +153,7 @@ sub print_list {
   my $name  = shift;
   my $list = shift;
   die "Not a list: $list" unless ref($list) eq 'ARRAY';
-  
+
   if (ref($list->[0]) eq 'ARRAY') {
     # Multimensional arrays are printed differently in Praat
     print $INDENT, "$_ [] []: \n";
@@ -160,14 +167,14 @@ sub print_list {
       decrease_indent();
     }
     decrease_indent();
-    
+
   } else {
     if ($name =~ /^(intervals|points)$/) {
-      print $INDENT, "$name: size = $#{$list}\n";
+      print $INDENT, "$name: size = " . scalar @{$list} . " \n";
     } else {
-      print $INDENT, "$_ []:\n";
+      print $INDENT, "$_ []: \n";
+      increase_indent();
     }
-    increase_indent();
     foreach my $i (1..@{$list}) {
       if (ref($list->[$i-1])) {
         print $INDENT, $name, ' [', $i, "]:\n";
@@ -178,6 +185,7 @@ sub print_list {
         print $INDENT, "$name [$i] = " . $list->[$i-1] . " \n";
       }
     }
+    decrease_indent() if ($name !~ /^(intervals|points)$/);
 
   }
 }
@@ -204,7 +212,7 @@ sub set_indent {
 sub set_keys {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
-  
+
   my $copy = $object;
   my @keys = ();
   # Many objects, including items in Collections
@@ -302,7 +310,7 @@ sub set_keys {
   if (exists $object->{'label'}) {
     push @keys, ('label');
   }
-  
+
   return @keys;
 }
 
@@ -337,7 +345,7 @@ be read as-is in Praat (at least until a bug is found).
 
 The script can be called as B<yaml2praat> or as B<json2praat>. The only
 difference is that in the latter case, the I<-json> option is set by default.
-  
+
 =head1 OPTIONS
 
 =over 8

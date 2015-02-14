@@ -30,7 +30,7 @@ Add menu command: "Objects", "Praat", "Sort selected objects...",               
 # Formats menu
 Add menu command: "Objects", "Praat", "Formats -",                                  "JJATools",           1, ""
 Add menu command: "Objects", "Praat", "Save selected objects to JSON...",           "Formats -",          2, "management/save_as_json.old.praat"
-Add menu command: "Objects", "Praat", "Save selected objects as serial text...",    "Formats -",          2, "management/save_as_json.praat"
+Add menu command: "Objects", "Praat", "Serialise Praat object...",                  "Formats -",          2, "management/save_as_json.praat"
 
 # Object selection menu
 Add menu command: "Objects", "Praat", "Object selection -",                         "JJATools",           1, ""
@@ -46,6 +46,7 @@ Add menu command: "Objects", "Praat", "Generate Pitch (two-pass)...",           
 
 Add menu command: "Objects", "New",   "Create Strings as file list (full path)...", "",                   0, "strings/file_list_full_path.praat"
 Add menu command: "Objects", "New",   "Create empty Strings...",                    "",                   0, "strings/create_empty_strings.praat"
+Add menu command: "Objects", "Open",  "Read from serialised text file...",          "",                   0, "management/read_from_json.praat"
 
 ## Dynamic commands
 
@@ -75,10 +76,11 @@ Add action command: "Pitch",         0, "",         0, "", 0, "View each",      
 Add action command: "Sound",         0, "",         0, "", 0, "View each",                            "",                      0, "management/view_each.opened.praat"
 
 # JSON conversion
-Add action command: "TextGrid",      0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "PointProcess",  0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "DurationTier",  0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "IntensityTier", 0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "Intensity",     0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "AmplitudeTier", 0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
-Add action command: "PitchTier",     0, "",         0, "", 0, "Save as JSON file...",                 "",                      0, "management/save_as_json.praat"
+Add action command: "Sound",         0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "TextGrid",      0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "PointProcess",  0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "DurationTier",  0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "IntensityTier", 0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "Intensity",     0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "AmplitudeTier", 0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"
+Add action command: "PitchTier",     0, "",         0, "", 0, "Save as serial text file...",          "",                      0, "management/save_as_json.praat"

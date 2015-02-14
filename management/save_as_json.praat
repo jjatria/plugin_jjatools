@@ -2,7 +2,7 @@
 # This version is _much_ simpler, and _much_ more robust but it does require
 # Perl. For the older, kludgier, pure praat version, use save_as_json.old.praat
 #
-# Written by Jose J. Atria (10 February 2015)
+# Written by Jose J. Atria (13 February 2015)
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -15,7 +15,6 @@
 include ../procedures/utils.proc
 include ../procedures/selection.proc
 include ../procedures/check_filename.proc
-include ../procedures/check_directory.proc
 
 form Save as serialised text file...
   sentence Save_to
@@ -39,16 +38,6 @@ original_selection = saveSelectionTable.table
 # De-select all incompatible objects
 @deselect_unsupported(original_selection)
 
-if numberOfSelected() and numberOfSelected() = 1
-  # Set output directory
-  @checkDirectory(save_to$, "Save to...")
-  directory$ = checkDirectory.name$
-else
-  # Set output directory
-  @checkFilename(save_to$, "Save object(s) as one " + output$ + " file...")
-  directory$ = checkFilename.name$
-endif
-
 # Set initial options:
 # Should output be pretty-printed?
 @tolower(output$)
@@ -56,10 +45,6 @@ output$ = tolower.return$
 format$ = if pretty_printed then "pretty" else "minified" fi
 # Should output maintain Collection structure?
 collection = if save_as$ = "Collection" then 1 else 0 fi
-
-# Create temporary directory for output
-@mktemp: ""
-tempdir$ = mktemp.name$
 
 # Prepare for writing
 # Generate filename for Praat serialisation
@@ -72,17 +57,24 @@ if numberOfSelected() = 1
   @tolower(type$)
   outfile$ = name$ + "_" + tolower.return$ + "." + output$
 else
-  infile$ = "praat_collection.Collection"
-  
-  outfile$
+  infile$  = "praat_collection.Collection"
+  outfile$ = "praat_collection." + output$
 endif
 
+# Set output file
+@checkWriteFile(save_to$,
+  ... "Save object(s) as one " + output$ + " file...", outfile$)
+outfile$ = checkWriteFile.name$
+
+# Create temporary directory for output
+@mktemp: ""
+infile$ = mktemp.name$ + infile$
+
 # Do it!
-@serialise(tempdir$ + infile$, directory$ + outfile$,
-  ... output$, format$, "write", collection)
+@serialise(infile$, outfile$, output$, format$, "write", collection)
 
 # Delete the temporary directory
-deleteFile: tempdir$
+deleteFile: mktemp.name$
 
 # Restore the original selection and clean-up
 @selectSelectionTables()
@@ -101,36 +93,36 @@ procedure serialise (.in$, .out$, .output$, .format$, .mode$)
     ... "--" + .output$ + " " +
     ... "--" + .format$ + " " + .in$ +
     ... " > " + .out$
-  appendInfoLine: command$
+#   appendInfoLine: command$
   system 'command$'
-  deleteFile: tempdir$ + infile$
+  deleteFile: .in$
 endproc
 
 # Deselect unsupported objects
 procedure deselect_unsupported (.selection)
   .unsupported$ = "LongSound Photo"
   @split: " ", .unsupported$
-  
+
   @createEmptySelectionTable()
   .unsupported = createEmptySelectionTable.table
-  
+
   .warnings = 0
-  
+
   for .i to split.length
     @restoreSavedSelection(.selection)
     @refineToType(split.return$[.i])
-    
+
     if numberOfSelected()
       .warnings = 1
       appendInfoLine: "W: ", split.return$[.i], " objects not supported"
     endif
-    
+
     @plusSavedSelection(.unsupported)
     @saveSelectionTable()
     removeObject: .unsupported
     .unsupported = saveSelectionTable.table
   endfor
-  
+
   if .warnings
     beginPause: "Some unsupported objects were deselected. Do you want to continue?"
     .button = endPause: "Yes", "No", 2, 2
@@ -140,10 +132,8 @@ procedure deselect_unsupported (.selection)
       exit
     endif
   endif
-  
+
   @restoreSavedSelection(.selection)
   @minusSavedSelection(.unsupported)
   removeObject: .unsupported
 endproc
-
-

@@ -6,3 +6,12 @@ procedure checkFilename (.name$, .label$)
     exit
   endif
 endproc
+
+procedure checkWriteFile (.name$, .label$, .file$)
+  if .name$ = ""
+    .name$ = chooseWriteFile$(.label$, .file$)
+  endif
+  if .name$ = ""
+    exit
+  endif
+endproc
