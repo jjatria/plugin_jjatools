@@ -100,7 +100,10 @@ endproc
 
 # Deselect unsupported objects
 procedure deselect_unsupported (.selection)
-  .unsupported$ = "LongSound Photo"
+  # Currently, only LongSound objects should be de-selected. This is the
+  # optimal case. More objects need to be tested before this procedure can be
+  # renamed to "deselect_longsounds" and greatly simplified.
+  .unsupported$ = "LongSound"
   @split: " ", .unsupported$
 
   @createEmptySelectionTable()

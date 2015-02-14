@@ -1,8 +1,21 @@
 #!/usr/bin/perl
 
+# Data de-serialisation script for Praat
+#
+# Written by Jose J. Atria (February 14, 2015)
+#
+# This script is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# A copy of the GNU General Public License is available at
+# <http://www.gnu.org/licenses/>.
+
 use warnings;
 use strict;
 use diagnostics;
+binmode STDOUT, ':utf8';
 
 use Getopt::Long qw(:config no_ignore_case);
 use Data::Dumper;
@@ -37,6 +50,7 @@ GetOptions (
 
 $INDENT = set_indent();
 
+$setup{'input'}      = $setup{'input'}      // $YAML;
 $setup{'collection'} = $setup{'collection'} // 0;
 $setup{'encoding'}   = $setup{'encoding'}   // 'UTF-8';
 
@@ -50,8 +64,8 @@ foreach (@ARGV) {
 
     my $object;
     if ($setup{'input'} eq $JSON) {
-      use JSON;
-      $object = decode_json($input);
+      use JSON qw//;
+      $object = JSON->decode_json($input);
     } else {
       use YAML::Tiny;
       $object = YAML::Tiny->read_string($input);
@@ -75,7 +89,6 @@ foreach (@ARGV) {
 
 sub collectionise {
   my $serial = shift;
-  print "Collectionise\n";
 
   my @objects;
 
@@ -103,21 +116,20 @@ sub print_object {
   foreach (@keys) {
     if (!ref($object->{$_})) {
       my $value = $object->{$_};
-      if ($_ eq "tiers" and $value =~ /^<.*?>$/) {
-        print $INDENT, "$_? = $value \n";
+      $value = stringify($_, $value);
+      if ($_ eq 'tiers' and $value =~ /(true|false)/) {
+        $value = $value eq 'true' ? 'exists' : 'none?';
+        print $INDENT, "$_? <$value> \n";
       } else {
-        $value = stringify($_, $value);
-        if ($_ eq 'tiers' and $value =~ /(true|false)/) {
-          $value = $value eq 'true' ? 'exists' : 'none?';
-          print $INDENT, "$_? <$value> \n";
-        } else {
-          print $INDENT, "$_ = $value \n";
-        }
+        print $INDENT, "$_ = $value \n";
       }
     }
   }
 
   foreach (@keys) {
+    if ($_ =~ /^(red|green|blue|transparency)$/) {
+      print $INDENT, "$_? <exists> \n";
+    }
     if (ref($object->{$_}) eq 'HASH') {
       print_object($object->{$_});
     } elsif (ref($object->{$_}) eq 'ARRAY') {
@@ -310,6 +322,10 @@ sub set_keys {
   # Table cell
   if (exists $object->{'label'}) {
     push @keys, ('label');
+  }
+  # Photo
+  if (exists $object->{'transparency'}) {
+    push @keys, ('red', 'green', 'blue', 'transparency');
   }
 
   return @keys;
