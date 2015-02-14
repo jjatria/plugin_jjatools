@@ -28,6 +28,14 @@ Readonly my $YAML   => 'yaml';
 Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
+Readonly my %STRINGS = (
+              class  => 1,
+              name   => 1,
+              text   => 1,
+              label  => 1,
+              string => 1,
+              mark   => 1,
+            );
 
 my %setup;
 my $TAB = '    ';
@@ -144,16 +152,7 @@ sub stringify {
   my $key = shift;
   my $val = shift;
 
-  my %strings = (
-    class  => 1,
-    name   => 1,
-    text   => 1,
-    label  => 1,
-    string => 1,
-    mark   => 1,
-  );
-
-  if (exists $strings{$key}) {
+  if (exists $STRINGS{$key}) {
     return '"' . $val . '"';
   } else {
     return $val;
