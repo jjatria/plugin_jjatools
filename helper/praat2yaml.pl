@@ -2,7 +2,7 @@
 
 # Data serialisation script for Praat
 #
-# Written by Jose J. Atria (February 12, 2015)
+# Written by Jose J. Atria (February 14, 2015)
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -40,11 +40,13 @@ GetOptions (
   'json'       => sub { $setup{'output'} = $JSON },
   'pretty'     => sub { $setup{'format'} = $PRETTY },
   'minified'   => sub { $setup{'format'} = $MINI },
+  'debug'      => \$setup{'debug'},
   'encoding=s' => \$setup{'encoding'},
   'collection' => \$setup{'collection'},
   'help|?'     => sub { pod2usage( -verbose => 3 ) },
 ) or pod2usage(2);
 
+$setup{'debug'}      = $setup{'debug'} // 0;
 $setup{'collection'} = $setup{'collection'} // 0;
 $setup{'output'}     = $setup{'output'}     // $YAML;
 $setup{'encoding'}   = $setup{'encoding'}   // 'UTF-8';
@@ -58,19 +60,26 @@ foreach (@ARGV) {
     };
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
 
-    print Dumper($input);   
-    print encode('UTF-8', $input);
-    
+    # Praat Photo objects are saved in (yet another) slightly non-standard
+    # way. If a Photo object is contained in the stream to be processed, then
+    # some pre-processing is needed.
+    $input = photo_fix($input) if ($input =~ /class = "Photo"/);
+
     # The Praat output format can be converted to satisfactory YAML by means of
     # the following set of regular expressions.
     $input = yaml_regex($input);
+
+    # For debugging purposes, print the input file before YAML parsing.
+    # Does the data need any further pre-processing before proper parsing?
+    if ($setup{'debug'}) {
+      print $input;
+      exit;
+    }
 
     # To be sure, however, the file is then parsed as YAML anyway, to catch any
     # remaining errors.
     my $object = YAML::Tiny->read_string($input);
     $object = $object->[0];
-
-#     print Dumper($object);
 
     if ($object->{'Object class'} eq "Collection" and
         !$setup{'collection'}) {
@@ -85,6 +94,41 @@ foreach (@ARGV) {
   } else {
     die "Can't read file at $_: $!";
   }
+}
+
+sub to_yaml {
+  my $o = shift;
+  $o = YAML::Tiny->new($o);
+  print $o->write_string();
+
+}
+
+sub to_json {
+  my $o = shift;
+  use JSON qw//;
+  my $json = JSON->new->allow_nonref;
+  my $output;
+  if ($setup{format} eq $PRETTY) {
+    $output = $json->pretty->encode($o);
+  } else {
+    $output = $json->encode($o);
+  }
+  print $output;
+}
+
+sub yaml_regex {
+  my $input = shift;
+  $input =~ s/File type = "ooTextFile"\n//g;
+  $input =~ s/(Object class) = "([^"]+)"/$1: $2/g;
+  $input =~ s/\s*\n/\n/g;
+  $input =~ s/(\S+)\? /$1: /g;
+  $input =~ s/<exists>\s*?/true/g;
+  $input =~ s/(\S+) = (\S*)/$1: $2/g;
+  $input =~ s/(\S+): size: 0/$1: []/g;
+  $input =~ s/(\S+): size: [0-9]+/$1:/g;
+  $input =~ s/(\S+) \[\](?: \[\])?:/$1:/g;
+  $input =~ s/(\S+) \[[0-9]+\]( \[[0-9]+\])?:/-/g;
+  return $input;
 }
 
 sub decollectionise {
@@ -110,39 +154,29 @@ sub decollectionise {
   return \%objects;
 }
 
-sub yaml_regex {
+sub photo_fix {
   my $input = shift;
-  $input =~ s/File type = "ooTextFile"\n//g;
-  $input =~ s/(Object class) = "([^"]+)"/$1: $2/g;
-  $input =~ s/\s*\n/\n/g;
-  $input =~ s/(\S+)\? /$1: /g;
-  $input =~ s/<exists>\s*?/true/g;
-  $input =~ s/(\S+) = (\S*)/$1: $2/g;
-  $input =~ s/(\S+): size: 0/$1: []/g;
-  $input =~ s/(\S+): size: [0-9]+/$1:/g;
-  $input =~ s/(\S+) \[\](?: \[\])?:/$1:/g;
-  $input =~ s/(\S+) \[[0-9]+\]( \[[0-9]+\])?:/-/g;
-  return $input;
-}
+  my @lines = split "\n", $input;
 
-sub to_yaml {
-  my $o = shift;
-  $o = YAML::Tiny->new($o);
-  print encode('UTF-8', $o->write_string());
+  my $in_photo = 0;
+  my $fix_line = 0;
+  foreach my $i (0..$#lines) {
+    my $indent;
+    if ($lines[$i] =~ /^(\s*)(Object )?class = "Photo"/) {
+      $in_photo = 1;
+      $indent = $1;
+    } elsif ($lines[$i] =~ /^\s*item \[[0-9]+\]:\s*/) {
+      $in_photo = 0;
+    }
 
-}
-
-sub to_json {
-  my $o = shift;
-  use JSON qw//;
-  my $json = JSON->new->allow_nonref;
-  my $output;
-  if ($setup{format} eq $PRETTY) {
-    $output = $json->pretty->encode($o);
-  } else {
-    $output = $json->encode($o);
+    if ($in_photo and $lines[$i] =~ /^(\s*(red|green|blue|transparency))\? <exists>\s*$/) {
+      $fix_line = 1;
+      $lines[$i] = "$1:";
+      next;
+    }
+    $lines[$i] = '    ' . $lines[$i] if ($fix_line);
   }
-  print encode('UTF-8', $output);
+  return (join "\n", @lines);
 }
 
 __END__
@@ -164,6 +198,7 @@ Options:
     -mini         Minify output (only used with JSON)
     -encoding     Specify encoding of input file.
     -collection   Maintain Praat Collection structure
+    -debug        Only process data with regular expressions, and print
 
 =head1 OPTIONS
 
@@ -203,6 +238,19 @@ Praat has its own way to serialise collections of objects, as a single
 I<Collection> object. Since both I<YAML> and I<JSON> are made for serial data
 formats, this script defaults to the standard way to serialise data in those
 formats. This behaviour changes when this flag is set.
+
+=item B<-debug>
+
+The processing of Praat files is separated into two stages: one of
+pre-processing, during which the format is converted to YAML to a satisfactory
+degree by means of regular expressions and some simple text editing.
+
+To ensure the completeness of this conversion, the pre-processed stream is then
+parsed as a YAML object, and any further processing (such as conversion to
+JSON, etc) are performed on this parsed object.
+
+Setting this flag will output the result of the pre-processing stage, for
+debugging purposes.
 
 =back
 

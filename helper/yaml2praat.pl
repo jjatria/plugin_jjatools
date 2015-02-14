@@ -169,7 +169,8 @@ sub print_list {
     decrease_indent();
 
   } else {
-    if ($name =~ /^(intervals|points)$/) {
+    my $size_array = '^(intervals|points)$';
+    if ($name =~ /$size_array/) {
       print $INDENT, "$name: size = " . scalar @{$list} . " \n";
     } else {
       print $INDENT, "$_ []: \n";
@@ -185,7 +186,7 @@ sub print_list {
         print $INDENT, "$name [$i] = " . $list->[$i-1] . " \n";
       }
     }
-    decrease_indent() if ($name !~ /^(intervals|points)$/);
+    decrease_indent() if ($name !~ /$size_array/);
 
   }
 }
