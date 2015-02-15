@@ -29,13 +29,17 @@ Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 Readonly my %STRINGS = (
-              class  => 1,
-              name   => 1,
-              text   => 1,
-              label  => 1,
-              string => 1,
-              mark   => 1,
-            );
+  class  => 1,
+  name   => 1,
+  text   => 1,
+  label  => 1,
+  string => 1,
+  mark   => 1,
+);
+Readonly my @KEYS = qw/class name xmin xmax intervals points text nx dx x1 ymin
+  ymax ny dy y1 z ceiling maxnCandidates frequency strength frame intensity
+  nCandidates candidate tiers size item number mark nt t numberOfColumns cells
+  columnHeaders rows string label red green blue transparency/;
 
 my %setup;
 my $TAB = '    ';
@@ -225,108 +229,10 @@ sub set_keys {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
 
-  my $copy = $object;
-  my @keys = ();
-  # Many objects, including items in Collections
-  if (exists $object->{'class'}) {
-    push @keys, ('class');
+  my @keys;
+  foreach (@KEYS) {
+    push @keys, $_ if (exists $object->{$_});
   }
-  # Many objects, including items in Collections
-  if (exists $object->{'name'}) {
-    push @keys, ('name');
-  }
-  # Many time-series-like objects
-  if (exists $object->{'xmin'}) {
-    push @keys, ('xmin', 'xmax');
-  }
-  # IntervalTiers
-  if (exists $object->{'intervals'}) {
-    push @keys, ('intervals');
-  }
-  # TextTiers
-  if (exists $object->{'points'}) {
-    push @keys, ('points');
-  }
-  # TextGrid intervals
-  if (exists $object->{'text'}) {
-    push @keys, ('text');
-  }
-  # Sampled matrix-like objects
-  if (exists $object->{'nx'}) {
-    push @keys, ('nx', 'dx', 'x1');
-  }
-  # Multi-dimensional arrays (Intensity, Sound, etc)
-  if (exists $object->{'ymin'}) {
-    push @keys, ('ymin', 'ymax');
-  }
-  # Multi-dimensional arrays (Intensity, Sound, etc)
-  if (exists $object->{'ny'}) {
-    push @keys, ('ny', 'dy', 'y1');
-  }
-  # Multi-dimensional arrays (Intensity, Sound, etc)
-  if (exists $object->{'z'}) {
-    push @keys, ('z');
-  }
-  # Pitch
-  if (exists $object->{'ceiling'}) {
-    push @keys, ('ceiling');
-  }
-  # Pitch
-  if (exists $object->{'maxnCandidates'}) {
-    push @keys, ('maxnCandidates');
-  }
-  # Pitch candidate
-  if (exists $object->{'frequency'}) {
-    push @keys, ('frequency', 'strength');
-  }
-  # Pitch
-  if (exists $object->{'frame'}) {
-    push @keys, ('frame');
-  }
-  # Pitch frames
-  if (exists $object->{'nCandidates'}) {
-    push @keys, ('intensity', 'nCandidates', 'candidate');
-  }
-  # TextGrids
-  if (exists $object->{'tiers'}) {
-    push @keys, ('tiers');
-  }
-  if (exists $object->{'size'}) {
-    push @keys, ('size', 'item');
-  }
-  # TextTiers
-  if (exists $object->{'mark'}) {
-    push @keys, ('number', 'mark');
-  }
-  # PointProcess
-  if (exists $object->{'t'}) {
-    push @keys, ('nt', 't');
-  }
-  # Tables
-  if (exists $object->{'numberOfColumns'}) {
-    push @keys, ('numberOfColumns');
-  }
-  # Tables
-  if (exists $object->{'cells'}) {
-    push @keys, ('cells');
-  }
-  # Tables
-  if (exists $object->{'columnHeaders'}) {
-    push @keys, ('columnHeaders', 'rows');
-  }
-  # Table cell
-  if (exists $object->{'string'}) {
-    push @keys, ('string');
-  }
-  # Table cell
-  if (exists $object->{'label'}) {
-    push @keys, ('label');
-  }
-  # Photo
-  if (exists $object->{'transparency'}) {
-    push @keys, ('red', 'green', 'blue', 'transparency');
-  }
-
   return @keys;
 }
 
