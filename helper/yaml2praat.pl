@@ -29,17 +29,23 @@ Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 Readonly my %STRINGS = (
-  class  => 1,
-  name   => 1,
-  text   => 1,
-  label  => 1,
-  string => 1,
-  mark   => 1,
+  class             => 1,
+  name              => 1,
+  text              => 1,
+  label             => 1,
+  string            => 1,
+  mark              => 1,
+  columnLabels      => 1,
+  voiceVariantName  => 1,
+  voiceLanguageName => 1,
 );
 Readonly my @KEYS = qw/class name xmin xmax intervals points text nx dx x1 ymin
   ymax ny dy y1 z ceiling maxnCandidates frequency strength frame intensity
   nCandidates candidate tiers size item number mark nt t numberOfColumns cells
-  columnHeaders rows string label red green blue transparency/;
+  columnLabels columnHeaders numberOfRows rows row metric w string label red
+  green blue transparency voiceLanguageName voiceVariantName wordsPerMinute
+  inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment
+  pitchRange outputPhonemeCoding estimateWordsPerMinute/;
 
 my %setup;
 my $TAB = '    ';
@@ -51,6 +57,7 @@ $setup{'input'} = $JSON if $0 =~ /json/;
 GetOptions (
   'yaml'       => sub { },
   'json'       => sub { $setup{'input'} = $JSON },
+  'debug'      => \$setup{'debug'},
   'encoding=s' => \$setup{'encoding'},
   'help|?'     => sub { pod2usage( -verbose => 3 ) },
   'tab=s'      => sub {
@@ -62,6 +69,7 @@ GetOptions (
 
 $INDENT = set_indent();
 
+$setup{'debug'}      = $setup{'debug'}      // 0;
 $setup{'input'}      = $setup{'input'}      // $YAML;
 $setup{'collection'} = $setup{'collection'} // 0;
 $setup{'encoding'}   = $setup{'encoding'}   // 'UTF-8';
@@ -78,12 +86,21 @@ foreach (@ARGV) {
     if ($setup{'input'} eq $JSON) {
       use JSON qw//;
       $object = JSON->decode_json($input);
+      
+      if ($setup{'debug'}) {
+        print Dumper($object);
+        exit;
+      }
     } else {
-      use YAML::Tiny;
-      $object = YAML::Tiny->read_string($input);
-      $object = $object->[0];
+      use YAML::XS;
+      $object = Load($input);
+      
+      if ($setup{'debug'}) {
+        print Dumper($object) ;
+        exit;
+      }
     }
-
+    
     my $size = scalar keys(%{$object});
 
     if ($size > 1 and !exists $object->{'Object class'}) {
@@ -93,7 +110,8 @@ foreach (@ARGV) {
     my $class = $object->{'Object class'};
     print "File type = \"ooTextFile\"\n";
     print "Object class = \"$class\"\n\n";
-    print_object($object);
+#     delete $object->{'Object class'};
+    print_object($class, $object);
   } else {
     die "Can't read file at $_: $!";
   }
@@ -120,6 +138,7 @@ sub collectionise {
 }
 
 sub print_object {
+  my $class = shift;
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
 
@@ -135,17 +154,34 @@ sub print_object {
       } else {
         print $INDENT, "$_ = $value \n";
       }
-    }
-  }
-
-  foreach (@keys) {
-    if ($_ =~ /^(red|green|blue|transparency)$/) {
-      print $INDENT, "$_? <exists> \n";
-    }
-    if (ref($object->{$_}) eq 'HASH') {
-      print_object($object->{$_});
-    } elsif (ref($object->{$_}) eq 'ARRAY') {
-      print_list($_, $object->{$_});
+    } else {
+      if ($_ =~ /^(red|green|blue|transparency)$/) {
+        print $INDENT, "$_? <exists> \n";
+      }
+      if (ref($object->{$_}) eq 'HASH') {
+        my $class = exists $object->{'Object class'} ?
+          $object->{'Object class'} : exists $object->{class} ?
+          $object->{class} : $_;
+        print_object($class, $object->{$_});
+      } elsif (ref($object->{$_}) eq 'ARRAY') {
+        if ($class =~ /(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight)/) {
+          if ($_ eq "columnLabels") {
+            print_tabbed_list($_, $object->{$_});
+          } elsif ($_ eq "rows") {
+            foreach my $i (0..@{$object->{$_}}-1) {
+              my $row = $object->{$_}->[$i];
+              while ((my $key, my $value) = each %{$row}) {
+                print "row [" . ($i+1) . "]: ";
+                print_tabbed_list($key, $value);
+              }
+            }
+          } else {
+            print_list($_, $object->{$_});
+          }
+        } else {
+          print_list($_, $object->{$_});
+        }
+      }
     }
   }
 }
@@ -154,12 +190,29 @@ sub print_object {
 # keys whose values are strings. If so, return value between quotation marks.
 sub stringify {
   my $key = shift;
-  my $val = shift;
-
+  
   if (exists $STRINGS{$key}) {
-    return '"' . $val . '"';
+    # Praat escapes string-internal double-quotes as ""
+    my @return;
+    foreach my $string (@_) {
+      $string =~ s/"/""/g;
+      push @return, '"' . $string . '"';
+    }
+    wantarray() ? return @return : return $return[0];
   } else {
-    return $val;
+    wantarray() ? return @_ : return $_[0];
+  }
+}
+
+sub print_tabbed_list {
+  my $name = shift;
+  my $list = shift;
+  
+  my @list = stringify($name, @{$list});
+  if ($name eq "columnLabels") {
+    print "$name []:\n" . join("\t", @list) . "\n";
+  } else {
+    print join("\t", ("\"$name\"", @list)) . "\n";
   }
 }
 
@@ -195,7 +248,10 @@ sub print_list {
       if (ref($list->[$i-1])) {
         print $INDENT, $name, ' [', $i, "]:\n";
         increase_indent();
-        print_object($list->[$i-1]);
+        my $class = exists $list->[$i-1]->{'Object class'} ?
+            $list->[$i-1]->{'Object class'} : exists $list->[$i-1]->{class} ?
+            $list->[$i-1]->{class} : $name;
+        print_object($class, $list->[$i-1]);
         decrease_indent();
       } else {
         print $INDENT, "$name [$i] = " . $list->[$i-1] . " \n";
@@ -229,11 +285,17 @@ sub set_keys {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
 
+  my %object = %{$object};
   my @keys;
   foreach (@KEYS) {
-    push @keys, $_ if (exists $object->{$_});
+    if (exists $object{$_}) {
+      push @keys, $_;
+      delete $object{$_};
+    } else {
+    }
   }
   return @keys;
+#   return @keys, keys(%object);
 }
 
 __END__

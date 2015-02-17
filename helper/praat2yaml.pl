@@ -21,7 +21,7 @@ use Readonly;
 use Pod::Usage;
 use Data::Dumper;
 use File::Slurp;
-use YAML::Tiny;
+use YAML::XS;
 use Encode qw(encode decode);
 
 use Getopt::Long qw(:config no_ignore_case);
@@ -30,6 +30,7 @@ Readonly my $YAML   => 'yaml';
 Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
+Readonly my $TAB    => '    ';
 
 my %setup;
 
@@ -64,6 +65,8 @@ foreach (@ARGV) {
     # way. If a Photo object is contained in the stream to be processed, then
     # some pre-processing is needed.
     $input = photo_fix($input) if ($input =~ /class = "Photo"/);
+    
+    $input = tableofreal_fix($input) if ($input =~ /class = "(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight)"/);
 
     # The Praat output format can be converted to satisfactory YAML by means of
     # the following set of regular expressions.
@@ -78,8 +81,7 @@ foreach (@ARGV) {
 
     # To be sure, however, the file is then parsed as YAML anyway, to catch any
     # remaining errors.
-    my $object = YAML::Tiny->read_string($input);
-    $object = $object->[0];
+    my $object = Load($input);
 
     if ($object->{'Object class'} eq "Collection" and
         !$setup{'collection'}) {
@@ -98,9 +100,7 @@ foreach (@ARGV) {
 
 sub to_yaml {
   my $o = shift;
-  $o = YAML::Tiny->new($o);
-  print $o->write_string();
-
+  print Dump $o;
 }
 
 sub to_json {
@@ -128,7 +128,19 @@ sub yaml_regex {
   $input =~ s/(\S+): size: [0-9]+/$1:/g;
   $input =~ s/(\S+) \[\](?: \[\])?:/$1:/g;
   $input =~ s/(\S+) \[[0-9]+\]( \[[0-9]+\])?:/-/g;
-  return $input;
+  $input =~ s/\\/\\\\/g;
+  
+  my @lines = split "\n", $input;
+  foreach my $i (1..$#lines) {
+    if ($lines[$i] =~ /([^"]*")(.*)("$)/) {
+      my $start = $1;
+      my $string = $2;
+      my $end = $3;
+      $string =~ s/""/\\"/g;
+      $lines[$i] = $start . $string . $end;
+    }
+  }
+  return join("\n", @lines) . "\n";
 }
 
 sub decollectionise {
@@ -152,6 +164,46 @@ sub decollectionise {
     delete $_->{'name'};
   }
   return \%objects;
+}
+
+sub tableofreal_fix {
+  my $input = shift;
+  my @lines = split "\n", $input;
+
+  my $in_tor = 0;
+  my $in_rows = 0;
+  foreach my $i (0..$#lines) {
+    my $indent;
+    if ($lines[$i] =~ /^(\s*)(Object )?class = "(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight)"/) {
+      $in_tor = 1;
+      $indent = $1;
+    } elsif ($lines[$i] =~ /^\s*item \[[0-9]+\]:\s*/) {
+      $in_tor  = 0;
+      $in_rows = 0;
+    }
+
+    if ($in_tor and $lines[$i] =~ "columnLabels") {
+      $lines[$i+1] = "$TAB- " . $lines[$i+1];
+      $lines[$i+1] =~ s/\t([^\t]+)/\n$TAB- $1/g;
+    }
+    
+    if ($in_tor and $lines[$i] =~ /numberOfRows/) {
+      $in_rows = 1;
+      $lines[$i] .= "\nrows:\n";
+      next;
+    }
+
+    if ($in_tor and $in_rows) {
+      if ($lines[$i] !~ /^row/) {
+        $in_rows = 0;
+      } else {
+        $lines[$i] =~ s/\t/: [ /;
+        $lines[$i] =~ s/\t/, /g;
+        $lines[$i] .= " ]";
+      }
+    }
+  }
+  return join("\n", @lines);
 }
 
 sub photo_fix {
