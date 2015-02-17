@@ -1,0 +1,136 @@
+NEED                    HAVE
+
+Activation
+AffineTransform
+AmplitudeTier           AmplitudeTier
+Art                     Art
+Artword
+Autosegment
+BarkFilter              BarkFilter
+CCA
+Categories              Categories
+Cepstrogram
+Cepstrum
+Cepstrumc
+ChebyshevSeries         ChebyshevSeries
+ClassificationTable
+Cochleagram             Cochleagram
+Collection
+Configuration
+Confusion               Confusion
+ContingencyTable        ContingencyTable
+Corpus
+Correlation             Correlation
+Covariance              Covariance
+CrossCorrelationTable   CrossCorrelationTable
+CrossCorrelationTables  CrossCorrelationTables
+DTW
+DataModeler
+Diagonalizer            Diagonalizer
+Discriminant
+Dissimilarity           Dissimilarity
+Distance                Distance
+Distributions
+DurationTier            DurationTier
+EEG
+ERP
+ERPTier
+EditCostsTable          EditCostsTable
+EditDistanceTable
+Eigen
+Excitation              Excitation
+Excitations             Excitations
+ExperimentMFC
+FFNet
+FeatureWeights
+FileInMemory
+FilesInMemory
+Formant                 Formant
+FormantFilter           FormantFilter
+FormantGrid             FormantGrid
+FormantModeler
+FormantPoint
+FormantTier
+GaussianMixture
+HMM
+HMM_Observation
+HMM_ObservationSequence
+HMM_State
+HMM_StateSequence
+Harmonicity             Harmonicity
+ISpline                 ISpline
+Index
+Intensity               Intensity
+IntensityTier           IntensityTier
+IntervalTier
+KNN
+KlattGrid               KlattGrid
+KlattTable
+LFCC
+LPC                     LPC
+Label
+LegendreSeries          LegendreSeries
+LinearRegression
+LogisticRegression
+LongSound
+Ltas                    Ltas
+MFCC                    MFCC
+MSpline                 MSpline
+ManPages
+Manipulation            Manipulation
+Matrix                  Matrix
+MelFilter               MelFilter
+MixingMatrix            MixingMatrix
+Movie
+Network
+OTGrammar
+OTHistory
+OTMulti
+PCA                     PCA
+PairDistribution
+ParamCurve
+Pattern                 Pattern
+Permutation             Permutation
+Photo                   Photo
+Pitch                   Pitch
+PitchModeler
+PitchTier               PitchTier
+PointProcess            PointProcess
+Polygon
+Polynomial              Polynomial
+PowerCepstrogram
+PowerCepstrum
+Procrustes
+RealPoint
+RealTier
+ResultsMFC
+Roots                   Roots
+SPINET
+SSCP
+SVD
+Salience
+ScalarProduct           ScalarProduct
+Similarity
+SimpleString
+SortedSetOfString
+Sound                   Sound
+Speaker                 Speaker
+Spectrogram             Spectrogram
+Spectrum                Spectrum
+SpectrumTier
+SpeechSynthesizer       SpeechSynthesizer
+SpellingChecker         SpellingChecker
+Strings
+StringsIndex
+Table                   Table
+TableOfReal             TableOfReal
+TextGrid                TextGrid
+TextInterval
+TextPoint
+TextTier                TextTier
+Tier
+Transition
+VocalTract              VocalTract
+VocalTractTier          VocalTractTier
+Weight                  Weight
+WordList                WordList
