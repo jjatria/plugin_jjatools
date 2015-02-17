@@ -53,10 +53,13 @@ procedure viewEach (.base, .pair, .i, .n)
   # this, but it didn't work. Why?
 
   if .pair != undefined and .pair
-    selectObject: .pair
-    .editor_name$ = .pair_type$ + " " + selected$(.pair_type$)
+    nocheck selectObject: .base, .pair
+    .editor_name$ = if numberOfSelected(.pair_type$) then
+      ... .pair_type$ + " " + selected$(.pair_type$) else "" fi
   else
-    .editor_name$ = .base_type$ + " " + selected$(.base_type$)
+    nocheck selectObject: .base
+    .editor_name$ = if numberOfSelected(.base_type$) then
+      ... .base_type$ + " " + selected$(.base_type$) else "" fi
   endif
 
   nocheck editor '.editor_name$'
@@ -71,13 +74,13 @@ procedure viewEach (.base, .pair, .i, .n)
   @viewEach_afterEndEditor()
 endproc
 
-procedure viewEach_cleanUp ()
-endproc
-
 # Hooks
 # A previously existing definition of these procedures
 # will get executed for every iteration of the script.
 procedure viewEach_atBeginEditor ()
+endproc
+
+procedure viewEach_cleanUp ()
 endproc
 
 procedure viewEach_atEndEditor ()
