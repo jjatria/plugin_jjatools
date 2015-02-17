@@ -21,6 +21,9 @@
 if !variableExists("jja.debug")
   jja.debug = 0
 endif
+if !variableExists("jja.restore_nocheck")
+  jja.restore_nocheck = 0
+endif
 jja.tab$ = ""
 jja.tabchar$ = ""
 
@@ -73,7 +76,11 @@ procedure restoreSelection ()
   if variableExists("saveSelection.n")
     @clearSelection()
     for .i to saveSelection.n
-      plusObject: saveSelection.id[.i]
+      if jja.restore_nocheck
+        nocheck plusObject: saveSelection.id[.i]
+      else
+        plusObject: saveSelection.id[.i]
+      endif
     endfor
   else
     exitScript: "No selection saved"
@@ -185,7 +192,11 @@ procedure restoreSavedSelection (.id)
     endfor
 
     for .i to .n
-      plusObject: .id[.i]
+      if jja.restore_nocheck
+        nocheck plusObject: .id[.i]
+      else
+        plusObject: .id[.i]
+      endif
     endfor
 
     minusObject: .id
