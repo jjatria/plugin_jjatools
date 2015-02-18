@@ -36,6 +36,7 @@ Add menu command: "Objects", "Praat", "Save as YAML...",                        
 Add menu command: "Objects", "Praat", "Object selection -",                         "JJATools",           1, ""
 Add menu command: "Objects", "Praat", "Select one type...",                         "Object selection -", 2, "management/select_one_type.praat"
 Add menu command: "Objects", "Praat", "Invert selection",                           "Object selection -", 2, "management/invert_selection.praat"
+Add menu command: "Objects", "Praat", "Save selection",                             "Object selection -", 2, "management/save_selection.praat"
 
 # Batch scripts menu
 Add menu command: "Objects", "Praat", "Batch processing -",                         "JJATools",           1, ""
@@ -49,6 +50,10 @@ Add menu command: "Objects", "New",   "Create empty Strings...",                
 Add menu command: "Objects", "Open",  "Read from serialised text file...",          "",                   0, "management/read_from_json.praat"
 
 ## Dynamic commands
+
+# Table commands
+Add action command: "Table",         0, "",         0, "", 0, "Selection table -",                    "",                      0, ""
+Add action command: "Table",         0, "",         0, "", 0, "Restore selection",                    "Selection table -",     1, "management/restore_selection.praat"
 
 # Sound commands
 Add action command: "Sound",         0, "",         0, "", 0, "Filter and center...",                 "Filter -",              1, "sound/filter_and_center.praat"
