@@ -82,16 +82,20 @@ foreach (@ARGV) {
     };
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
 
+    
     my $object;
-    if ($setup{'input'} eq $JSON) {
-      use JSON qw//;
-      $object = JSON->decode_json($input);
-      
-      if ($setup{'debug'}) {
-        print Dumper($object);
-        exit;
-      }
-    } else {
+      # Not only did this suddenly stop working...
+      # it turns out it's not even necessary?!
+#     if ($setup{'input'} eq $JSON) {
+#       use JSON qw//;
+#       print "JSON\n";
+#       $object = JSON->decode_json($input);
+#       
+#       if ($setup{'debug'}) {
+#         print Dumper($object);
+#         exit;
+#       }
+#     } else {
       use YAML::XS;
       $object = Load($input);
       
@@ -99,7 +103,7 @@ foreach (@ARGV) {
         print Dumper($object) ;
         exit;
       }
-    }
+#     }
     
     my $size = scalar keys(%{$object});
 

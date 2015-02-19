@@ -93,13 +93,14 @@ procedure serialise (.in$, .out$, .output$, .format$, collection)
     ... "--" + .output$ + " " +
     ... "--" + .format$ + " " + .in$ +
     ... " > " + .out$
+#   appendInfoLine: command$
   system 'command$'
-  deleteFile: infile$
+#   deleteFile: infile$
 endproc
 
 # Deselect unsupported objects
 procedure deselect_unsupported (.selection)
-  .unsupported$ = "LongSound Photo"
+  .unsupported$ = "LongSound"
   @split: " ", .unsupported$
 
   @createEmptySelectionTable()

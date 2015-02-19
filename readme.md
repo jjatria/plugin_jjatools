@@ -98,6 +98,17 @@ ignored.
 
 ## Installation
 
+For general instructions on how to install Praat plugins, please check the page
+in [the documentation][plugin].
+
+The easiest way to install this plugin is to use `git`. That way you can also
+keep up with the latest releases, and you can even quickly switch to the
+development version if you are feeling particularly adventurous.
+
+To do that, navigate to your [preferences directory][preferences] and clone the
+repository. After that, restarting Praat should give you access to the
+`Praat->JJATools` menu where you can get started.
+
 If you are using GNU/Linux, and have `git` installed, you can run
 
     cd ~/.praat-dir
@@ -105,14 +116,14 @@ If you are using GNU/Linux, and have `git` installed, you can run
 
 and you should be good to go!
 
-If not, then you can use the general instructions below:
+If none of that made any sense to you at all, then follow these steps:
 
-1. Download [the contents of the repo][zip] and extract into a folder called
-   `plugin_jjatools` in your Praat preferences directory. The exact location of
-   the preferences directory depends on your operating system, so please
+1. Download [the contents of the repo][zip] and extract into your Praat
+   preferences directory. The exact location of the preferences directory
+   depends on your operating system, so please
    [check the documentation][preferences].
 
-   This means that the directory structure should look like this:
+   In the end, the directory structure should look like this:
 
    ~~~~
    [preferences directory]
@@ -125,6 +136,16 @@ If not, then you can use the general instructions below:
    ~~~~
 
 2. Restart Praat.
+
+[plugin]: http://uvafon.hum.uva.nl/praat/manual/plug-ins.html
+
+## Contributions, comments and issues
+
+All help and comments are welcome! Feel free to create new issues for whatever
+problem or suggestion you have. If you have code contributions, feel free to
+clone this repository and make a pull request when it's done so I can take a
+look.
+
 
 [praat]: www.praat.org
 [preferences]: http://www.fon.hum.uva.nl/praat/manual/preferences_directory.html
