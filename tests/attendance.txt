@@ -1,6 +1,6 @@
 NEED                    HAVE
 
-Activation
+Activation              Activation
 AffineTransform
 AmplitudeTier           AmplitudeTier
 Art                     Art
@@ -41,10 +41,10 @@ Eigen
 Excitation              Excitation
 Excitations             Excitations
 ExperimentMFC
-FFNet
-FeatureWeights
-FileInMemory
-FilesInMemory
+FFNet                   FFNet
+FeatureWeights          FeatureWeights
+FileInMemory            FileInMemory
+FilesInMemory           FilesInMemory
 Formant                 Formant
 FormantFilter           FormantFilter
 FormantGrid             FormantGrid
@@ -52,20 +52,20 @@ FormantModeler
 FormantPoint
 FormantTier
 GaussianMixture
-HMM
+HMM                     HMM
 HMM_Observation
-HMM_ObservationSequence
+HMM_ObservationSequence HMM_ObservationSequence
 HMM_State
-HMM_StateSequence
+HMM_StateSequence       HMM_StateSequence
 Harmonicity             Harmonicity
 ISpline                 ISpline
 Index
 Intensity               Intensity
 IntensityTier           IntensityTier
 IntervalTier
-KNN
+KNN                     KNN
 KlattGrid               KlattGrid
-KlattTable
+KlattTable              KlattTable
 LFCC
 LPC                     LPC
 Label
@@ -82,12 +82,12 @@ Matrix                  Matrix
 MelFilter               MelFilter
 MixingMatrix            MixingMatrix
 Movie
-Network
-OTGrammar
+Network                 Network
+OTGrammar               OTGrammar
 OTHistory
 OTMulti
 PCA                     PCA
-PairDistribution
+PairDistribution        PairDistribution
 ParamCurve
 Pattern                 Pattern
 Permutation             Permutation
@@ -102,7 +102,7 @@ PowerCepstrogram
 PowerCepstrum
 Procrustes
 RealPoint
-RealTier
+RealTier                RealTier
 ResultsMFC
 Roots                   Roots
 SPINET

@@ -1,8 +1,12 @@
 # Creates sample versions of all Praat objects
 select all
-Remove
+nocheck Remove
 
 include .praat-dir/plugin_jjatools/procedures/selection.proc
+include .praat-dir/plugin_jjatools/procedures/utils.proc
+
+@mktemp("")
+dir$ = mktemp.name$
 
 @createEmptySelectionTable()
 objects = createEmptySelectionTable.table
@@ -12,13 +16,11 @@ default.points = 3
 default.channels = 2
 
 Create SpeechSynthesizer: "English", "m3"
-@addToSelectionTable(objects, selected())
+@add()
 To Sound: "This is some text.", "yes"
-@addToSelectionTable(objects, selected("Sound"))
-@addToSelectionTable(objects, selected("TextGrid"))
+@add()
 
-@get("TextGrid")
-selectObject: get.id
+@select("TextGrid")
 @get("Sound")
 Insert point tier: 1, "points"
 labels$ = "ɕɣ4a"
@@ -29,184 +31,223 @@ endfor
 
 selectObject: get.id
 To CrossCorrelationTable: 0, 10, 0
-@addToSelectionTable(objects, selected())
+@add()
 To CrossCorrelationTables
-@addToSelectionTable(objects, selected())
+@add()
 To Diagonalizer: 100, 0.001, "ffdiag"
-@addToSelectionTable(objects, selected())
+@add()
 To MixingMatrix
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Pitch: 0, 75, 600
-@addToSelectionTable(objects, selected())
+@add()
 Down to PitchTier
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Intensity: 100, 0, "yes"
-@addToSelectionTable(objects, selected())
+@add()
 Down to IntensityTier
-@addToSelectionTable(objects, selected())
+@add()
 To AmplitudeTier
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To PointProcess (periodic, cc): 75, 600
-@addToSelectionTable(objects, selected())
+@add()
 Up to TextTier: "a"
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Spectrum: "yes"
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Ltas: 100
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Spectrogram: 0.005, 5000, 0.002, 20, "Gaussian"
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Cochleagram: 0.01, 0.1, 0.03, 0.03
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To FormantFilter: 0.015, 0.005, 100, 50, 0, 1.1, 75, 600
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To BarkFilter: 0.015, 0.005, 1, 1, 0
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To MelFilter: 0.015, 0.005, 100, 100, 0
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Formant (burg): 0, 5, 5500, 0.025, 50
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To LPC (burg): 16, 0.025, 0.005, 50
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To MFCC: 12, 0.015, 0.005, 100, 100, 0
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Harmonicity (cc): 0.01, 75, 0.1, 1
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To Manipulation: 0.01, 75, 600
-@addToSelectionTable(objects, selected())
+@add()
 Extract duration tier
-@addToSelectionTable(objects, selected())
+@add()
 
 selectObject: get.id
 To KlattGrid (simple): 0.005, 5, 5500, 0.025, 50, 60, 600, 100, "yes"
-@addToSelectionTable(objects, selected())
+@add()
+Extract flutter tier
+@add()
+
+Create NoCoda grammar
+@add()
+To PairDistribution: 100000, 2
+@add()
+
+Create rectangular Network: 0.01, "linear", 0, 1, 1, 0.1, -1, 1, 0, 10, 10, "yes", -0.1, 0.1
+@add()
+
+Create FFNet: "4-3", 4, 3, 0, 0
+@add()
 
 Create Strings as file list: "files", preferencesDirectory$ + "*wav"
-@addToSelectionTable(objects, selected())
+@add()
 To WordList
-@addToSelectionTable(objects, selected())
+@add()
 
 Create TableOfReal (Weenink 1985): "Men"
-@addToSelectionTable(objects, selected())
+@add()
 To ContingencyTable
-@addToSelectionTable(objects, selected())
+@add()
 To Matrix
-@addToSelectionTable(objects, selected())
+@add()
 To Excitation
-@addToSelectionTable(objects, selected())
+@add()
 To Excitations
-@addToSelectionTable(objects, selected())
-To Pattern: 1
-@addToSelectionTable(objects, selected())
+@add()
 
 Create letter R example: 32.5
-@addToSelectionTable(objects, selected())
+@add()
 To Weight
-@addToSelectionTable(objects, selected())
+@add()
 
 Create Permutation: "p", 10, "yes"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create Polynomial: "p", -3, 4, "2 -1 -2 1"
-@addToSelectionTable(objects, selected())
+@add()
 To Roots
-@addToSelectionTable(objects, selected())
+@add()
 
 Create LegendreSeries: "ls", -1, 1, "0 0 1"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create ChebyshevSeries: "cs", -1, 1, "0 0 1"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create MSpline: "mspline", 0, 1, 2, "1.2 2 1.2 1.2 3 0", "0.3 0.5 0.6"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create ISpline: "ispline", 0, 1, 3, "1.2 2 1.2 1.2 3 0", "0.3 0.5 0.6"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create Articulation: "articulation"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create Speaker: "speaker", "Female", "2"
-@addToSelectionTable(objects, selected())
+@add()
 
-@get("Art")
-plusObject: get.id
+Create iris example: 0, 0
+@add()
+
+@minus("Categories")
+To Activation: 1
+@add()
+
+@select("Categories")
+@plus("Pattern")
+To KNN Classifier: "Classifier", "Random"
+@add()
+@plus("Categories")
+@plus("Pattern")
+To FeatureWeights: 0.02, 20, 1, "Co-optimization", 1, "Flat"
+@add()
+
+@select("Speaker")
+@plus("Art")
 To VocalTract
-@addToSelectionTable(objects, selected())
+@add()
 To VocalTractTier: 0, 1, 0.5
-@addToSelectionTable(objects, selected())
+@add()
 
 Create Artword: "hallo", 1
-@addToSelectionTable(objects, selected())
-
+@add()
 
 Create simple Photo: "xy", 10, 10, "x*y/100", "x*y/100", "x*y/100"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create simple Confusion: "simple", "u i a"
-@addToSelectionTable(objects, selected())
+@add()
 
 Create simple Covariance: "c", "1.0 0.0 1.0", "0.0 0.0", 100
-@addToSelectionTable(objects, selected())
+@add()
 To PCA
-@addToSelectionTable(objects, selected())
+@add()
 
-@get("Covariance")
-selectObject: get.id
+Create KlattTable example
+@add()
+Save as text file: dir$ + "example.KlattTable"
+
+Create FileInMemory: dir$ + "example.KlattTable"
+@add()
+To FilesInMemory
+@add()
+
+Create HMM: "hmm", "no", 3, 3
+@add()
+To HMM_ObservationSequence: 0, 20
+@add()
+@plus("HMM")
+To HMM_StateSequence
+@add()
+
+Create simple Polygon: "p", "0.0 0.0  0.0 1.0  1.0 0.0"
+@add()
+
+@select("Covariance")
 To Correlation
-@addToSelectionTable(objects, selected())
+@add()
 
 Create empty EditCostsTable: "editCosts", 0, 0
-@addToSelectionTable(objects, selected())
+@add()
 
 Create FormantGrid: "schwa", 0, 1, 10, 550, 1100, 60, 50
-@addToSelectionTable(objects, selected())
+@add()
 
 Create Poisson process: "poisson", 0,1, 100
-@addToSelectionTable(objects, selected())
+@add()
 
-@get("Dissimilarity")
-selectObject: get.id
+@select("Dissimilarity")
 To Distance: "yes"
-@addToSelectionTable(objects, selected())
+@add()
 To ScalarProduct: "yes"
-@addToSelectionTable(objects, selected())
-
-@get("Pattern")
-selectObject: get.id
-To Categories: 1, 0.0000001, 1000
-@addToSelectionTable(objects, selected())
+@add()
 
 # Replace sound with shorter one
 
@@ -223,11 +264,13 @@ for i to default.channels
 endfor
 Combine to stereo
 Rename: "sound"
-@addToSelectionTable(objects, selected())
+@add()
 
 for i to default.channels
   removeObject: channel[i]
 endfor
+
+deletefile
 
 selectObject: objects
 
@@ -236,5 +279,33 @@ procedure get (.type$)
   selectObject: objects
   .n = Search column: "type", .type$
   .id = Object_'objects'[.n, "id"]
+  @restoreSelection()
+endproc
+
+procedure plus (.type$)
+  @get(.type$)
+  nocheck plusObject: get.id
+endproc
+
+procedure minus (.type$)
+  @get(.type$)
+  nocheck minusObject: get.id
+endproc
+
+procedure select (.type$)
+  @get(.type$)
+  nocheck selectObject: get.id
+endproc
+
+procedure remove (.type$)
+  @get(.type$)
+  nocheck removeObject: get.id
+endproc
+
+procedure add ()
+  @saveSelection()
+  for .i to saveSelection.n
+    @addToSelectionTable(objects, saveSelection.id[.i])
+  endfor
   @restoreSelection()
 endproc
