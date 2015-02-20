@@ -2,10 +2,10 @@
 select all
 nocheck Remove
 
-include .praat-dir/plugin_jjatools/procedures/selection.proc
-include .praat-dir/plugin_jjatools/procedures/utils.proc
+include ../procedures/selection.proc
+include ../procedures/utils.proc
 
-@mktemp("")
+@mktemp("mkobj.XXXXX")
 dir$ = mktemp.name$
 
 @createEmptySelectionTable()
@@ -51,6 +51,11 @@ To Intensity: 100, 0, "yes"
 Down to IntensityTier
 @add()
 To AmplitudeTier
+@add()
+
+select all
+@saveSelectionTable()
+selectObject: saveSelectionTable.table
 @add()
 
 selectObject: get.id
@@ -121,9 +126,6 @@ To PairDistribution: 100000, 2
 @add()
 
 Create rectangular Network: 0.01, "linear", 0, 1, 1, 0.1, -1, 1, 0, 10, 10, "yes", -0.1, 0.1
-@add()
-
-Create FFNet: "4-3", 4, 3, 0, 0
 @add()
 
 Create Strings as file list: "files", preferencesDirectory$ + "*wav"
@@ -216,6 +218,7 @@ Save as text file: dir$ + "example.KlattTable"
 
 Create FileInMemory: dir$ + "example.KlattTable"
 @add()
+deleteFile: dir$ + "example.KlattTable"
 To FilesInMemory
 @add()
 
@@ -270,8 +273,7 @@ for i to default.channels
   removeObject: channel[i]
 endfor
 
-deletefile
-
+deleteFile: dir$
 selectObject: objects
 
 procedure get (.type$)

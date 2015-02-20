@@ -1,12 +1,12 @@
-NEED                    HAVE
+NEED                    HAVE                    PASSING
 
-Activation              Activation
+Activation              Activation              Activation (00)
 AffineTransform
-AmplitudeTier           AmplitudeTier
+AmplitudeTier           AmplitudeTier           AmplitudeTier (00)
 Art                     Art
 Artword
 Autosegment
-BarkFilter              BarkFilter
+BarkFilter              BarkFilter              BarkFilter (00)
 CCA
 Categories              Categories
 Cepstrogram
@@ -14,39 +14,39 @@ Cepstrum
 Cepstrumc
 ChebyshevSeries         ChebyshevSeries
 ClassificationTable
-Cochleagram             Cochleagram
+Cochleagram             Cochleagram             Cochleagram (00)
 Collection
 Configuration
 Confusion               Confusion
-ContingencyTable        ContingencyTable
+ContingencyTable        ContingencyTable        ContingencyTable (00)
 Corpus
 Correlation             Correlation
 Covariance              Covariance
-CrossCorrelationTable   CrossCorrelationTable
+CrossCorrelationTable   CrossCorrelationTable   CrossCorrelationTable (00)
 CrossCorrelationTables  CrossCorrelationTables
 DTW
 DataModeler
-Diagonalizer            Diagonalizer
+Diagonalizer            Diagonalizer            Diagonalizer (00)
 Discriminant
-Dissimilarity           Dissimilarity
-Distance                Distance
+Dissimilarity           Dissimilarity           Dissimilarity (00)
+Distance                Distance                Distance (00)
 Distributions
-DurationTier            DurationTier
+DurationTier            DurationTier            DurationTier (00)
 EEG
 ERP
 ERPTier
 EditCostsTable          EditCostsTable
 EditDistanceTable
 Eigen
-Excitation              Excitation
-Excitations             Excitations
+Excitation              Excitation              Excitation (00)
+Excitations             Excitations             Excitations (00)
 ExperimentMFC
-FFNet                   FFNet
+FFNet                   FFNet                   FFNet (00)
 FeatureWeights          FeatureWeights
-FileInMemory            FileInMemory
-FilesInMemory           FilesInMemory
+FileInMemory            FileInMemory            FileInMemory (00)
+FilesInMemory           FilesInMemory           FilesInMemory (00)
 Formant                 Formant
-FormantFilter           FormantFilter
+FormantFilter           FormantFilter           FormantFilter (00)
 FormantGrid             FormantGrid
 FormantModeler
 FormantPoint
@@ -57,80 +57,80 @@ HMM_Observation
 HMM_ObservationSequence HMM_ObservationSequence
 HMM_State
 HMM_StateSequence       HMM_StateSequence
-Harmonicity             Harmonicity
+Harmonicity             Harmonicity             Harmonicity (00)
 ISpline                 ISpline
 Index
-Intensity               Intensity
-IntensityTier           IntensityTier
+Intensity               Intensity               Intensity (00)
+IntensityTier           IntensityTier           IntensityTier (00)
 IntervalTier
 KNN                     KNN
 KlattGrid               KlattGrid
 KlattTable              KlattTable
 LFCC
-LPC                     LPC
+LPC                     LPC                     LPC (00)
 Label
 LegendreSeries          LegendreSeries
 LinearRegression
 LogisticRegression
 LongSound
-Ltas                    Ltas
-MFCC                    MFCC
+Ltas                    Ltas                    Ltas (00)
+MFCC                    MFCC                    MFCC (00)
 MSpline                 MSpline
 ManPages
 Manipulation            Manipulation
-Matrix                  Matrix
-MelFilter               MelFilter
-MixingMatrix            MixingMatrix
+Matrix                  Matrix                  Matrix (00)
+MelFilter               MelFilter               MelFilter (00)
+MixingMatrix            MixingMatrix            MixingMatrix (00)
 Movie
 Network                 Network
 OTGrammar               OTGrammar
 OTHistory
 OTMulti
-PCA                     PCA
+PCA                     PCA                     PCA (00)
 PairDistribution        PairDistribution
 ParamCurve
-Pattern                 Pattern
+Pattern                 Pattern                 Pattern (00)
 Permutation             Permutation
 Photo                   Photo
-Pitch                   Pitch
+Pitch                   Pitch                   Pitch (00)
 PitchModeler
-PitchTier               PitchTier
-PointProcess            PointProcess
+PitchTier               PitchTier               PitchTier (00)
+PointProcess            PointProcess            PointProcess (00)
 Polygon
 Polynomial              Polynomial
 PowerCepstrogram
 PowerCepstrum
 Procrustes
 RealPoint
-RealTier                RealTier
+RealTier                RealTier                RealTier (00)
 ResultsMFC
 Roots                   Roots
 SPINET
 SSCP
 SVD
 Salience
-ScalarProduct           ScalarProduct
+ScalarProduct           ScalarProduct           ScalarProduct (00)
 Similarity
 SimpleString
 SortedSetOfString
-Sound                   Sound
+Sound                   Sound                   Sound (00)
 Speaker                 Speaker
-Spectrogram             Spectrogram
-Spectrum                Spectrum
+Spectrogram             Spectrogram             Spectrogram (00)
+Spectrum                Spectrum                Spectrum (00)
 SpectrumTier
-SpeechSynthesizer       SpeechSynthesizer
+SpeechSynthesizer       SpeechSynthesizer       SpeechSynthesizer (00)
 SpellingChecker         SpellingChecker
 Strings
 StringsIndex
 Table                   Table
-TableOfReal             TableOfReal
-TextGrid                TextGrid
+TableOfReal             TableOfReal             TableOfReal (00)
+TextGrid                TextGrid                TextGrid (00)
 TextInterval
 TextPoint
-TextTier                TextTier
+TextTier                TextTier                TextTier (00)
 Tier
 Transition
-VocalTract              VocalTract
+VocalTract              VocalTract              VocalTract (00)
 VocalTractTier          VocalTractTier
-Weight                  Weight
-WordList                WordList
+Weight                  Weight                  Weight (00)
+WordList                WordList                WordList (00)
