@@ -1,29 +1,17 @@
-# Extremely limited version of pwgen(1), the 
+# Extremely limited version of pwgen(1). Currently, unlike the traditional
+# command, this procedure does not strive for legibility, and acts simply as an
+# alias for rndstr().
 #
-# Usage:
-#  include /path/to/this/script.praat
-#  [code]
-#  @split (SEPARATOR, STRING)
-#  for i to split.length
-#    str$[i] = split.return$[i]
-#  endfor
-#
-# where SEPARATOR is a separator string and STRING is a string to
-# separate.
-#
-# If string$ = "hello world", then after
-# @split (" ", string$)
-# split.return$[1] contains "hello" and split.return$[2] contains "world"
-#
-# Since .length stores the number of items separated by a string, it is always
-# larger than the amount of occurences of that string by one, which means
-# it can be used to count occurences as well.
+# In the future this will hopefully change.
 #
 procedure pwgen (.length)
   @rndstr(.length, "a1")
   .return$ = rndstr.return$
 endproc
 
+# Returns a random string of the specified length, with characters from the
+# specified character sets.
+#
 procedure rndstr (.length, .charset$)
   .charset$ = if .charset$ = "" then "a1" else .charset$ fi
   .char$ = ""
@@ -90,18 +78,17 @@ endproc
 
 procedure numchar (.str$, .tgt$)
   .pos = index(.str$, .tgt$)
-  if .pos
-    .return = 1
-    .strlen = length(.str$)
-    .tgtlen = length(.tgt$)
-    while .pos
-      .substr$ = right$(.str$, .pos)
-      .pos = index(.substr$, .tgt$)
-      .return = if .pos then .return + 1 else .return fi
-    endwhile
-  else
-    .return = 0
-  endif
+  .tgtlen = length(.tgt$)
+  .return = 0
+  .substr$ = .str$
+  while .pos
+    .strlen = length(.substr$)
+    .pos = index(.substr$, .tgt$)
+    if .pos
+      .return += 1
+    endif
+    .substr$ = right$(.str$, .strlen - (.pos + .tgtlen) + 1)
+  endwhile
 endproc
 
 procedure mktemp (.template$)

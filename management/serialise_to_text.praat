@@ -100,7 +100,7 @@ endproc
 
 # Deselect unsupported objects
 procedure deselect_unsupported (.selection)
-  .unsupported$ = "LongSound Photo"
+  .unsupported$ = "LongSound"
   @split: " ", .unsupported$
 
   @createEmptySelectionTable()

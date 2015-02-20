@@ -101,6 +101,7 @@ foreach (@ARGV) {
     };
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
 
+    
     my $object;
     eval {
       $object = Load(encode($setup{encoding}, $input, Encode::FB_CROAK));
