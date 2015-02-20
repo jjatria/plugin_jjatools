@@ -386,8 +386,7 @@ procedure getId (.table, .i)
 
   @_IsSelectionTable(.table)
   .id = if .i and '_IsSelectionTable.return' and
-      ... .i <= Object_'.table'.nrow and
-      ... then
+      ... .i <= Object_'.table'.nrow then
     ... Object_'.table'[.i, "id"] else undefined fi
 
   if jja.debug

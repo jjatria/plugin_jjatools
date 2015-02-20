@@ -141,7 +141,7 @@ procedure zeropad (.n, .length)
   .return$ = .sign$ + right$(.pad$ + .n$, .length)
 endproc
 
-procedure tolower (.string$)
+procedure toLower (.string$)
   .return$ = replace_regex$(.string$, "(.*)", "\L\1", 0)  
 endproc
 

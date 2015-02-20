@@ -40,8 +40,8 @@ original_selection = saveSelectionTable.table
 
 # Set initial options:
 # Should output be pretty-printed?
-@tolower(output$)
-output$ = tolower.return$
+@toLower(output$)
+output$ = toLower.return$
 format$ = if pretty_printed then "pretty" else "minified" fi
 # Should output maintain Collection structure?
 collection = if format$ = "Collection" then 1 else 0 fi
@@ -54,8 +54,8 @@ if numberOfSelected() = 1
   infile$ = name$ + "." + type$
 
   # Generate output filename
-  @tolower(type$)
-  outfile$ = name$ + "_" + tolower.return$ + "." + output$
+  @toLower(type$)
+  outfile$ = name$ + "_" + toLower.return$ + "." + output$
 else
   infile$  = "praat_collection.Collection"
   outfile$ = "praat_collection." + output$
@@ -67,7 +67,7 @@ endif
 outfile$ = checkWriteFile.name$
 
 # Create temporary directory for output
-@mktemp: ""
+@mktemp: "toserial.XXXXX"
 infile$ = mktemp.name$ + infile$
 
 # Do it!
@@ -77,8 +77,8 @@ infile$ = mktemp.name$ + infile$
 deleteFile: mktemp.name$
 
 # Restore the original selection and clean-up
-@selectSelectionTables()
-Remove
+# @selectSelectionTables()
+# Remove
 @restoreSelection
 
 #
@@ -93,8 +93,9 @@ procedure serialise (.in$, .out$, .output$, .format$, collection)
     ... "--" + .output$ + " " +
     ... "--" + .format$ + " " + .in$ +
     ... " > " + .out$
-  system 'command$'
-  deleteFile: infile$
+#   appendInfoLine: command$
+  system_nocheck 'command$'
+  deleteFile: .in$
 endproc
 
 # Deselect unsupported objects

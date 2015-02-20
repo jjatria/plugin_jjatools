@@ -55,18 +55,18 @@ $setup{'format'}     = $PRETTY unless exists $setup{'format'};
 
 foreach (@ARGV) {
   if (-e $_) {
-    my $input = read_file($ARGV[0]);
+    my $input = read_file($ARGV[0]) ;
     eval {
       $input = decode($setup{encoding}, $input, Encode::FB_WARN);
     };
-    die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
+    die("Error reading $_.\nAre you using the right encoding?") if $@;
 
     # Praat Photo objects are saved in (yet another) slightly non-standard
     # way. If a Photo object is contained in the stream to be processed, then
     # some pre-processing is needed.
     $input = photo_fix($input) if ($input =~ /class = "Photo"/);
-    
-    $input = tableofreal_fix($input) if ($input =~ /class = "(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight)"/);
+
+    $input = tableofreal_fix($input) if ($input =~ /class = "(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)"/);
 
     # The Praat output format can be converted to satisfactory YAML by means of
     # the following set of regular expressions.
@@ -81,7 +81,7 @@ foreach (@ARGV) {
 
     # To be sure, however, the file is then parsed as YAML anyway, to catch any
     # remaining errors.
-    my $object = Load($input);
+    my $object = Load(encode($setup{encoding}, $input, Encode::FB_CROAK));
 
     if ($object->{'Object class'} eq "Collection" and
         !$setup{'collection'}) {
@@ -100,7 +100,7 @@ foreach (@ARGV) {
 
 sub to_yaml {
   my $o = shift;
-  print Dump $o;
+  print decode('UTF-8', Dump $o);
 }
 
 sub to_json {
@@ -128,8 +128,9 @@ sub yaml_regex {
   $input =~ s/(\S+): size: [0-9]+/$1:/g;
   $input =~ s/(\S+) \[\](?: \[\])?:/$1:/g;
   $input =~ s/(\S+) \[[0-9]+\]( \[[0-9]+\])?:/-/g;
+  $input =~ s/<(true|false)>/$1/g;
   $input =~ s/\\/\\\\/g;
-  
+
   my @lines = split "\n", $input;
   foreach my $i (1..$#lines) {
     if ($lines[$i] =~ /([^"]*")(.*)("$)/) {
@@ -174,7 +175,7 @@ sub tableofreal_fix {
   my $in_rows = 0;
   foreach my $i (0..$#lines) {
     my $indent;
-    if ($lines[$i] =~ /^(\s*)(Object )?class = "(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight)"/) {
+    if ($lines[$i] =~ /(\s*)(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)"/) {
       $in_tor = 1;
       $indent = $1;
     } elsif ($lines[$i] =~ /^\s*item \[[0-9]+\]:\s*/) {
@@ -182,11 +183,11 @@ sub tableofreal_fix {
       $in_rows = 0;
     }
 
-    if ($in_tor and $lines[$i] =~ "columnLabels") {
+    if ($in_tor and $lines[$i] =~ /columnLabels/) {
       $lines[$i+1] = "$TAB- " . $lines[$i+1];
       $lines[$i+1] =~ s/\t([^\t]+)/\n$TAB- $1/g;
     }
-    
+
     if ($in_tor and $lines[$i] =~ /numberOfRows/) {
       $in_rows = 1;
       $lines[$i] .= "\nrows:\n";

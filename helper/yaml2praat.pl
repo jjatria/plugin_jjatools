@@ -22,6 +22,7 @@ use Data::Dumper;
 use File::Slurp;
 use Readonly;
 use Pod::Usage;
+use YAML::XS;
 use Encode qw(encode decode);
 
 Readonly my $YAML   => 'yaml';
@@ -33,19 +34,37 @@ Readonly my %STRINGS = (
   name              => 1,
   text              => 1,
   label             => 1,
+  labels            => 1,
   string            => 1,
   mark              => 1,
   columnLabels      => 1,
   voiceVariantName  => 1,
   voiceLanguageName => 1,
 );
-Readonly my @KEYS = qw/class name xmin xmax intervals points text nx dx x1 ymin
-  ymax ny dy y1 z ceiling maxnCandidates frequency strength frame intensity
-  nCandidates candidate tiers size item number mark nt t numberOfColumns cells
-  columnLabels columnHeaders numberOfRows rows row metric w string label red
-  green blue transparency voiceLanguageName voiceVariantName wordsPerMinute
-  inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment
-  pitchRange outputPhonemeCoding estimateWordsPerMinute/;
+Readonly my %SPECIAL_QUOTES = (
+  tiers                => 1,
+  red                  => 1,
+  green                => 1,
+  blue                 => 1,
+  transparency         => 1,
+  clamped              => 1,
+  activityClippingRule => 1,
+);
+Readonly my @KEYS = qw/class name minimumActivity maximumActivity
+  dummyActivitySpreadingRule shunting activityClippingRule spreadingRate
+  activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate
+  instar outstar weightLeak xmin xmax intervals points text nx dx x1
+  samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients frames
+  nCoefficients a numberOfCoefficients c0 c gain ymin ymax numberOfNodes nodes
+  x y clamped activity ny dy y1 z ceiling maxnCandidates frequency strength
+  frame intensity nCandidates candidate tiers size item number value mark nt t
+  numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric
+  nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType
+  outputCategories nWeights w string label red green blue transparency
+  voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat
+  inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange
+  outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension
+  eigenvalues eigenvectors numberOfObservations labels centroid/;
 
 my %setup;
 my $TAB = '    ';
@@ -83,24 +102,16 @@ foreach (@ARGV) {
     die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
 
     my $object;
-    if ($setup{'input'} eq $JSON) {
-      use JSON qw//;
-      $object = JSON->decode_json($input);
-      
-      if ($setup{'debug'}) {
-        print Dumper($object);
-        exit;
-      }
-    } else {
-      use YAML::XS;
-      $object = Load($input);
-      
-      if ($setup{'debug'}) {
-        print Dumper($object) ;
-        exit;
-      }
+    eval {
+      $object = Load(encode($setup{encoding}, $input, Encode::FB_CROAK));
+    };
+    die $@ if $@;
+
+    if ($setup{'debug'}) {
+      print Dumper($object) ;
+      exit;
     }
-    
+
     my $size = scalar keys(%{$object});
 
     if ($size > 1 and !exists $object->{'Object class'}) {
@@ -147,16 +158,18 @@ sub print_object {
   foreach (@keys) {
     if (!ref($object->{$_})) {
       my $value = $object->{$_};
-      $value = stringify($_, $value);
-      if ($_ eq 'tiers' and $value =~ /(true|false)/) {
-        $value = $value eq 'true' ? 'exists' : 'none?';
-        print $INDENT, "$_? <$value> \n";
+      if ($_ eq 'tiers') {
+        $value = process_value($_, $value);
+        $value =~ s/true/exists/g;
+        print $INDENT, "$_? $value \n";
       } else {
+        $value = process_value($_, $value);
         print $INDENT, "$_ = $value \n";
       }
     } else {
       if ($_ =~ /^(red|green|blue|transparency)$/) {
-        print $INDENT, "$_? <exists> \n";
+        my $value = process_value($_, "exists");
+        print $INDENT, "$_? $value \n";
       }
       if (ref($object->{$_}) eq 'HASH') {
         my $class = exists $object->{'Object class'} ?
@@ -164,7 +177,7 @@ sub print_object {
           $object->{class} : $_;
         print_object($class, $object->{$_});
       } elsif (ref($object->{$_}) eq 'ARRAY') {
-        if ($class =~ /(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight)/) {
+        if ($class =~ /(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)/) {
           if ($_ eq "columnLabels") {
             print_tabbed_list($_, $object->{$_});
           } elsif ($_ eq "rows") {
@@ -186,29 +199,30 @@ sub print_object {
   }
 }
 
-# Check a key-value pair to see if the key corresponds to a known list of
-# keys whose values are strings. If so, return value between quotation marks.
-sub stringify {
+sub process_value {
   my $key = shift;
-  
+  my @return;
   if (exists $STRINGS{$key}) {
-    # Praat escapes string-internal double-quotes as ""
-    my @return;
     foreach my $string (@_) {
       $string =~ s/"/""/g;
       push @return, '"' . $string . '"';
     }
-    wantarray() ? return @return : return $return[0];
+  } elsif (exists $SPECIAL_QUOTES{$key}) {
+    foreach (@_) {
+      my $string = $_ == 1 ? 'true' : 'false' ;
+      push @return, '<' . $string . '>';
+    }
   } else {
-    wantarray() ? return @_ : return $_[0];
+    @return = @_;
   }
+  wantarray() ? return @return : return $return[0];
 }
 
 sub print_tabbed_list {
   my $name = shift;
   my $list = shift;
-  
-  my @list = stringify($name, @{$list});
+
+  my @list = process_value($name, @{$list});
   if ($name eq "columnLabels") {
     print "$name []:\n" . join("\t", @list) . "\n";
   } else {
@@ -230,14 +244,15 @@ sub print_list {
       print $INDENT, "$name [$x]:\n";
       increase_indent();
       foreach my $y (1..@{$list->[$x-1]}) {
-        print $INDENT, "$name [$x] [$y] = " . $list->[$x-1]->[$y-1] . " \n";
+        my $value = process_value($name, $list->[$x-1]->[$y-1]);
+        print $INDENT, "$name [$x] [$y] = " . $value . " \n";
       }
       decrease_indent();
     }
     decrease_indent();
 
   } else {
-    my $size_array = '^(intervals|points)$';
+    my $size_array = '^(intervals|points|outputCategories)$';
     if ($name =~ /$size_array/) {
       print $INDENT, "$name: size = " . scalar @{$list} . " \n";
     } else {
@@ -254,7 +269,8 @@ sub print_list {
         print_object($class, $list->[$i-1]);
         decrease_indent();
       } else {
-        print $INDENT, "$name [$i] = " . $list->[$i-1] . " \n";
+        my $value = process_value($name, $list->[$i-1]);
+        print $INDENT, "$name [$i] = " . $value . " \n";
       }
     }
     decrease_indent() if ($name !~ /$size_array/);

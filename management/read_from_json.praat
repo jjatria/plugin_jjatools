@@ -30,7 +30,7 @@ type$ = right$(infile$, length(infile$) - rindex(infile$, "."))
 name$ = name$ - ("." + type$)
 
 # Create temporary directory for output
-@mktemp: ""
+@mktemp: "readserial.XXXXX"
 tmpfile$ = mktemp.name$ + name$ + ".Praat"
 
 command$ = "perl " +
@@ -38,7 +38,7 @@ command$ = "perl " +
   ... "--" + type$ + " " +
   ... infile$ + " > " + tmpfile$
 # appendInfoLine: command$
-system 'command$'
+system_nocheck 'command$'
 
 Read from file: tmpfile$
 
