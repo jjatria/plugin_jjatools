@@ -16,21 +16,46 @@ use warnings;
 use strict;
 use diagnostics;
 binmode STDOUT, ':utf8';
+use 5.010;
 
-use Readonly;
-use Pod::Usage;
-use Data::Dumper;
-use File::Slurp;
-use YAML::XS;
-use Encode qw(encode decode);
-
-use Getopt::Long qw(:config no_ignore_case);
+BEGIN {
+  my @use = (
+    'use Data::Dumper',
+    'use File::Slurp',
+    'use Pod::Usage',
+    'use Getopt::Long qw(:config no_ignore_case)',
+    'use Encode qw(encode decode)',
+    'use YAML::XS',
+    'use Readonly',
+  );
+  my $missing = 0;
+  foreach (@use) {
+    eval $_;
+    if ($@) {
+      if ($@ =~ /Can't locate (\S+)/) {
+        $missing = 1;
+        warn "W: Module $1 is not installed\n";
+      }
+      else { die $@; }
+    }
+  }
+  if ($missing) {
+    warn "E: Unmet dependencies. Please install the missing modules before ",
+      "continuing.\n";
+    exit 1;
+  }
+}
 
 Readonly my $YAML   => 'yaml';
 Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 Readonly my $TAB    => '    ';
+Readonly my %TYPES = (
+  TableOfReal    => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)',
+  size_list      => '(intervals|points|outputCategories)',
+  Photo_channels => '(red|green|blue|transparency)',
+);
 
 my %setup;
 
@@ -66,7 +91,7 @@ foreach (@ARGV) {
     # some pre-processing is needed.
     $input = photo_fix($input) if ($input =~ /class = "Photo"/);
 
-    $input = tableofreal_fix($input) if ($input =~ /class = "(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)"/);
+    $input = tableofreal_fix($input) if ($input =~ /class = "$TYPES{TableOfReal}"/);
 
     # The Praat output format can be converted to satisfactory YAML by means of
     # the following set of regular expressions.
@@ -175,7 +200,7 @@ sub tableofreal_fix {
   my $in_rows = 0;
   foreach my $i (0..$#lines) {
     my $indent;
-    if ($lines[$i] =~ /(\s*)(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)"/) {
+    if ($lines[$i] =~ /(\s*)$TYPES{TableOfReal}"/) {
       $in_tor = 1;
       $indent = $1;
     } elsif ($lines[$i] =~ /^\s*item \[[0-9]+\]:\s*/) {
@@ -222,7 +247,9 @@ sub photo_fix {
       $in_photo = 0;
     }
 
-    if ($in_photo and $lines[$i] =~ /^(\s*(red|green|blue|transparency))\? <exists>\s*$/) {
+    if ($in_photo and
+        $lines[$i] =~ /^(\s*$TYPES{Photo_channels})\? <exists>\s*$/)
+      {
       $fix_line = 1;
       $lines[$i] = "$1:";
       next;
@@ -245,35 +272,36 @@ praat2yaml, praat2json - Serialise Praat objects from text
 
 Options:
 
-    -yaml         Use YAML serialisation
-    -json         Use JSON serialisation
-    -pretty       Pretty print output (only used with JSON)
-    -mini         Minify output (only used with JSON)
-    -encoding     Specify encoding of input file.
-    -collection   Maintain Praat Collection structure
-    -debug        Only process data with regular expressions, and print
+    --yaml         Use YAML serialisation
+    --json         Use JSON serialisation
+    --pretty       Pretty print output (only used with JSON)
+    --mini         Minify output (only used with JSON)
+    --encoding     Specify encoding of input file.
+    --collection   Maintain Praat Collection structure
+    --debug        Only process data with regular expressions, and print
+    --help         Show the full documentation
 
 =head1 OPTIONS
 
 =over 8
 
-=item B<-yaml>
+=item B<--yaml>
 
 Use YAML for serialisation
 
-=item B<-json>
+=item B<--json>
 
 Use JSON for serialisation
 
-=item B<-pretty>
+=item B<--pretty>
 
 Pretty print output (this option is only used with JSON).
 
-=item B<-mini>
+=item B<--mini>
 
 Minify output (this option is only used with JSON).
 
-=item B<-encoding=CODE>
+=item B<--encoding=CODE>
 
 Specify the encoding of the input file. This script uses B<Encode> in the
 background, so the file's I<CODE> can be any of the ones supported by that Perl
@@ -283,7 +311,7 @@ http://search.cpan.org/~jhi/perl-5.8.1/ext/Encode/lib/Encode/Supported.pod
 
 If unspecified, the script defaults to reading as UTF-8. Output is always UTF-8.
 
-=item B<-collection>
+=item B<--collection>
 
 Preserve Praat's I<Collection> data structure.
 
@@ -292,7 +320,11 @@ I<Collection> object. Since both I<YAML> and I<JSON> are made for serial data
 formats, this script defaults to the standard way to serialise data in those
 formats. This behaviour changes when this flag is set.
 
-=item B<-debug>
+=item B<--help>
+
+Show this documentaion.
+
+=item B<--debug>
 
 The processing of Praat files is separated into two stages: one of
 pre-processing, during which the format is converted to YAML to a satisfactory

@@ -16,14 +16,35 @@ use warnings;
 use strict;
 use diagnostics;
 binmode STDOUT, ':utf8';
+use 5.010;
 
-use Getopt::Long qw(:config no_ignore_case);
-use Data::Dumper;
-use File::Slurp;
-use Readonly;
-use Pod::Usage;
-use YAML::XS;
-use Encode qw(encode decode);
+BEGIN {
+  my @use = (
+    'use Data::Dumper',
+    'use File::Slurp',
+    'use Pod::Usage',
+    'use Getopt::Long qw(:config no_ignore_case)',
+    'use Encode qw(encode decode)',
+    'use YAML::XS',
+    'use Readonly',
+  );
+  my $missing = 0;
+  foreach (@use) {
+    eval $_;
+    if ($@) {
+      if ($@ =~ /Can't locate (\S+)/) {
+        $missing = 1;
+        warn "W: Module $1 is not installed\n";
+      }
+      else { die $@; }
+    }
+  }
+  if ($missing) {
+    warn "E: Unmet dependencies. Please install the missing modules before ",
+      "continuing.\n";
+    exit 1;
+  }
+}
 
 Readonly my $YAML   => 'yaml';
 Readonly my $JSON   => 'json';
@@ -40,6 +61,11 @@ Readonly my %STRINGS = (
   columnLabels      => 1,
   voiceVariantName  => 1,
   voiceLanguageName => 1,
+);
+Readonly my %TYPES = (
+  TableOfReal    => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)',
+  size_list      => '(intervals|points|outputCategories)',
+  Photo_channels => '(red|green|blue|transparency)',
 );
 Readonly my %SPECIAL_QUOTES = (
   tiers                => 1,
@@ -168,7 +194,7 @@ sub print_object {
         print $INDENT, "$_ = $value \n";
       }
     } else {
-      if ($_ =~ /^(red|green|blue|transparency)$/) {
+      if ($_ =~ /^$TYPES{Photo_channels}$/) {
         my $value = process_value($_, "exists");
         print $INDENT, "$_? $value \n";
       }
@@ -178,7 +204,7 @@ sub print_object {
           $object->{class} : $_;
         print_object($class, $object->{$_});
       } elsif (ref($object->{$_}) eq 'ARRAY') {
-        if ($class =~ /(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)/) {
+        if ($class =~ /$TYPES{TableOfReal}/) {
           if ($_ eq "columnLabels") {
             print_tabbed_list($_, $object->{$_});
           } elsif ($_ eq "rows") {
@@ -253,8 +279,7 @@ sub print_list {
     decrease_indent();
 
   } else {
-    my $size_array = '^(intervals|points|outputCategories)$';
-    if ($name =~ /$size_array/) {
+    if ($name =~ /$TYPES{size_list}/) {
       print $INDENT, "$name: size = " . scalar @{$list} . " \n";
     } else {
       print $INDENT, "$_ []: \n";
@@ -274,7 +299,7 @@ sub print_list {
         print $INDENT, "$name [$i] = " . $value . " \n";
       }
     }
-    decrease_indent() if ($name !~ /$size_array/);
+    decrease_indent() if ($name !~ /$TYPES{size_list}/);
 
   }
 }
