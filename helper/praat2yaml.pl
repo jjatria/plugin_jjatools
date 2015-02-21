@@ -203,34 +203,40 @@ sub tableofreal_fix {
 
   my $in_tor = 0;
   my $in_rows = 0;
+  my $indent = '';
   foreach my $i (0..$#lines) {
-    my $indent;
-    if ($lines[$i] =~ /(\s*)$TYPES{TableOfReal}"/) {
+    if ($lines[$i] =~ /^(\s*)(?:Object )?class.*($TYPES{TableOfReal})"/) {
       $in_tor = 1;
       $indent = $1;
+    } elsif ($lines[$i] =~ /fweights\s*/) {
+      $in_tor  = 1;
+      $indent = '    ';
     } elsif ($lines[$i] =~ /^\s*item \[[0-9]+\]:\s*/) {
       $in_tor  = 0;
       $in_rows = 0;
     }
 
-    if ($in_tor and $lines[$i] =~ /columnLabels/) {
-      $lines[$i+1] = "$TAB- " . $lines[$i+1];
-      $lines[$i+1] =~ s/\t([^\t]+)/\n$TAB- $1/g;
+    if ($in_tor and $lines[$i] =~ /(^\s*)columnLabels/) {
+      $lines[$i] = $indent . $lines[$i] if ($input =~ /CrossCorrelationTables/);
+      $lines[$i+1] =~ s/^\s*//g;
+      $lines[$i+1] = "$indent- " . $lines[$i+1];
+      $lines[$i+1] =~ s/\t(?:\s*)([^\t]+)/\n$indent- $1/g;
     }
 
-    if ($in_tor and $lines[$i] =~ /numberOfRows/) {
+    if ($in_tor and $lines[$i] =~ /(^\s*)numberOfRows/) {
       $in_rows = 1;
-      $lines[$i] .= "\nrows:\n";
+      $lines[$i] .= "\n${indent}rows:\n";
       next;
     }
 
     if ($in_tor and $in_rows) {
-      if ($lines[$i] !~ /^row/) {
-        $in_rows = 0;
-      } else {
+      if ($lines[$i] =~ /(^\s*)row/) {
+        $lines[$i] = $indent . $lines[$i];
         $lines[$i] =~ s/\t/: [ /;
         $lines[$i] =~ s/\t/, /g;
         $lines[$i] .= " ]";
+      } else {
+        $in_rows = 0;
       }
     }
   }
@@ -246,7 +252,7 @@ sub multipart_fix {
   my $fix_line = 0;
   foreach my $i (0..$#lines) {
     my $indent;
-    if ($lines[$i] =~ /^(\s*)(Object )?class = "(?'class'$TYPES{MultiPart})"/) {
+    if ($lines[$i] =~ /^(\s*)(?:Object )?class = "(?'class'$TYPES{MultiPart})"/) {
       $in_multipart = 1;
       $class = $+{class};
       $indent = $1;

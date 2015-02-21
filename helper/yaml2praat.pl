@@ -89,29 +89,29 @@ Readonly my %SIZED_LISTS = (
   frication_formants_amplitudes => 1,
 );
 Readonly my %TABLE_TYPES = (
-  TableOfReal            => 1,
-  ContingencyTable       => 1,
-  Configuration          => 1,
-  Dissimilarity          => 1,
-  Similarity             => 1,
-  Distance               => 1,
-  ScalarProduct          => 1,
-  Weight                 => 1,
-  CrossCorrelationTable  => 1,
-  CrossCorrelationTables => 1,
-  Diagonalizer           => 1,
-  MixingMatrix           => 1,
-  Confusion              => 1,
-  FeatureWeights         => 1,
-  Correlation            => 1,
-  Covariance             => 1,
+  TableOfReal                   => 1,
+  ContingencyTable              => 1,
+  Configuration                 => 1,
+  Dissimilarity                 => 1,
+  Similarity                    => 1,
+  Distance                      => 1,
+  ScalarProduct                 => 1,
+  Weight                        => 1,
+  CrossCorrelationTable         => 1,
+  CrossCorrelationTables        => 1,
+  Diagonalizer                  => 1,
+  MixingMatrix                  => 1,
+  Confusion                     => 1,
+  FeatureWeights                => 1,
+  Correlation                   => 1,
+  Covariance                    => 1,
 );
 Readonly my %PARTS = (
-  TextGrid       => { tiers=>1,},
-  Photo          => { red=>1,green=>1,blue=>1,transparency=>1,},
-  FeatureWeights => { fweights=>1,},
-  VocalTractTier => { vocalTract=>1,},
-  KlattGrid      => { phonation=>1,pitch=>1,flutter=>1,voicingAmplitude=>1,doublePulsing=>1,openPhase=>1,collisionPhase=>1,power1=>1,power2=>1,spectralTilt=>1,aspirationAmplitude=>1,breathinessAmplitude=>1,vocalTract=>1,oral_formants=>1,nasal_formants=>1,nasal_antiformants=>1,coupling=>1,tracheal_formants=>1,tracheal_antiformants=>1,delta_formants=>1,frication=>1,fricationAmplitude=>1,frication_formants=>1,bypass=>1,gain=>1,},
+  TextGrid                      => { tiers=>1,},
+  Photo                         => { red=>1,green=>1,blue=>1,transparency=>1,},
+  FeatureWeights                => { fweights=>1,},
+  VocalTractTier                => { vocalTract=>1,},
+  KlattGrid                     => { phonation=>1,pitch=>1,flutter=>1,voicingAmplitude=>1,doublePulsing=>1,openPhase=>1,collisionPhase=>1,power1=>1,power2=>1,spectralTilt=>1,aspirationAmplitude=>1,breathinessAmplitude=>1,vocalTract=>1,oral_formants=>1,nasal_formants=>1,nasal_antiformants=>1,coupling=>1,tracheal_formants=>1,tracheal_antiformants=>1,delta_formants=>1,frication=>1,fricationAmplitude=>1,frication_formants=>1,bypass=>1,gain=>1,},
 );
 Readonly my @KEYS = qw/ class name minimumActivity maximumActivity dummyActivitySpreadingRule shunting activityClippingRule spreadingRate activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate instar outstar weightLeak number xmin xmax phonation pitch flutter voicingAmplitude doublePulsing openPhase collisionPhase power1 power2 spectralTilt aspirationAmplitude breathinessAmplitude vocalTract oral_formants nasal_formants nasal_antiformants coupling tracheal_formants tracheal_antiformants delta_formants frication fricationAmplitude frication_formants bypass intervals points text nx dx x1 samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients maxnFormants frames nCoefficients numberOfCoefficients coefficients degree numberOfKnots knots c0 c ymin ymax numberOfNodes nodes numberOfConnections connections nodeFrom nodeTo weight plasticity x y r a gain clamped activity ny dx1 dx2 dy y1 z ceiling maxnCandidates frequency bandwidth strength frame intensity nFormants formant nCandidates candidate tiers size item number value mark nt t fweights numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType outputCategories nWeights w string label red green blue transparency voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension eigenvalues eigenvectors numberOfObservations labels centroid relativeSize cord lowerCord upperCord shunt velum palate radius tip neutralBodyDistance alveoli teethCavity lowerTeeth upperTeeth lowerLip upperLip nose numberOfMasses length thickness mass k1 Dx Dy Dz weq numberOfStrings strings numberOfElements p min max v vocalTracts formants bandwidths oral_formants_amplitudes nasal_formants_amplitudes tracheal_formants_amplitudes frication_formants_amplitudes /; 
 my %setup;
@@ -278,8 +278,8 @@ sub print_part {
   my $key = shift;
   my $value = shift;
 
-  $value =~ s/1/exists/g;
-#   $value =~ s/(<?)0(>?)/$1\?\?\?$2/g;
+  $value = 'exists' if $value eq '1';
+  $value = 'absent' if $value eq '';
 
   print $INDENT, "$key? <$value> \n";
 }
@@ -288,7 +288,7 @@ sub print_boolean {
   my $key = shift;
   my $value = shift;
 
-  $value = 'true' if ($value eq '1');
+  $value = 'true'  if ($value eq '1');
   $value = 'false' if ($value eq '');
 
   print $INDENT, "$key = <$value> \n";
@@ -356,6 +356,7 @@ sub print_list {
         }
       }
     }
+    decrease_indent() if (!exists $SIZED_LISTS{$name});
   }
 }
 
