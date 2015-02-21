@@ -1,12 +1,89 @@
-NEED                    HAVE                    PASSING
+Fail  Art (20)
+Fail  Artword (20)
+Fail  Categories (20)
+Fail  CrossCorrelationTables (20)
+Fail  EditCostsTable (20)
+Fail  FeatureWeights (20)
+Fail  HMM (20)
+Fail  KNN (20)
+Fail  Manipulation (20)
+Fail  OTGrammar (20)
+Fail  PairDistribution (20)
+Fail  Polygon (20)
+Fail  VocalTractTier (20)
+OK    Activation (00)
+OK    AmplitudeTier (00)
+OK    BarkFilter (00)
+OK    ChebyshevSeries (00)
+OK    Cochleagram (00)
+OK    Confusion (00)
+OK    ContingencyTable (00)
+OK    Correlation (00)
+OK    Covariance (00)
+OK    CrossCorrelationTable (00)
+OK    Diagonalizer (00)
+OK    Dissimilarity (00)
+OK    Distance (00)
+OK    DurationTier (00)
+OK    Excitation (00)
+OK    Excitations (00)
+OK    FFNet (00)
+OK    FileInMemory (00)
+OK    FilesInMemory (00)
+OK    Formant (00)
+OK    FormantFilter (00)
+OK    FormantGrid (00)
+OK    HMM_ObservationSequence (00)
+OK    HMM_StateSequence (00)
+OK    Harmonicity (00)
+OK    ISpline (00)
+OK    Intensity (00)
+OK    IntensityTier (00)
+OK    KlattGrid (00)
+OK    KlattTable (00)
+OK    LPC (00)
+OK    LegendreSeries (00)
+OK    Ltas (00)
+OK    MFCC (00)
+OK    MSpline (00)
+OK    Matrix (00)
+OK    MelFilter (00)
+OK    MixingMatrix (00)
+OK    Network (00)
+OK    PCA (00)
+OK    Pattern (00)
+OK    Permutation (00)
+OK    Photo (00)
+OK    Pitch (00)
+OK    PitchTier (00)
+OK    PointProcess (00)
+OK    PointProcess (00)
+OK    Polynomial (00)
+OK    RealTier (00)
+OK    Roots (00)
+OK    ScalarProduct (00)
+OK    Sound (00)
+OK    Speaker (00)
+OK    Spectrogram (00)
+OK    Spectrum (00)
+OK    SpeechSynthesizer (00)
+OK    Strings (00)
+OK    Table (00)
+OK    TableOfReal (00)
+OK    TextGrid (00)
+OK    TextTier (00)
+OK    VocalTract (00)
+OK    Weight (00)
+OK    WordList (00)
 
-Activation              Activation              Activation (00)
+NEED                    HAVE
+Activation              Activation
 AffineTransform
-AmplitudeTier           AmplitudeTier           AmplitudeTier (00)
+AmplitudeTier           AmplitudeTier
 Art                     Art
 Artword
 Autosegment
-BarkFilter              BarkFilter              BarkFilter (00)
+BarkFilter              BarkFilter
 CCA
 Categories              Categories
 Cepstrogram
@@ -14,39 +91,39 @@ Cepstrum
 Cepstrumc
 ChebyshevSeries         ChebyshevSeries
 ClassificationTable
-Cochleagram             Cochleagram             Cochleagram (00)
+Cochleagram             Cochleagram
 Collection
 Configuration
 Confusion               Confusion
-ContingencyTable        ContingencyTable        ContingencyTable (00)
+ContingencyTable        ContingencyTable
 Corpus
 Correlation             Correlation
 Covariance              Covariance
-CrossCorrelationTable   CrossCorrelationTable   CrossCorrelationTable (00)
+CrossCorrelationTable   CrossCorrelationTable
 CrossCorrelationTables  CrossCorrelationTables
 DTW
 DataModeler
-Diagonalizer            Diagonalizer            Diagonalizer (00)
+Diagonalizer            Diagonalizer
 Discriminant
-Dissimilarity           Dissimilarity           Dissimilarity (00)
-Distance                Distance                Distance (00)
+Dissimilarity           Dissimilarity
+Distance                Distance
 Distributions
-DurationTier            DurationTier            DurationTier (00)
+DurationTier            DurationTier
 EEG
 ERP
 ERPTier
 EditCostsTable          EditCostsTable
 EditDistanceTable
 Eigen
-Excitation              Excitation              Excitation (00)
-Excitations             Excitations             Excitations (00)
+Excitation              Excitation
+Excitations             Excitations
 ExperimentMFC
-FFNet                   FFNet                   FFNet (00)
+FFNet                   FFNet
 FeatureWeights          FeatureWeights
-FileInMemory            FileInMemory            FileInMemory (00)
-FilesInMemory           FilesInMemory           FilesInMemory (00)
+FileInMemory            FileInMemory
+FilesInMemory           FilesInMemory
 Formant                 Formant
-FormantFilter           FormantFilter           FormantFilter (00)
+FormantFilter           FormantFilter
 FormantGrid             FormantGrid
 FormantModeler
 FormantPoint
@@ -57,80 +134,80 @@ HMM_Observation
 HMM_ObservationSequence HMM_ObservationSequence
 HMM_State
 HMM_StateSequence       HMM_StateSequence
-Harmonicity             Harmonicity             Harmonicity (00)
+Harmonicity             Harmonicity
 ISpline                 ISpline
 Index
-Intensity               Intensity               Intensity (00)
-IntensityTier           IntensityTier           IntensityTier (00)
+Intensity               Intensity
+IntensityTier           IntensityTier
 IntervalTier
 KNN                     KNN
 KlattGrid               KlattGrid
 KlattTable              KlattTable
 LFCC
-LPC                     LPC                     LPC (00)
+LPC                     LPC
 Label
 LegendreSeries          LegendreSeries
 LinearRegression
 LogisticRegression
 LongSound
-Ltas                    Ltas                    Ltas (00)
-MFCC                    MFCC                    MFCC (00)
+Ltas                    Ltas
+MFCC                    MFCC
 MSpline                 MSpline
 ManPages
 Manipulation            Manipulation
-Matrix                  Matrix                  Matrix (00)
-MelFilter               MelFilter               MelFilter (00)
-MixingMatrix            MixingMatrix            MixingMatrix (00)
+Matrix                  Matrix
+MelFilter               MelFilter
+MixingMatrix            MixingMatrix
 Movie
 Network                 Network
 OTGrammar               OTGrammar
 OTHistory
 OTMulti
-PCA                     PCA                     PCA (00)
+PCA                     PCA
 PairDistribution        PairDistribution
 ParamCurve
-Pattern                 Pattern                 Pattern (00)
+Pattern                 Pattern
 Permutation             Permutation
 Photo                   Photo
-Pitch                   Pitch                   Pitch (00)
+Pitch                   Pitch
 PitchModeler
-PitchTier               PitchTier               PitchTier (00)
-PointProcess            PointProcess            PointProcess (00)
+PitchTier               PitchTier
+PointProcess            PointProcess
 Polygon
 Polynomial              Polynomial
 PowerCepstrogram
 PowerCepstrum
 Procrustes
 RealPoint
-RealTier                RealTier                RealTier (00)
+RealTier                RealTier
 ResultsMFC
 Roots                   Roots
 SPINET
 SSCP
 SVD
 Salience
-ScalarProduct           ScalarProduct           ScalarProduct (00)
+ScalarProduct           ScalarProduct
 Similarity
 SimpleString
 SortedSetOfString
-Sound                   Sound                   Sound (00)
+Sound                   Sound
 Speaker                 Speaker
-Spectrogram             Spectrogram             Spectrogram (00)
-Spectrum                Spectrum                Spectrum (00)
+Spectrogram             Spectrogram
+Spectrum                Spectrum
 SpectrumTier
-SpeechSynthesizer       SpeechSynthesizer       SpeechSynthesizer (00)
+SpeechSynthesizer       SpeechSynthesizer
 SpellingChecker         SpellingChecker
 Strings
 StringsIndex
 Table                   Table
-TableOfReal             TableOfReal             TableOfReal (00)
-TextGrid                TextGrid                TextGrid (00)
+TableOfReal             TableOfReal
+TextGrid                TextGrid
 TextInterval
 TextPoint
-TextTier                TextTier                TextTier (00)
+TextTier                TextTier
 Tier
 Transition
-VocalTract              VocalTract              VocalTract (00)
+VocalTract              VocalTract
 VocalTractTier          VocalTractTier
-Weight                  Weight                  Weight (00)
-WordList                WordList                WordList (00)
+Weight                  Weight
+WordList                WordList

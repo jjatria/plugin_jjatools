@@ -52,9 +52,14 @@ Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 Readonly my $TAB    => '    ';
 Readonly my %TYPES = (
-  TableOfReal    => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)',
-  size_list      => '(intervals|points|outputCategories)',
-  Photo_channels => '(red|green|blue|transparency)',
+  TableOfReal         => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix|Confusion|FeatureWeights|Correlation|Covariance)',
+  size_list           => '(intervals|points|outputCategories)',
+  MultiPart           => '(Photo|KlattGrid|VocalTractTier|TextGrid|FeatureWeights)',
+  FeatureWeightsParts => '(fweights)',
+  PhotoParts          => '(red|green|blue|transparency)',
+  TextGridParts       => '(tiers)',
+  KlattGridParts      => '(phonation|pitch|flutter|voicingAmplitude|doublePulsing|openPhase|collisionPhase|power1|power2|spectralTilt|aspirationAmplitude|breathinessAmplitude|vocalTract|oral_formants|nasal_(anti)?formants|coupling|tracheal_(anti)?formants|delta_formants|frication(Amplitude|_formants)?|bypass|gain)',
+  VocalTractTierParts => '(vocalTract)',
 );
 
 my %setup;
@@ -89,7 +94,7 @@ foreach (@ARGV) {
     # Praat Photo objects are saved in (yet another) slightly non-standard
     # way. If a Photo object is contained in the stream to be processed, then
     # some pre-processing is needed.
-    $input = photo_fix($input) if ($input =~ /class = "Photo"/);
+    $input = multipart_fix($input) if ($input =~ /class = "$TYPES{MultiPart}"/);
 
     $input = tableofreal_fix($input) if ($input =~ /class = "$TYPES{TableOfReal}"/);
 
@@ -232,23 +237,25 @@ sub tableofreal_fix {
   return join("\n", @lines);
 }
 
-sub photo_fix {
+sub multipart_fix {
   my $input = shift;
   my @lines = split "\n", $input;
 
-  my $in_photo = 0;
+  my $in_multipart = 0;
+  my $class = "";
   my $fix_line = 0;
   foreach my $i (0..$#lines) {
     my $indent;
-    if ($lines[$i] =~ /^(\s*)(Object )?class = "Photo"/) {
-      $in_photo = 1;
+    if ($lines[$i] =~ /^(\s*)(Object )?class = "(?'class'$TYPES{MultiPart})"/) {
+      $in_multipart = 1;
+      $class = $+{class};
       $indent = $1;
     } elsif ($lines[$i] =~ /^\s*item \[[0-9]+\]:\s*/) {
-      $in_photo = 0;
+      $in_multipart = 0;
     }
 
-    if ($in_photo and
-        $lines[$i] =~ /^(\s*$TYPES{Photo_channels})\? <exists>\s*$/)
+    if ($in_multipart and
+        $lines[$i] =~ /^(\s*$TYPES{$class . 'Parts'})\? <exists>\s*$/)
       {
       $fix_line = 1;
       $lines[$i] = "$1:";

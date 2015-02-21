@@ -50,48 +50,70 @@ Readonly my $YAML   => 'yaml';
 Readonly my $JSON   => 'json';
 Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
-Readonly my %STRINGS = (
-  class             => 1,
-  name              => 1,
-  text              => 1,
-  label             => 1,
-  labels            => 1,
-  string            => 1,
-  mark              => 1,
-  columnLabels      => 1,
-  voiceVariantName  => 1,
-  voiceLanguageName => 1,
-);
-Readonly my %TYPES = (
-  TableOfReal    => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix)',
-  size_list      => '(intervals|points|outputCategories)',
-  Photo_channels => '(red|green|blue|transparency)',
-);
-Readonly my %SPECIAL_QUOTES = (
-  tiers                => 1,
-  red                  => 1,
-  green                => 1,
-  blue                 => 1,
-  transparency         => 1,
-  clamped              => 1,
-  activityClippingRule => 1,
-);
-Readonly my @KEYS = qw/class name minimumActivity maximumActivity
-  dummyActivitySpreadingRule shunting activityClippingRule spreadingRate
-  activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate
-  instar outstar weightLeak xmin xmax intervals points text nx dx x1
-  samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients frames
-  nCoefficients a numberOfCoefficients c0 c gain ymin ymax numberOfNodes nodes
-  x y clamped activity ny dy y1 z ceiling maxnCandidates frequency strength
-  frame intensity nCandidates candidate tiers size item number value mark nt t
-  numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric
-  nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType
-  outputCategories nWeights w string label red green blue transparency
-  voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat
-  inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange
-  outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension
-  eigenvalues eigenvectors numberOfObservations labels centroid/;
 
+Readonly my %BOOLEAN = (
+  duration                      => 1,
+  gm                            => 1,
+  input                         => 1,
+  observationSymbols            => 1,
+  output                        => 1,
+  pulses                        => 1,
+  sound                         => 1,
+  states                        => 1,
+  clamped                       => 1,
+);
+Readonly my %STRINGS = (
+  class                         => 1,
+  name                          => 1,
+  text                          => 1,
+  label                         => 1,
+  labels                        => 1,
+  string                        => 1,
+  strings                       => 1,
+  mark                          => 1,
+  columnLabels                  => 1,
+  voiceVariantName              => 1,
+  voiceLanguageName             => 1,
+);
+Readonly my %SIZED_LISTS = (
+  intervals                     => 1,
+  points                        => 1,
+  rows                          => 1,
+  outputCategories              => 1,
+  vocalTracts                   => 1,
+  formants                      => 1,
+  bandwidths                    => 1,
+  oral_formants_amplitudes      => 1,
+  nasal_formants_amplitudes     => 1,
+  tracheal_formants_amplitudes  => 1,
+  frication_formants_amplitudes => 1,
+);
+Readonly my %TABLE_TYPES = (
+  TableOfReal            => 1,
+  ContingencyTable       => 1,
+  Configuration          => 1,
+  Dissimilarity          => 1,
+  Similarity             => 1,
+  Distance               => 1,
+  ScalarProduct          => 1,
+  Weight                 => 1,
+  CrossCorrelationTable  => 1,
+  CrossCorrelationTables => 1,
+  Diagonalizer           => 1,
+  MixingMatrix           => 1,
+  Confusion              => 1,
+  FeatureWeights         => 1,
+  Correlation            => 1,
+  Covariance             => 1,
+);
+Readonly my %PARTS = (
+  TextGrid       => { tiers=>1,},
+  Photo          => { red=>1,green=>1,blue=>1,transparency=>1,},
+  FeatureWeights => { fweights=>1,},
+  VocalTractTier => { vocalTract=>1,},
+  KlattGrid      => { phonation=>1,pitch=>1,flutter=>1,voicingAmplitude=>1,doublePulsing=>1,openPhase=>1,collisionPhase=>1,power1=>1,power2=>1,spectralTilt=>1,aspirationAmplitude=>1,breathinessAmplitude=>1,vocalTract=>1,oral_formants=>1,nasal_formants=>1,nasal_antiformants=>1,coupling=>1,tracheal_formants=>1,tracheal_antiformants=>1,delta_formants=>1,frication=>1,fricationAmplitude=>1,frication_formants=>1,bypass=>1,gain=>1,},
+);
+Readonly my @KEYS = qw/ class name minimumActivity maximumActivity dummyActivitySpreadingRule shunting activityClippingRule spreadingRate activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate instar outstar weightLeak number xmin xmax phonation pitch flutter voicingAmplitude doublePulsing openPhase collisionPhase power1 power2 spectralTilt aspirationAmplitude breathinessAmplitude vocalTract oral_formants nasal_formants nasal_antiformants coupling tracheal_formants tracheal_antiformants delta_formants frication fricationAmplitude frication_formants bypass intervals points text nx dx x1 samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients maxnFormants frames nCoefficients numberOfCoefficients coefficients degree numberOfKnots knots c0 c ymin ymax numberOfNodes nodes numberOfConnections connections nodeFrom nodeTo weight plasticity x y r a gain clamped activity ny dx1 dx2 dy y1 z ceiling maxnCandidates frequency bandwidth strength frame intensity nFormants formant nCandidates candidate tiers size item number value mark nt t fweights numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType outputCategories nWeights w string label red green blue transparency voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension eigenvalues eigenvectors numberOfObservations labels centroid relativeSize cord lowerCord upperCord shunt velum palate radius tip neutralBodyDistance alveoli teethCavity lowerTeeth upperTeeth lowerLip upperLip nose numberOfMasses length thickness mass k1 Dx Dy Dz weq numberOfStrings strings numberOfElements p min max v vocalTracts formants bandwidths oral_formants_amplitudes nasal_formants_amplitudes tracheal_formants_amplitudes frication_formants_amplitudes /; 
 my %setup;
 my $TAB = '    ';
 my $INDENT;
@@ -125,14 +147,17 @@ foreach (@ARGV) {
     eval {
       $input = decode($setup{encoding}, $input, Encode::FB_QUIET);
     };
-    die("Error reading $_.\nAre you using the right encoding?") if $input eq "";
+    if ($@) {
+      die "Error reading $_.\n $@\n" ;
+    }
 
-    
     my $object;
     eval {
       $object = Load(encode($setup{encoding}, $input, Encode::FB_CROAK));
     };
-    die $@ if $@;
+    if ($@) {
+      die "Could not parse: $@\n";
+    }
 
     if ($setup{'debug'}) {
       print Dumper($object) ;
@@ -144,6 +169,9 @@ foreach (@ARGV) {
     if ($size > 1 and !exists $object->{'Object class'}) {
       $object = collectionise($object);
     }
+
+    (exists $object->{'Object class'})
+      or die "Improper object:\n" . Dumper $object;
 
     my $class = $object->{'Object class'};
     print "File type = \"ooTextFile\"\n";
@@ -180,31 +208,36 @@ sub print_object {
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
 
+#   print "Printing $class as object\n";
+
   my @keys = set_keys($object);
 
   foreach (@keys) {
     if (!ref($object->{$_})) {
       my $value = $object->{$_};
-      if ($_ eq 'tiers') {
-        $value = process_value($_, $value);
-        $value =~ s/true/exists/g;
-        print $INDENT, "$_? $value \n";
+      if (exists $BOOLEAN{$_}) {
+        print_boolean($_, $value);
       } else {
-        $value = process_value($_, $value);
-        print $INDENT, "$_ = $value \n";
+        print $INDENT, "$_ = " . quote_values($_, $value) . " \n";
       }
     } else {
-      if ($_ =~ /^$TYPES{Photo_channels}$/) {
-        my $value = process_value($_, "exists");
-        print $INDENT, "$_? $value \n";
+      if (exists $PARTS{$class}->{$_}) {
+        print_part($_, 'exists');
       }
       if (ref($object->{$_}) eq 'HASH') {
         my $class = exists $object->{'Object class'} ?
           $object->{'Object class'} : exists $object->{class} ?
           $object->{class} : $_;
+        if ($class eq 'Speaker') {
+          print "$_:\n";
+          increase_indent();
+        }
         print_object($class, $object->{$_});
+        if ($class eq 'Speaker') {
+          decrease_indent();
+        }
       } elsif (ref($object->{$_}) eq 'ARRAY') {
-        if ($class =~ /$TYPES{TableOfReal}/) {
+        if (exists $TABLE_TYPES{$class}) {
           if ($_ eq "columnLabels") {
             print_tabbed_list($_, $object->{$_});
           } elsif ($_ eq "rows") {
@@ -226,18 +259,14 @@ sub print_object {
   }
 }
 
-sub process_value {
+sub quote_values {
   my $key = shift;
   my @return;
+
   if (exists $STRINGS{$key}) {
     foreach my $string (@_) {
       $string =~ s/"/""/g;
       push @return, '"' . $string . '"';
-    }
-  } elsif (exists $SPECIAL_QUOTES{$key}) {
-    foreach (@_) {
-      my $string = $_ == 1 ? 'true' : 'false' ;
-      push @return, '<' . $string . '>';
     }
   } else {
     @return = @_;
@@ -245,11 +274,31 @@ sub process_value {
   wantarray() ? return @return : return $return[0];
 }
 
+sub print_part {
+  my $key = shift;
+  my $value = shift;
+
+  $value =~ s/1/exists/g;
+#   $value =~ s/(<?)0(>?)/$1\?\?\?$2/g;
+
+  print $INDENT, "$key? <$value> \n";
+}
+
+sub print_boolean {
+  my $key = shift;
+  my $value = shift;
+
+  $value = 'true' if ($value eq '1');
+  $value = 'false' if ($value eq '');
+
+  print $INDENT, "$key = <$value> \n";
+}
+
 sub print_tabbed_list {
   my $name = shift;
   my $list = shift;
 
-  my @list = process_value($name, @{$list});
+  my @list = quote_values($name, @{$list});
   if ($name eq "columnLabels") {
     print "$name []:\n" . join("\t", @list) . "\n";
   } else {
@@ -263,6 +312,8 @@ sub print_list {
   my $list = shift;
   die "Not a list: $list" unless ref($list) eq 'ARRAY';
 
+#   print "Printing $name as list\n";
+
   if (ref($list->[0]) eq 'ARRAY') {
     # Multimensional arrays are printed differently in Praat
     print $INDENT, "$_ [] []: \n";
@@ -271,7 +322,7 @@ sub print_list {
       print $INDENT, "$name [$x]:\n";
       increase_indent();
       foreach my $y (1..@{$list->[$x-1]}) {
-        my $value = process_value($name, $list->[$x-1]->[$y-1]);
+        my $value = quote_values($name, $list->[$x-1]->[$y-1]);
         print $INDENT, "$name [$x] [$y] = " . $value . " \n";
       }
       decrease_indent();
@@ -279,7 +330,7 @@ sub print_list {
     decrease_indent();
 
   } else {
-    if ($name =~ /$TYPES{size_list}/) {
+    if (exists $SIZED_LISTS{$name}) {
       print $INDENT, "$name: size = " . scalar @{$list} . " \n";
     } else {
       print $INDENT, "$_ []: \n";
@@ -295,12 +346,16 @@ sub print_list {
         print_object($class, $list->[$i-1]);
         decrease_indent();
       } else {
-        my $value = process_value($name, $list->[$i-1]);
-        print $INDENT, "$name [$i] = " . $value . " \n";
+        my $value = quote_values($name, $list->[$i-1]);
+        if ($name eq 'weq') {
+          # The weq list in the Speaker object is _the only_ list that seems
+          # to be zero-based.
+          print $INDENT, "$name [" . ($i-1) . "] = " . $value . " \n";
+        } else {
+          print $INDENT, "$name [$i] = " . $value . " \n";
+        }
       }
     }
-    decrease_indent() if ($name !~ /$TYPES{size_list}/);
-
   }
 }
 
@@ -312,7 +367,7 @@ sub increase_indent {
 
 # Decrease indent level
 sub decrease_indent {
-  $LEVEL--;
+  $LEVEL-- if ($LEVEL > 0);
   $INDENT = set_indent();
 }
 
@@ -336,7 +391,9 @@ sub set_keys {
     } else {
     }
   }
+#   print Dumper \@keys;
   return @keys;
+
 #   return @keys, keys(%object);
 }
 

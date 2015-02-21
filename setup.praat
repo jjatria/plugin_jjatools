@@ -17,7 +17,7 @@
 ## Static commands:
 
 # Uncomment next line to run tests at startup
-runScript: "run_tests.praat"
+# runScript: "run_tests.praat"
 
 # Base menu
 Add menu command: "Objects", "Praat", "JJATools",                                   "",                   0, ""
