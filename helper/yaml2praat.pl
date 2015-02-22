@@ -52,14 +52,7 @@ Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 
 Readonly my %BOOLEAN = (
-  duration                      => 1,
   gm                            => 1,
-  input                         => 1,
-  observationSymbols            => 1,
-  output                        => 1,
-  pulses                        => 1,
-  sound                         => 1,
-  states                        => 1,
   clamped                       => 1,
 );
 Readonly my %STRINGS = (
@@ -69,6 +62,8 @@ Readonly my %STRINGS = (
   label                         => 1,
   labels                        => 1,
   string                        => 1,
+  string1                       => 1,
+  string2                       => 1,
   strings                       => 1,
   mark                          => 1,
   columnLabels                  => 1,
@@ -87,6 +82,7 @@ Readonly my %SIZED_LISTS = (
   nasal_formants_amplitudes     => 1,
   tracheal_formants_amplitudes  => 1,
   frication_formants_amplitudes => 1,
+  pairs                         => 1,
 );
 Readonly my %TABLE_TYPES = (
   TableOfReal                   => 1,
@@ -105,15 +101,19 @@ Readonly my %TABLE_TYPES = (
   FeatureWeights                => 1,
   Correlation                   => 1,
   Covariance                    => 1,
+  EditCostsTable                => 1,
 );
 Readonly my %PARTS = (
   TextGrid                      => { tiers=>1,},
   Photo                         => { red=>1,green=>1,blue=>1,transparency=>1,},
   FeatureWeights                => { fweights=>1,},
-  VocalTractTier                => { vocalTract=>1,},
+  vocalTracts                   => { vocalTract=>1,},
+  HMM                           => { states=>1,observationSymbols=>1,},
+  KNN                           => { input=>1,ouput=>1,},
   KlattGrid                     => { phonation=>1,pitch=>1,flutter=>1,voicingAmplitude=>1,doublePulsing=>1,openPhase=>1,collisionPhase=>1,power1=>1,power2=>1,spectralTilt=>1,aspirationAmplitude=>1,breathinessAmplitude=>1,vocalTract=>1,oral_formants=>1,nasal_formants=>1,nasal_antiformants=>1,coupling=>1,tracheal_formants=>1,tracheal_antiformants=>1,delta_formants=>1,frication=>1,fricationAmplitude=>1,frication_formants=>1,bypass=>1,gain=>1,},
+  Manipulation                  => { sound=>1,pulses=>1,pitch=>1,dummyIntensity=>1,duration=>1,dummySpectrogram=>1,dummyFormantTier=>1,dummy1=>1,dummy2=>1,dummy3=>1,dummy10=>1,dummyPitchAnalysis=>1,dummy11=>1,dummy12=>1,dummyIntensityAnalysis=>1,dummyFormantAnalysis=>1,},
 );
-Readonly my @KEYS = qw/ class name minimumActivity maximumActivity dummyActivitySpreadingRule shunting activityClippingRule spreadingRate activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate instar outstar weightLeak number xmin xmax phonation pitch flutter voicingAmplitude doublePulsing openPhase collisionPhase power1 power2 spectralTilt aspirationAmplitude breathinessAmplitude vocalTract oral_formants nasal_formants nasal_antiformants coupling tracheal_formants tracheal_antiformants delta_formants frication fricationAmplitude frication_formants bypass intervals points text nx dx x1 samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients maxnFormants frames nCoefficients numberOfCoefficients coefficients degree numberOfKnots knots c0 c ymin ymax numberOfNodes nodes numberOfConnections connections nodeFrom nodeTo weight plasticity x y r a gain clamped activity ny dx1 dx2 dy y1 z ceiling maxnCandidates frequency bandwidth strength frame intensity nFormants formant nCandidates candidate tiers size item number value mark nt t fweights numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType outputCategories nWeights w string label red green blue transparency voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension eigenvalues eigenvectors numberOfObservations labels centroid relativeSize cord lowerCord upperCord shunt velum palate radius tip neutralBodyDistance alveoli teethCavity lowerTeeth upperTeeth lowerLip upperLip nose numberOfMasses length thickness mass k1 Dx Dy Dz weq numberOfStrings strings numberOfElements p min max v vocalTracts formants bandwidths oral_formants_amplitudes nasal_formants_amplitudes tracheal_formants_amplitudes frication_formants_amplitudes /; 
+Readonly my @KEYS = qw/ notHidden leftToRight numberOfStates numberOfObservationSymbols numberOfMixtureComponents componentDimension componentStorage transitionProbs states observationSymbols class name minimumActivity maximumActivity dummyActivitySpreadingRule shunting activityClippingRule spreadingRate activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate instar outstar weightLeak number xmin xmax phonation sound pulses pitch flutter voicingAmplitude doublePulsing openPhase collisionPhase power1 power2 spectralTilt aspirationAmplitude breathinessAmplitude vocalTract oral_formants nasal_formants nasal_antiformants coupling tracheal_formants tracheal_antiformants delta_formants frication fricationAmplitude frication_formants bypass intervals points text nx dx x1 samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients maxnFormants frames nCoefficients numberOfCoefficients coefficients degree numberOfKnots knots c0 c ymin ymax numberOfNodes nodes numberOfConnections connections nodeFrom nodeTo string1 string2 weight plasticity x y r a gain clamped activity ny dx1 dx2 dy y1 z ceiling maxnCandidates frequency bandwidth strength frame intensity nFormants formant nCandidates candidate tiers size item number value mark nt t fweights numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType outputCategories nWeights w string label red green blue transparency voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension eigenvalues eigenvectors numberOfObservations labels centroid relativeSize cord lowerCord upperCord shunt velum palate radius tip neutralBodyDistance alveoli teethCavity lowerTeeth upperTeeth lowerLip upperLip nose numberOfMasses length thickness mass k1 Dx Dy Dz weq numberOfStrings strings numberOfElements p min max v vocalTracts formants bandwidths oral_formants_amplitudes nasal_formants_amplitudes tracheal_formants_amplitudes frication_formants_amplitudes pairs nInstances input ouput dummyIntensity duration dummySpectrogram dummyFormantTier dummy1 dummy2 dummy3 dummy10 dummyPitchAnalysis dummy11 dummy12 dummyIntensityAnalysis dummyFormantAnalysis dummy4 dummy5 dummy6 dummy7 dummy8 dummy9 /; 
 my %setup;
 my $TAB = '    ';
 my $INDENT;
@@ -151,6 +151,8 @@ foreach (@ARGV) {
       die "Error reading $_.\n $@\n" ;
     }
 
+    $input =~ s/(~|null)/{}/g;
+    
     my $object;
     eval {
       $object = Load(encode($setup{encoding}, $input, Encode::FB_CROAK));
@@ -205,6 +207,7 @@ sub collectionise {
 
 sub print_object {
   my $class = shift;
+  $class =~ s/^(\S+).*/$1/g;
   my $object = shift;
   die "Not an object: $object" unless ref($object) eq 'HASH';
 
@@ -214,7 +217,7 @@ sub print_object {
 
   foreach (@keys) {
     if (!ref($object->{$_})) {
-      my $value = $object->{$_};
+      my $value = $object->{$_} // '';
       if (exists $BOOLEAN{$_}) {
         print_boolean($_, $value);
       } else {
@@ -222,7 +225,11 @@ sub print_object {
       }
     } else {
       if (exists $PARTS{$class}->{$_}) {
-        print_part($_, 'exists');
+        if (ref($object->{$_}) eq 'HASH' and scalar keys %{$object->{$_}}) {
+          print_part($_, 'exists');
+        } else {
+          print_part($_, 'absent');
+        }
       }
       if (ref($object->{$_}) eq 'HASH') {
         my $class = exists $object->{'Object class'} ?
@@ -277,9 +284,6 @@ sub quote_values {
 sub print_part {
   my $key = shift;
   my $value = shift;
-
-  $value = 'exists' if $value eq '1';
-  $value = 'absent' if $value eq '';
 
   print $INDENT, "$key? <$value> \n";
 }

@@ -52,14 +52,17 @@ Readonly my $PRETTY => 'pretty';
 Readonly my $MINI   => 'mini';
 Readonly my $TAB    => '    ';
 Readonly my %TYPES = (
-  TableOfReal         => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix|Confusion|FeatureWeights|Correlation|Covariance)',
+  TableOfReal         => '(TableOfReal|ContingencyTable|Configuration|(Diss|S)imilarity|Distance|ScalarProduct|Weight|CrossCorrelationTables?|Diagonalizer|MixingMatrix|Confusion|FeatureWeights|Correlation|Covariance|EditCostsTable)',
   size_list           => '(intervals|points|outputCategories)',
-  MultiPart           => '(Photo|KlattGrid|VocalTractTier|TextGrid|FeatureWeights)',
+  MultiPart           => '(Photo|KlattGrid|VocalTractTier|TextGrid|FeatureWeights|HMM|KNN|Manipulation)',
   FeatureWeightsParts => '(fweights)',
   PhotoParts          => '(red|green|blue|transparency)',
   TextGridParts       => '(tiers)',
   KlattGridParts      => '(phonation|pitch|flutter|voicingAmplitude|doublePulsing|openPhase|collisionPhase|power1|power2|spectralTilt|aspirationAmplitude|breathinessAmplitude|vocalTract|oral_formants|nasal_(anti)?formants|coupling|tracheal_(anti)?formants|delta_formants|frication(Amplitude|_formants)?|bypass|gain)',
   VocalTractTierParts => '(vocalTract)',
+  HMMParts            => '(states|observationSymbols)',
+  KNNParts            => '(input|ouput)',
+  ManipulationParts   => '(sound|pulses|pitch|dummyIntensity|duration|dummySpectrogram|dummyFormantTier|dummy1|dummy2|dummy3|dummy10|dummyPitchAnalysis|dummy11|dummy12|dummyIntensityAnalysis|dummyFormantAnalysis)',
 );
 
 my %setup;
@@ -94,9 +97,12 @@ foreach (@ARGV) {
     # Praat Photo objects are saved in (yet another) slightly non-standard
     # way. If a Photo object is contained in the stream to be processed, then
     # some pre-processing is needed.
-    $input = multipart_fix($input) if ($input =~ /class = "$TYPES{MultiPart}"/);
+    $input = multipart_fix($input) if ($input =~ /class = "$TYPES{MultiPart}.*"/);
 
     $input = tableofreal_fix($input) if ($input =~ /class = "$TYPES{TableOfReal}"/);
+    
+    $input = polygon_fix($input) if ($input =~ /class = "Polygon.*"/);
+
 
     # The Praat output format can be converted to satisfactory YAML by means of
     # the following set of regular expressions.
@@ -148,6 +154,23 @@ sub to_json {
 
 sub yaml_regex {
   my $input = shift;
+
+  my @lines = split "\n", $input;
+  foreach my $i (1..$#lines) {
+    if ($lines[$i] =~ /([^"]*")(.*)("$)/) {
+      my $start = $1;
+      my $string = $2;
+      my $end = $3;
+      $string =~ s/""/\\"/g;
+      $lines[$i] = $start . $string . $end;
+    } elsif ($i > 1 and $lines[$i] =~ /(?'indent'^\s*)(?'name'\w+) \[1\](:\s?| = .*)$/) {
+      if ($+{name} !~ /(weq|nUnitsInLayer)/ and $lines[$i-1] !~ /^\s*$+{name}( \[\]:\s?|: size.*)$/) {
+        $lines[$i] = $+{indent} . $+{name} . " []: \n" . $lines[$i];
+      }
+    }
+  }
+  $input = join("\n", @lines) . "\n";
+
   $input =~ s/File type = "ooTextFile"\n//g;
   $input =~ s/(Object class) = "([^"]+)"/$1: $2/g;
   $input =~ s/\s*\n/\n/g;
@@ -161,17 +184,7 @@ sub yaml_regex {
   $input =~ s/<(true|false)>/$1/g;
   $input =~ s/\\/\\\\/g;
 
-  my @lines = split "\n", $input;
-  foreach my $i (1..$#lines) {
-    if ($lines[$i] =~ /([^"]*")(.*)("$)/) {
-      my $start = $1;
-      my $string = $2;
-      my $end = $3;
-      $string =~ s/""/\\"/g;
-      $lines[$i] = $start . $string . $end;
-    }
-  }
-  return join("\n", @lines) . "\n";
+  return $input;
 }
 
 sub decollectionise {
@@ -195,6 +208,17 @@ sub decollectionise {
     delete $_->{'name'};
   }
   return \%objects;
+}
+
+sub polygon_fix {
+  my $input = shift;
+  $input =~ s/
+    \n(?'tab'\s*)
+    x\ \[(?:(?'index'[0-9]+))\]
+    (?'line'.*\n)
+    y\ \[(?:[0-9]+)\]
+    /\npoints\ [$+{index}]:\ \n$+{tab}${TAB}x$+{line}$+{tab}${TAB}y/xg;
+  return $input;
 }
 
 sub tableofreal_fix {
@@ -244,6 +268,7 @@ sub tableofreal_fix {
 }
 
 sub multipart_fix {
+#   print "Multipart!\n";
   my $input = shift;
   my @lines = split "\n", $input;
 
@@ -252,7 +277,7 @@ sub multipart_fix {
   my $fix_line = 0;
   foreach my $i (0..$#lines) {
     my $indent;
-    if ($lines[$i] =~ /^(\s*)(?:Object )?class = "(?'class'$TYPES{MultiPart})"/) {
+    if ($lines[$i] =~ /^(\s*)(?:Object )?class = "(?'class'$TYPES{MultiPart}).*"/) {
       $in_multipart = 1;
       $class = $+{class};
       $indent = $1;
@@ -260,12 +285,16 @@ sub multipart_fix {
       $in_multipart = 0;
     }
 
-    if ($in_multipart and
-        $lines[$i] =~ /^(\s*$TYPES{$class . 'Parts'})\? <exists>\s*$/)
-      {
-      $fix_line = 1;
-      $lines[$i] = "$1:";
-      next;
+    if ($in_multipart) {
+      if ($lines[$i] =~ /^(\s*$TYPES{$class . 'Parts'})\? <exists>\s*$/) {
+        $fix_line = 1;
+        $lines[$i] = "$1:";
+        next;
+      } elsif ($lines[$i] =~ /^(\s*$TYPES{$class . 'Parts'})\? <absent>\s*$/) {
+        $lines[$i] = "$1: ~";
+        $fix_line = 0;
+        next;
+      }
     }
     $lines[$i] = '    ' . $lines[$i] if ($fix_line);
   }
