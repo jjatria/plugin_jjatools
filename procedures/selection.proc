@@ -18,11 +18,16 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+include ../../plugin_jjatools/procedures/utils.proc
+
 if !variableExists("jja.debug")
   jja.debug = 0
 endif
 if !variableExists("jja.restore_nocheck")
   jja.restore_nocheck = 0
+endif
+if !variableExists("jja.warnings")
+  jja.warnings = 0
 endif
 jja.tab$ = ""
 jja.tabchar$ = ""
@@ -564,14 +569,19 @@ endproc
 
 # Selects only one type from the entire object list
 #
-procedure selectType (.type$)
+procedure selectType (.types$)
+  # For backwards compatibility
+  @selectTypes(.types$)
+endproc
+
+procedure selectTypes (.types$)
   if jja.debug
     jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "selectType(", .type$, ")"
+    appendInfoLine: jja.tab$ - jja.tabchar$, "selectType(", .types$, ")"
   endif
 
   select all
-  @refineToType(.type$)
+  @refineToType(.types$)
 
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
@@ -580,26 +590,74 @@ endproc
 
 # Selects only one type from the active selection
 #
-procedure refineToType (.type$)
+procedure refineToType (.types$)
+  # For backwards compatibility
+  @refineToTypes(.types$)
+endproc
+
+procedure refineToTypes (.types$)
   if jja.debug
     jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "refineToType(", .type$, ")"
+    appendInfoLine: jja.tab$ - jja.tabchar$, "refineToType(", .types$, ")"
   endif
+  
+  @saveSelectionTable()
+  .selection = saveSelectionTable.table
 
-  @_IsValidType(.type$)
-  if '_IsValidType.return'
-    @saveSelectionTable()
-    selectObject: saveSelectionTable.table
-    .per_type = nowarn Extract rows where column (text): "type", "is equal to", .type$
-    @restoreSavedSelection(.per_type)
-    removeObject: saveSelectionTable.table, .per_type
-  else
-    exitScript: """", .type$, """ is not a valid Praat type"
+  if .types$ != ""
+    @split: " ", .types$
+
+    @createEmptySelectionTable()
+    .objects = createEmptySelectionTable.table
+
+    .found$ = ""
+    for .i to split.length
+      .type$ = split.return$[.i]
+      @_IsValidType(.type$)
+      if '_IsValidType.return'
+        selectObject: .selection
+        .per_type = nowarn Extract rows where column (text): "type", "is equal to", .type$
+
+        @restoreSavedSelection(.per_type)
+        @plusSavedSelection(.objects)
+        
+        @saveSelectionTable()
+        removeObject: .objects
+        .objects = saveSelectionTable.table
+        removeObject: .per_type
+
+        if numberOfSelected()
+          .found$ = .found$ + .type$ + ", "
+        endif
+      else
+        exitScript: """", .type$, """ is not a valid Praat type"
+      endif
+    endfor
+    .found$ = .found$ - ", "
+
+    @restoreSavedSelection(.objects)
+    removeObject: .objects, .selection
   endif
 
   if jja.debug
     jja.tab$ = jja.tab$ - jja.tabchar$
   endif
+endproc
+
+# Deselect multiple types
+procedure deselectTypes (.types$)
+  @saveSelectionTable()
+  .selection = saveSelectionTable.table
+  
+  @refineToTypes(.types$)
+  .deselected$ = refineToTypes.found$
+  
+  @saveSelectionTable()
+  .deselect = saveSelectionTable.table
+  
+  @restoreSavedSelection(.selection)
+  @minusSavedSelection(.deselect)
+  removeObject: .selection, .deselect
 endproc
 
 #

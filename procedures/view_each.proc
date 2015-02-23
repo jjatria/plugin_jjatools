@@ -40,12 +40,12 @@ procedure viewEach (.base, .pair, .i, .n)
     plusObject: .pair
   endif
 
-  if .base_type$ = "LongSound"
-    View
-  else
-    View & Edit
+  @getEditorType()
+  .editor_command$ = getEditorType.return$
+  if .editor_command$ != ""
+    do(.editor_command$)
   endif
-
+  
   nocheck editor '.editor_name$'
     # Hook right after opening the editor
     @inEditor()
@@ -132,4 +132,24 @@ endproc
 procedure inEditor ()
   .info$ = nocheck Editor info
   .return = if .info$ = "" then 0 else 1 fi
+endproc
+
+procedure getEditorType ()
+  .return$ = ""
+  @_TestEditor("View")
+  if "'_TestEditor.return$'" != ""
+  .return$ = "'_TestEditor.return$'"
+  else
+    @_TestEditor("View & Edit")
+    .return$ = "'_TestEditor.return$'"
+  endif
+endproc
+
+procedure _TestEditor (.cmd$)
+  nocheck do(.cmd$)
+  nocheck editor 'full_name$'
+  @inEditor()
+  nocheck Close
+  nocheck endeditor
+  .return$ = if inEditor.return then .cmd$ else "" fi
 endproc

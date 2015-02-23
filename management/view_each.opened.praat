@@ -18,5 +18,14 @@
 # <http://www.gnu.org/licenses/>.
 
 include ../procedures/view_each.opened.proc
+# view_each.opened already includes the selection tools
 
+@saveSelectionTable()
+.selection = saveSelectionTable.table
+
+supported_objects$ = "AmplitudeTier Artword DurationTier FormantGrid IntensityTier LongSound Manipulation OTGrammar Pitch PitchTier PointProcess Sound Spectrogram Spectrum Strings Table TextGrid"
+
+@refineToTypes (supported_objects$)
 @viewEachOpened()
+@restoreSavedSelection(.selection)
+removeObject: .selection

@@ -31,12 +31,11 @@ form Save as serialised text file...
 endform
 
 # Save original selection
-@saveSelection()
 @saveSelectionTable()
 original_selection = saveSelectionTable.table
 
 # De-select all incompatible objects
-@deselect_unsupported(original_selection)
+@deselectTypes("LongSound")
 
 # Set initial options:
 # Should output be pretty-printed?
@@ -77,9 +76,8 @@ infile$ = mktemp.name$ + infile$
 deleteFile: mktemp.name$
 
 # Restore the original selection and clean-up
-# @selectSelectionTables()
-# Remove
-@restoreSelection
+@restoreSavedSelection(original_selection)
+removeObject: original_selection
 
 #
 # Procedures
@@ -96,44 +94,4 @@ procedure serialise (.in$, .out$, .output$, .format$, collection)
 #   appendInfoLine: command$
   system_nocheck 'command$'
   deleteFile: .in$
-endproc
-
-# Deselect unsupported objects
-procedure deselect_unsupported (.selection)
-  .unsupported$ = "LongSound"
-  @split: " ", .unsupported$
-
-  @createEmptySelectionTable()
-  .unsupported = createEmptySelectionTable.table
-
-  .warnings = 0
-
-  for .i to split.length
-    @restoreSavedSelection(.selection)
-    @refineToType(split.return$[.i])
-
-    if numberOfSelected()
-      .warnings = 1
-      appendInfoLine: "W: ", split.return$[.i], " objects not supported"
-    endif
-
-    @plusSavedSelection(.unsupported)
-    @saveSelectionTable()
-    removeObject: .unsupported
-    .unsupported = saveSelectionTable.table
-  endfor
-
-  if .warnings
-    beginPause: "Some unsupported objects were deselected. Do you want to continue?"
-    .button = endPause: "Yes", "No", 2, 2
-    if .button = 2
-      removeObject: .unsupported
-      @restoreSavedSelection(.selection)
-      exit
-    endif
-  endif
-
-  @restoreSavedSelection(.selection)
-  @minusSavedSelection(.unsupported)
-  removeObject: .unsupported
 endproc

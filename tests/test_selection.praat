@@ -6,7 +6,8 @@ baseline = numberOfSelected()
 
 ## Create test sounds
 name$ = "sound"
-sound[1] = Create Sound as pure tone: name$, 1, 0, 0.4, 44100, 220, 0.2, 0.01, 0.01
+sound[1] = Create Sound as pure tone: name$,
+  ... 1, 0, 0.4, 44100, 220, 0.2, 0.01, 0.01
 for i from 2 to 5
   sound[i] = Copy: name$
 endfor
@@ -77,6 +78,29 @@ assert checkSelectionTable.return = 1
 assert countObjects.n = 5
 @countObjects(objects, "Pitch")
 assert countObjects.n = 0
+
+# Deselect multiple object types
+@restoreSavedSelection(all)
+@deselectTypes("Sound TextGrid")
+assert numberOfSelected("TextGrid") = 0
+assert numberOfSelected("Sound")    = 0
+assert numberOfSelected()           = 5
+
+# Refine selection to multiple object types
+@restoreSavedSelection(all)
+@refineToTypes("Sound TextGrid")
+assert numberOfSelected("TextGrid") = 5
+assert numberOfSelected("Sound")    = 5
+assert numberOfSelected("Pitch")    = 0
+assert numberOfSelected()           = 10
+
+# Seelct only certain types
+@clearSelection()
+@selectTypes("Sound TextGrid")
+assert numberOfSelected("TextGrid") = 5
+assert numberOfSelected("Sound")    = 5
+assert numberOfSelected("Pitch")    = 0
+assert numberOfSelected()           = 10
 
 @restoreSavedSelection(all)
 assert numberOfSelected("TextGrid") = 5

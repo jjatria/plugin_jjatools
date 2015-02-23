@@ -61,7 +61,7 @@ procedure viewEachOpened ()
     .sounds    = countObjects.n
     @countObjects(.object_table, "TextGrid")
     .textgrids = countObjects.n
-    if .sounds = .textgrids
+    if .sounds and .sounds = .textgrids
       .paired = 1
       @restoreSavedSelection(.selection)
       @refineToType("Sound")
