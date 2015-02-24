@@ -1,0 +1,68 @@
+include ../procedures/utils.proc
+
+# Format-free time
+#
+# Provides:
+#
+# date.dw  = day of the week           (1-7)
+# date.dw$ = day of the week as string ("Mon", ...)
+# date.dm  = day of the month          (1-31)
+# date.mo  = month                     (1-12)
+# date.mo$ = month as string           ("Jan", ...)
+# date.yr  = year                      (Gregorian)
+# date.tm$ = time as string            ("00:00:00")
+# date.hr  = hours                     (0-24)
+# date.mn  = minutes                   (0-60)
+# date.sc  = seconds                   (0-60)
+#
+procedure date ()
+  .date$ = date$()
+#   Fri Jul 18 18:41:33 2014
+  @split(" ", .date$)
+  if split.length != 5
+    exitScript: "Unexpected output from date$()!"
+  endif
+  
+  .dw$ = split.return$[1]   ; "Fri"
+  .days$ = "Mon Tue Wed Thu Fri Sat Sun"
+  .dw = index(.days$, .dw$)
+  .dw = if .dw > 0 then ((.dw - 1) / 4) + 1 else .dw fi
+#  .dw  = if .dw$ = "Mon" then 1 else
+#     ... if .dw$ = "Tue" then 2 else
+#     ... if .dw$ = "Wed" then 3 else
+#     ... if .dw$ = "Thu" then 4 else
+#     ... if .dw$ = "Fri" then 5 else
+#     ... if .dw$ = "Sat" then 6 else
+#     ... if .dw$ = "Sun" then 7 else 0
+#     ... fi fi fi fi fi fi fi
+
+  .mo$ = split.return$[2]   ; "Jul"
+  .months$ = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
+  .mo = index(.months$, .mo$)
+  .mo = if .mo > 0 then ((.mo - 1) / 4) + 1 else .mo fi
+#  .mo  = if .mo$ = "Jan" then  1 else
+#     ... if .mo$ = "Feb" then  2 else
+#     ... if .mo$ = "Mar" then  3 else
+#     ... if .mo$ = "Apr" then  4 else
+#     ... if .mo$ = "May" then  5 else
+#     ... if .mo$ = "Jun" then  6 else
+#     ... if .mo$ = "Jul" then  7 else
+#     ... if .mo$ = "Aug" then  8 else
+#     ... if .mo$ = "Sep" then  9 else
+#     ... if .mo$ = "Oct" then 10 else
+#     ... if .mo$ = "Nov" then 11 else
+#     ... if .mo$ = "Dec" then 12 else 0
+#     ... fi fi fi fi fi fi fi fi fi fi fi fi
+  .dm  = split.return$[3]   ; 18
+  .tm$ = split.return$[4]   ; "18:41:33"
+  .yr  = split.return$[5]   ; 2014
+  
+  @split(":", .tm$)
+  if split.length != 3
+    exitScript: "Unexpected time format from date$()!"
+  endif
+  
+  .hr = split.return$[1]    ; 18
+  .mn = split.return$[2]    ; 41
+  .sc = split.return$[3]    ; 33
+endproc
