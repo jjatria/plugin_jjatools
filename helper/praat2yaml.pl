@@ -70,13 +70,13 @@ my %setup;
 $setup{'output'} = $JSON if $0 =~ /json/;
 
 GetOptions (
-  'yaml'       => sub { },
+  'yaml'       => sub {},
   'json'       => sub { $setup{'output'} = $JSON },
   'pretty'     => sub { $setup{'format'} = $PRETTY },
   'minified'   => sub { $setup{'format'} = $MINI },
-  'debug'      => \$setup{'debug'},
-  'encoding=s' => \$setup{'encoding'},
-  'collection' => \$setup{'collection'},
+  'debug',
+  'encoding=s',
+  'collection',
   'help|?'     => sub { pod2usage( -verbose => 3 ) },
 ) or pod2usage(2);
 
