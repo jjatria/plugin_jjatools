@@ -3,211 +3,134 @@ Fail  Artword (20)
 Fail  HMM (20)
 Fail  KNN (20)
 Fail  OTGrammar (20)
-OK    Activation (00)
-OK    AmplitudeTier (00)
-OK    BarkFilter (00)
-OK    Categories (00)
-OK    ChebyshevSeries (00)
-OK    Cochleagram (00)
-OK    Confusion (00)
-OK    ContingencyTable (00)
-OK    Correlation (00)
-OK    Covariance (00)
-OK    CrossCorrelationTable (00)
-OK    CrossCorrelationTables (00)
-OK    Diagonalizer (00)
-OK    Dissimilarity (00)
-OK    Distance (00)
-OK    DurationTier (00)
-OK    EditCostsTable (00)
-OK    Excitation (00)
-OK    Excitations (00)
-OK    FFNet (00)
-OK    FeatureWeights (00)
-OK    FileInMemory (00)
-OK    FilesInMemory (00)
-OK    Formant (00)
-OK    FormantFilter (00)
-OK    FormantGrid (00)
-OK    HMM_ObservationSequence (00)
-OK    HMM_StateSequence (00)
-OK    Harmonicity (00)
-OK    ISpline (00)
-OK    Intensity (00)
-OK    IntensityTier (00)
-OK    KlattGrid (00)
-OK    KlattTable (00)
-OK    LPC (00)
-OK    LegendreSeries (00)
-OK    Ltas (00)
-OK    MFCC (00)
-OK    MSpline (00)
-OK    Manipulation (00)
-OK    Matrix (00)
-OK    MelFilter (00)
-OK    MixingMatrix (00)
-OK    Network (00)
-OK    PCA (00)
-OK    PairDistribution (00)
-OK    Pattern (00)
-OK    Permutation (00)
-OK    Photo (00)
-OK    Pitch (00)
-OK    PitchTier (00)
-OK    PointProcess (00)
-OK    PointProcess (00)
-OK    Polygon (00)
-OK    Polynomial (00)
-OK    RealTier (00)
-OK    Roots (00)
-OK    ScalarProduct (00)
-OK    Sound (00)
-OK    Speaker (00)
-OK    Spectrogram (00)
-OK    Spectrum (00)
-OK    SpeechSynthesizer (00)
-OK    Strings (00)
-OK    Table (00)
-OK    TableOfReal (00)
-OK    TextGrid (00)
-OK    TextTier (00)
-OK    VocalTract (00)
-OK    VocalTractTier (00)
-OK    Weight (00)
-OK    WordList (00)
-
-NEED                    HAVE
-Activation              Activation
-AffineTransform
-AmplitudeTier           AmplitudeTier
-Art                     Art
-Artword
-Autosegment
-BarkFilter              BarkFilter
-CCA
-Categories              Categories
-Cepstrogram
-Cepstrum
-Cepstrumc
-ChebyshevSeries         ChebyshevSeries
-ClassificationTable
-Cochleagram             Cochleagram
-Collection
-Configuration
-Confusion               Confusion
-ContingencyTable        ContingencyTable
-Corpus
-Correlation             Correlation
-Covariance              Covariance
-CrossCorrelationTable   CrossCorrelationTable
-CrossCorrelationTables  CrossCorrelationTables
-DTW
-DataModeler
-Diagonalizer            Diagonalizer
-Discriminant
-Dissimilarity           Dissimilarity
-Distance                Distance
-Distributions
-DurationTier            DurationTier
-EEG
-ERP
-ERPTier
-EditCostsTable          EditCostsTable
-EditDistanceTable
-Eigen
-Excitation              Excitation
-Excitations             Excitations
-ExperimentMFC
-FFNet                   FFNet
-FeatureWeights          FeatureWeights
-FileInMemory            FileInMemory
-FilesInMemory           FilesInMemory
-Formant                 Formant
-FormantFilter           FormantFilter
-FormantGrid             FormantGrid
-FormantModeler
-FormantPoint
-FormantTier
-GaussianMixture
-HMM                     HMM
-HMM_Observation
-HMM_ObservationSequence HMM_ObservationSequence
-HMM_State
-HMM_StateSequence       HMM_StateSequence
-Harmonicity             Harmonicity
-ISpline                 ISpline
-Index
-Intensity               Intensity
-IntensityTier           IntensityTier
-IntervalTier
-KNN                     KNN
-KlattGrid               KlattGrid
-KlattTable              KlattTable
-LFCC
-LPC                     LPC
-Label
-LegendreSeries          LegendreSeries
-LinearRegression
-LogisticRegression
-LongSound
-Ltas                    Ltas
-MFCC                    MFCC
-MSpline                 MSpline
-ManPages
-Manipulation            Manipulation
-Matrix                  Matrix
-MelFilter               MelFilter
-MixingMatrix            MixingMatrix
-Movie
-Network                 Network
-OTGrammar               OTGrammar
-OTHistory
-OTMulti
-PCA                     PCA
-PairDistribution        PairDistribution
-ParamCurve
-Pattern                 Pattern
-Permutation             Permutation
-Photo                   Photo
-Pitch                   Pitch
-PitchModeler
-PitchTier               PitchTier
-PointProcess            PointProcess
-Polygon
-Polynomial              Polynomial
-PowerCepstrogram
-PowerCepstrum
-Procrustes
-RealPoint
-RealTier                RealTier
-ResultsMFC
-Roots                   Roots
-SPINET
-SSCP
-SVD
-Salience
-ScalarProduct           ScalarProduct
-Similarity
-SimpleString
-SortedSetOfString
-Sound                   Sound
-Speaker                 Speaker
-Spectrogram             Spectrogram
-Spectrum                Spectrum
-SpectrumTier
-SpeechSynthesizer       SpeechSynthesizer
-SpellingChecker         SpellingChecker
-Strings
-StringsIndex
-Table                   Table
-TableOfReal             TableOfReal
-TextGrid                TextGrid
-TextInterval
-TextPoint
-TextTier                TextTier
-Tier
-Transition
-VocalTract              VocalTract
-VocalTractTier          VocalTractTier
-Weight                  Weight
-WordList                WordList
+OK    Activation
+OK    AffineTransform
+OK    AmplitudeTier
+OK    BarkFilter
+OK    Categories
+OK    ChebyshevSeries
+OK    Cochleagram
+OK    Configuration
+OK    Confusion
+OK    ContingencyTable
+OK    Correlation
+OK    Covariance
+OK    CrossCorrelationTable
+OK    CrossCorrelationTables
+OK    Diagonalizer
+OK    Dissimilarity
+OK    Distance
+OK    DurationTier
+OK    EditCostsTable
+OK    Excitation
+OK    Excitations
+OK    FFNet
+OK    FeatureWeights
+OK    FileInMemory
+OK    FilesInMemory
+OK    Formant
+OK    FormantFilter
+OK    FormantGrid
+OK    HMM_ObservationSequence
+OK    HMM_StateSequence
+OK    Harmonicity
+OK    ISpline
+OK    Intensity
+OK    IntensityTier
+OK    KlattGrid
+OK    KlattTable
+OK    LPC
+OK    LegendreSeries
+OK    Ltas
+OK    MFCC
+OK    MSpline
+OK    Manipulation
+OK    Matrix
+OK    MelFilter
+OK    MixingMatrix
+OK    Network
+OK    PCA
+OK    PairDistribution
+OK    Pattern
+OK    Permutation
+OK    Photo
+OK    Pitch
+OK    PitchTier
+OK    PointProcess
+OK    PointProcess
+OK    Polygon
+OK    Polynomial
+OK    Procrustes
+OK    RealTier
+OK    Roots
+OK    SSCP
+OK    ScalarProduct
+OK    Sound
+OK    Speaker
+OK    Spectrogram
+OK    Spectrum
+OK    SpeechSynthesizer
+OK    Strings
+OK    Table
+OK    TableOfReal
+OK    TextGrid
+OK    TextTier
+OK    VocalTract
+OK    VocalTractTier
+OK    Weight
+OK    WordList
+??    Autosegment
+??    CCA
+??    Cepstrogram
+??    Cepstrum
+??    Cepstrumc
+??    ClassificationTable
+??    Collection
+??    Corpus
+??    DTW
+??    DataModeler
+??    Discriminant
+??    Distributions
+??    EEG
+??    ERP
+??    ERPTier
+??    EditDistanceTable
+??    Eigen
+??    ExperimentMFC
+??    FormantModeler
+??    FormantPoint
+??    FormantTier
+??    GaussianMixture
+??    HMM_Observation
+??    HMM_State
+??    Index
+??    IntervalTier
+??    LFCC
+??    Label
+??    LinearRegression
+??    LogisticRegression
+??    LongSound
+??    ManPages
+??    Movie
+??    OTHistory
+??    OTMulti
+??    ParamCurve
+??    PitchModeler
+??    Polygon
+??    PowerCepstrogram
+??    PowerCepstrum
+??    RealPoint
+??    ResultsMFC
+??    SPINET
+??    SVD
+??    Salience
+??    Similarity
+??    SimpleString
+??    SortedSetOfString
+??    SpectrumTier
+??    Strings
+??    StringsIndex
+??    TextInterval
+??    TextPoint
+??    Tier
+??    Transition

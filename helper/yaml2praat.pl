@@ -102,6 +102,7 @@ Readonly my %TABLE_TYPES = (
   Correlation                   => 1,
   Covariance                    => 1,
   EditCostsTable                => 1,
+  SSCP                          => 1,
 );
 Readonly my %PARTS = (
   TextGrid                      => { tiers=>1,},

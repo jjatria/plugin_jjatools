@@ -64,6 +64,17 @@ To PointProcess (periodic, cc): 75, 600
 Up to TextTier: "a"
 @add()
 
+a = Create Configuration: "Configuration", 10, 2, "self*2"
+b = Create Configuration: "Configuration", 10, 2, "self*3"
+@add()
+selectObject: a, b
+To Procrustes: 1
+@add()
+selectObject: a, b
+To AffineTransform (congruence): 50, 1e-6
+@add()
+removeObject: a
+
 selectObject: get.id
 To Spectrum: "yes"
 @add()
@@ -135,6 +146,10 @@ To WordList
 
 Create TableOfReal (Weenink 1985): "Men"
 @add()
+To SSCP: 1, 120, 1, 3
+@add()
+@get("TableOfReal")
+selectObject: get.id
 To ContingencyTable
 @add()
 To Matrix
