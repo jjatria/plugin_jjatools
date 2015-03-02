@@ -31,8 +31,8 @@ read_from$ = checkDirectory.name$
 
 files = Create Strings as file list: "files", read_from$ + "*"
 
-@extractStrings(.file_regex$)
+@extractStrings(filename_regex$)
 removeObject: files
 files = extractStrings.id
 
-@viewEachFromDisk(read_from$, files, 1)
+@viewEachFromDisk(files, 1)
