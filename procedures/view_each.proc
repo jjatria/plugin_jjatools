@@ -20,67 +20,73 @@
 include ../../plugin_jjatools/procedures/selection.proc
 
 procedure viewEach (.base, .pair, .i, .n)
-  selectObject: .base
-  .base_type$   = extractWord$(selected$(), "")
-  .base_name$   = selected$(.base_type$)
-  .editor_name$ = selected$()
-
-  if .pair != undefined and .pair
-    selectObject: .pair
-    .pair_type$   = extractWord$(selected$(), "")
-    .pair_name$   = selected$(.pair_type$)
+  nocheck selectObject: .base
+  if numberOfSelected()
+    .base_type$   = extractWord$(selected$(), "")
+    .base_name$   = selected$(.base_type$)
     .editor_name$ = selected$()
-    selectObject: .base, .pair
-  endif
 
-  @viewEach_atBeginIteration()
-
-  selectObject: .base
-  if .pair != undefined and .pair
-    plusObject: .pair
-  endif
-
-  @getEditorType()
-  .editor_command$ = getEditorType.return$
-  if .editor_command$ != ""
-    do(.editor_command$)
-  endif
-  
-  nocheck editor '.editor_name$'
-    # Hook right after opening the editor
-    @inEditor()
-    if inEditor.return
-      @viewEach_atBeginEditor()
+    if .pair != undefined and .pair
+      selectObject: .pair
+      .pair_type$   = extractWord$(selected$(), "")
+      .pair_name$   = selected$(.pair_type$)
+      .editor_name$ = selected$()
+      selectObject: .base, .pair
     endif
-  nocheck endeditor
 
-  @viewEach_pause()
+    @viewEach_atBeginIteration()
 
-  # If objects are renamed while viewing each, editors are
-  # not closed properly. Attempted to solve
-  # this, but it didn't work. Why?
-
-  if .pair != undefined and .pair
-    selectObject: .pair
-    .editor_name$ = .pair_type$ + " " + selected$(.pair_type$)
-  else
     selectObject: .base
-    .editor_name$ = .base_type$ + " " + selected$(.base_type$)
-  endif
-
-  nocheck editor '.editor_name$'
-    # Hook within editor, after the pause
-    @inEditor()
-    if inEditor.return
-      @viewEach_atEndEditor()
+    if .pair != undefined and .pair
+      plusObject: .pair
     endif
-  nocheck endeditor
 
-  # Hook called after atEndEditor, which might not be in an editor
-  @viewEach_afterEndEditor()
+    @getEditorType()
+    .editor_command$ = getEditorType.return$
+    if .editor_command$ != ""
+      do(.editor_command$)
+    endif
 
-  # Hook called immediately befre the end of the iteration
-  @viewEach_atEndIteration()
+    nocheck editor '.editor_name$'
+      # Hook right after opening the editor
+      @inEditor()
+      if inEditor.return
+        @viewEach_atBeginEditor()
+      endif
+    nocheck endeditor
+
+    @viewEach_pause()
+
+    # If objects are renamed while viewing each, editors are
+    # not closed properly. Attempted to solve
+    # this, but it didn't work. Why?
+
+    if .pair != undefined and .pair
+      nocheck selectObject: .pair
+      if numberOfSelected()
+        .editor_name$ = .pair_type$ + " " + selected$(.pair_type$)
+      endif
+    else
+      nocheck selectObject: .base
+      if numberOfSelected()
+        .editor_name$ = .base_type$ + " " + selected$(.base_type$)
+      endif
+    endif
+
+    nocheck editor '.editor_name$'
+      # Hook within editor, after the pause
+      @inEditor()
+      if inEditor.return
+        @viewEach_atEndEditor()
+      endif
+    nocheck endeditor
+
+    # Hook called after atEndEditor, which might not be in an editor
+    @viewEach_afterEndEditor()
+
+    # Hook called immediately befre the end of the iteration
+    @viewEach_atEndIteration()
+  endif
 endproc
 
 procedure viewEach_cleanUp ()

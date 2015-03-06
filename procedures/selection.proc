@@ -24,7 +24,7 @@ if !variableExists("jja.debug")
   jja.debug = 0
 endif
 if !variableExists("jja.restore_nocheck")
-  jja.restore_nocheck = 0
+  jja.restore_nocheck = 1
 endif
 if !variableExists("jja.warnings")
   jja.warnings = 0
@@ -600,7 +600,7 @@ procedure refineToTypes (.types$)
     jja.tab$ = jja.tab$ + jja.tabchar$
     appendInfoLine: jja.tab$ - jja.tabchar$, "refineToType(", .types$, ")"
   endif
-  
+
   @saveSelectionTable()
   .selection = saveSelectionTable.table
 
@@ -620,7 +620,7 @@ procedure refineToTypes (.types$)
 
         @restoreSavedSelection(.per_type)
         @plusSavedSelection(.objects)
-        
+
         @saveSelectionTable()
         removeObject: .objects
         .objects = saveSelectionTable.table
@@ -648,13 +648,13 @@ endproc
 procedure deselectTypes (.types$)
   @saveSelectionTable()
   .selection = saveSelectionTable.table
-  
+
   @refineToTypes(.types$)
   .deselected$ = refineToTypes.found$
-  
+
   @saveSelectionTable()
   .deselect = saveSelectionTable.table
-  
+
   @restoreSavedSelection(.selection)
   @minusSavedSelection(.deselect)
   removeObject: .selection, .deselect

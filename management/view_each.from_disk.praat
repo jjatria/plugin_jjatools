@@ -20,6 +20,7 @@
 include ../../plugin_jjatools/procedures/extract_strings.proc
 include ../../plugin_jjatools/procedures/check_directory.proc
 include ../../plugin_jjatools/procedures/view_each.from_disk.proc
+include ../../plugin_jjatools/procedures/file_list_full_path.proc
 
 form View each (from disk)...
   sentence Read_from
@@ -29,10 +30,12 @@ endform
 @checkDirectory(read_from$, "Read files from...")
 read_from$ = checkDirectory.name$
 
-files = Create Strings as file list: "files", read_from$ + "*"
+@fileListFullPath("files", read_from$, "*", 0)
+files = fileListFullPath.id
 
 @extractStrings(filename_regex$)
 removeObject: files
 files = extractStrings.id
+Rename: "bla"
 
 @viewEachFromDisk(files, 1)
