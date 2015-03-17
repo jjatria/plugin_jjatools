@@ -18,7 +18,7 @@ form Get points in range...
   real    right_End 0 (= all)
 endform
 
-include count_points_in_range.proc
+include ../procedures/count_points_in_range.proc
 
 interval_tier = Is interval tier: tier
 

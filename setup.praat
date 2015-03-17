@@ -69,6 +69,7 @@ Add action command: "Strings",  0, "",         0, "", 0, "Find in Strings...",  
 # TextGrid commands             
 Add action command: "TextGrid", 1, "",         0, "", 0, "Find label...",                        "Query -",               1, "textgrid/find_label_in_textgrid.praat"
 Add action command: "TextGrid", 0, "",         0, "", 0, "Save as Audacity label...",            "",                      0, "textgrid/textgrid_to_audacity_label.praat"
+Add action command: "TextGrid", 1, "",         0, "", 0, "Count points in range...",             "Query point tier",      2, "textgrid/count_points_in_range.praat"
                                 
 # Combined commands             
 Add action command: "Sound",    0, "TextGrid", 0, "", 0, "Extract labels...",                    "",                      0, "textgrid/extract_labels.praat"

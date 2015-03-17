@@ -26,9 +26,6 @@ endif
 if !variableExists("jja.restore_nocheck")
   jja.restore_nocheck = 1
 endif
-if !variableExists("jja.warnings")
-  jja.warnings = 0
-endif
 jja.tab$ = ""
 jja.tabchar$ = ""
 

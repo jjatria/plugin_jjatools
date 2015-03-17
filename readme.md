@@ -1,7 +1,7 @@
 JJATools
 ========
 
-Version: 1.0.2-devel
+Version: 1.0.3-devel
 
 ## Overview
 

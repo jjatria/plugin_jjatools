@@ -106,7 +106,7 @@ if sounds and sounds = all
   time = stopwatch
 
   if verbose
-    writeInfoLine: "Processed " + string$(n) + " files ",
+    writeInfoLine: "Processed " + string$(sounds) + " files ",
       ... "in " + fixed$(time, 2) + " seconds"
     appendInfoLine: "All processed files set to ", fixed$(intensity, 2), "dB"
   endif

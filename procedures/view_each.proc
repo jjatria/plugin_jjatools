@@ -89,9 +89,6 @@ procedure viewEach (.base, .pair, .i, .n)
   endif
 endproc
 
-procedure viewEach_cleanUp ()
-endproc
-
 # Hooks
 # A previously existing definition of these procedures
 # will get executed for every iteration of the script.
@@ -99,6 +96,9 @@ procedure viewEach_atBeginIteration ()
 endproc
 
 procedure viewEach_atBeginEditor ()
+endproc
+
+procedure viewEach_cleanUp ()
 endproc
 
 procedure viewEach_atEndEditor ()
