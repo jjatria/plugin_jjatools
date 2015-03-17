@@ -104,13 +104,13 @@ procedure viewEachOpened ()
     @_ObjectExists(getId.id)
     if '_ObjectExists.return'
       .base = getId.id
-    endif
 
-    if .paired
-      selectObject: .pair_selection
-      .pair = Get value: .i, "id"
-    else
-      .pair = undefined
+      if .paired
+        selectObject: .pair_selection
+        .pair = Get value: .i, "id"
+      else
+        .pair = undefined
+      endif
     endif
 
     @viewEach(.base, .pair, .i, .n)
