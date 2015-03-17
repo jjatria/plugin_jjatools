@@ -39,7 +39,7 @@ procedure viewEachFromDisk (.file_list, .paired)
     .types = Copy: "types"
     for .i to .n
       .filename$ = Get string: .i
-      .dot = index(.filename$, ".")
+      .dot = rindex(.filename$, ".")
       .new_string$ = right$(.filename$, length(.filename$) - .dot)
       .new_string$ = if .new_string$ = "wav" then "Sound" else .new_string$ fi
       Set string: .i, .new_string$
