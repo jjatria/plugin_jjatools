@@ -1,8 +1,6 @@
 # Move TextGrid time marks to nearest zero-crossings (procedure)
 #
 # Author: Jose Joaquin Atria
-# Initial release: October 27, 2014
-# Last modified:   October 27, 2014
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -19,14 +17,16 @@ procedure moveToZeroCrossings (.tier, .max_shift)
   .textgrid = selected("TextGrid")
 
   .items = do("Get number of " + .item$ + "s...", .tier)
+    appendInfoLine: "items ", .items
   .last_item = if .interval_tier then .items-1 else .items fi
+  appendInfoLine: "last item is ", .last_item
 
   selectObject: .sound, .textgrid
   @_checkShifts(.max_shift, .last_item)
 
   selectObject: .sound, .textgrid
   @_moveToZero(.last_item)
-  
+
   selectObject: .sound, .textgrid
 endproc
 
@@ -66,7 +66,7 @@ procedure _moveToZero: .last
     .time_query$  = "Get time of point..."
     .delete_item$ = "Remove point..."
   endif
-  
+
   .max = 0
   for .item to .last
     selectObject: .textgrid
@@ -81,11 +81,15 @@ procedure _moveToZero: .last
       .max = if .shift > .max then .shift else .max fi
 
       selectObject: .textgrid
+      .items_before = do("Get number of " + .item$ + "s...", .tier)
       if .interval_tier
         @_moveBoundary: .tier, .item, .zero
       else
         @_movePoint: .tier, .item, .zero
       endif
+      .items_after = do("Get number of " + .item$ + "s...", .tier)
+
+      .last_item -= if .items_before > .items_after then 1 else 0 fi
     endif
   endfor
 endproc
@@ -95,15 +99,15 @@ procedure _moveBoundary: .tier, .item, .zero
   .label$[2] = Get label of interval: .tier, .item+1
 
   Remove right boundary: .tier, .item
-  Insert boundary: .tier, .zero
+  nocheck Insert boundary: .tier, .zero
 
   Set interval text: .tier, .item,   .label$[1]
   Set interval text: .tier, .item+1, .label$[2]
 endproc
-        
+
 procedure _movePoint: .tier, .item, .zero
   .label$ = Get label of point: .tier, .item
 
   Remove point: .tier, .item
-  Insert point: .tier, .zero, .label$
+  nocheck Insert point: .tier, .zero, .label$
 endproc

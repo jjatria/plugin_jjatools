@@ -1,7 +1,7 @@
 JJATools
 ========
 
-Version: 1.0.3-devel
+Version: 1.0.5-devel
 
 ## Overview
 
@@ -149,4 +149,4 @@ look.
 
 [praat]: www.praat.org
 [preferences]: http://www.fon.hum.uva.nl/praat/manual/preferences_directory.html
-[zip]: https://github.com/jjatria/plugin_jjatools/archive/master.zip
+[zip]: https://github.com/jjatria/plugin_jjatools/releases/latest
