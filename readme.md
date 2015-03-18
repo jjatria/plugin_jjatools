@@ -128,4 +128,4 @@ If not, then you can use the general instructions below:
 
 [praat]: www.praat.org
 [preferences]: http://www.fon.hum.uva.nl/praat/manual/preferences_directory.html
-[zip]: https://github.com/jjatria/plugin_jjatools/archive/master.zip
+[zip]: https://github.com/jjatria/plugin_jjatools/releases/latest
