@@ -59,7 +59,7 @@ include ../procedures/move_to_zero_crossings.proc
 for current to total_sounds
 
   sound    = Object_'sounds'[current, "id"]
-  textgrid = Object_'textgrid'[current, "id"]
+  textgrid = Object_'textgrids'[current, "id"]
 
   selectObject: sound
   sound_length = Get total duration
@@ -69,7 +69,7 @@ for current to total_sounds
   textgrid_length = Get total duration
   textgrid_name$ = selected$("TextGrid")
 
-  if verbose
+  if form.verbose
     @clearOnce()
     appendInfoLine: "Sound: " + sound_name$ + "; TextGrid: " + textgrid_name$
   endif
@@ -95,7 +95,7 @@ for current to total_sounds
         selectObject: sound, textgrid
         @moveToZeroCrossings(tier, maximum_shift)
 
-        if verbose
+        if form.verbose
           moved = moveToZeroCrossings.moved_items
           if moved
             appendInfo: "Moved ", moved

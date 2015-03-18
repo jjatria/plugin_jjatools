@@ -61,13 +61,13 @@ procedure moveToZeroCrossings (.tier, .max_shift)
     .zero = Get nearest zero crossing: 1, .time
 
     if .time != .zero
-      appendInfo: "Shifting ", .time, " to ", .zero
+      # appendInfo: "Shifting ", .time, " to ", .zero
 
       .moved_items += 1
       .shift = abs(.time - .zero)
       .max_shift = if .shift > .max_shift then .shift else .max_shift fi
 
-      appendInfoLine: " Shift:", .shift
+      # appendInfoLine: " Shift:", .shift
 
       selectObject: .textgrid
       if .interval_tier
