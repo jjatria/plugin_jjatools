@@ -1,8 +1,6 @@
 # Move TextGrid time marks to nearest zero-crossings (procedure)
 #
 # Author: Jose Joaquin Atria
-# Initial release: October 27, 2014
-# Last modified:   October 27, 2014
 #
 # This script is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -33,7 +31,9 @@ procedure moveToZeroCrossings (.tier, .max_shift)
   endif
 
   .items = do("Get number of " + .item$ + "s...", .tier)
+    appendInfoLine: "items ", .items
   .last_item = if .interval_tier then .items-1 else .items fi
+  appendInfoLine: "last item is ", .last_item
 
   if .max_shift
     for .item to .last_item
@@ -74,16 +74,45 @@ procedure moveToZeroCrossings (.tier, .max_shift)
         .label$[1] = Get label of interval: .tier, .item
         .label$[2] = Get label of interval: .tier, .item+1
 
+        # If two boundaries share the same zero crossing, and one
+        # of them is _already_ at that zero-crossing, they are merged
+        .merge = 0
+        if .item != .zero
+          if .time < .zero
+            .boundary = Get end point: .tier, .item
+          elsif .time > .zero
+            .boundary = Get start point: .tier, .item
+          endif
+          .merge = if .boundary = .zero then 1 else .merge fi
+        endif
+		
         Remove right boundary: .tier, .item
-        Insert boundary: .tier, .zero
+        nocheck Insert boundary: .tier, .zero
 
+        .last_item -= if .merge then 1 else 0 fi
+		
         Set interval text: .tier, .item,   .label$[1]
         Set interval text: .tier, .item+1, .label$[2]
       else
         .label$ = Get label of point: .tier, .item
 
+        # If two points share the same zero crossing, and one
+        # of them is _already_ at that zero-crossing, they are merged
+        .merge = 0
+        if .item != .zero 
+          if .time < .zero
+            .boundary = Get time of point: .tier, .item
+          elsif .time > .zero
+            .boundary = Get time of point: .tier, .item+1
+          endif
+          .merge = if .boundary = .zero then 1 else .merge fi
+        endif   
+
         Remove point: .tier, .item
-        Insert point: .tier, .zero, .label$
+        nocheck Insert point: .tier, .zero, .label$
+
+        .last_item -= if .merge then 1 else 0 fi
+
       endif
     endif
   endfor
