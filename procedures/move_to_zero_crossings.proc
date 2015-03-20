@@ -17,9 +17,7 @@ procedure moveToZeroCrossings (.tier, .max_shift)
   .textgrid = selected("TextGrid")
 
   .items = do("Get number of " + .item$ + "s...", .tier)
-    appendInfoLine: "items ", .items
   .last_item = if .interval_tier then .items-1 else .items fi
-  appendInfoLine: "last item is ", .last_item
 
   selectObject: .sound, .textgrid
   @_checkShifts(.max_shift, .last_item)
