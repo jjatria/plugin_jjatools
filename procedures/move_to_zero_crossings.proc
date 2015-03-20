@@ -31,9 +31,7 @@ procedure moveToZeroCrossings (.tier, .max_shift)
   endif
 
   .items = do("Get number of " + .item$ + "s...", .tier)
-    appendInfoLine: "items ", .items
   .last_item = if .interval_tier then .items-1 else .items fi
-  appendInfoLine: "last item is ", .last_item
 
   if .max_shift
     for .item to .last_item
