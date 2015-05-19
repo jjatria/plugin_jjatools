@@ -12,10 +12,6 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include ../procedures/utils.proc
-include ../procedures/selection.proc
-include ../procedures/check_filename.proc
-
 form Save as YAML...
   sentence Save_as
   optionmenu Format: 1
@@ -26,5 +22,6 @@ form Save as YAML...
   comment If saving multiple objects with the same name, save as Collection
 endform
 
-runScript: "../../plugin_jjatools/management/serialise_to_text.praat",
+runScript: preferencesDirectory$ +
+  ... "/plugin_serialise/scripts/serialise_to_text.praat",
   ... save_as$, "YAML", format$, 0

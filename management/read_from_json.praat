@@ -12,9 +12,9 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
-include ../procedures/utils.proc
-include ../procedures/selection.proc
-include ../procedures/check_filename.proc
+include ../../plugin_utils/procedures/utils.proc
+include ../../plugin_utils/procedures/check_filename.proc
+include ../../plugin_selection/procedures/selection.proc
 
 form Read from serialised text file...
   sentence Read_from
@@ -27,7 +27,6 @@ infile$ = checkFilename.name$
 
 name$ = right$(infile$, length(infile$) - rindex(infile$, "/"))
 type$ = right$(infile$, length(infile$) - rindex(infile$, "."))
-type$ = if type$ = "json" or type$ = "yaml" then type$ else "yaml" fi 
 name$ = name$ - ("." + type$)
 
 # Create temporary directory for output
@@ -35,13 +34,12 @@ name$ = name$ - ("." + type$)
 tmpfile$ = mktemp.name$ + name$ + ".Praat"
 
 command$ = "perl " +
-  ... preferencesDirectory$ + "/plugin_jjatools/helper/yaml2praat.pl " +
-  ... "--" + type$ + " " +
-  ... infile$ + " > " + tmpfile$
+  ... preferencesDirectory$ + "/plugin_serialise/scripts/yaml2praat.pl " +
+  ... infile$ + " --outfile " + tmpfile$
 # appendInfoLine: command$
 system_nocheck 'command$'
 
-Read from file: tmpfile$
+nocheck Read from file: tmpfile$
 
 deleteFile: tmpfile$
 deleteFile: mktemp.name$

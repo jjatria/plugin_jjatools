@@ -26,6 +26,7 @@ BEGIN {
     'use Getopt::Long qw(:config no_ignore_case)',
     'use Encode qw(encode decode)',
     'use YAML::XS',
+    'use Try::Tiny',
     'use Readonly',
   );
   my $missing = 0;
@@ -42,7 +43,7 @@ BEGIN {
   if ($missing) {
     warn "E: Unmet dependencies. Please install the missing modules before ",
       "continuing.\n";
-    exit 1;
+    exit 0;
   }
 }
 
@@ -114,8 +115,8 @@ Readonly my %PARTS = (
   KlattGrid                     => { phonation=>1,pitch=>1,flutter=>1,voicingAmplitude=>1,doublePulsing=>1,openPhase=>1,collisionPhase=>1,power1=>1,power2=>1,spectralTilt=>1,aspirationAmplitude=>1,breathinessAmplitude=>1,vocalTract=>1,oral_formants=>1,nasal_formants=>1,nasal_antiformants=>1,coupling=>1,tracheal_formants=>1,tracheal_antiformants=>1,delta_formants=>1,frication=>1,fricationAmplitude=>1,frication_formants=>1,bypass=>1,gain=>1,},
   Manipulation                  => { sound=>1,pulses=>1,pitch=>1,dummyIntensity=>1,duration=>1,dummySpectrogram=>1,dummyFormantTier=>1,dummy1=>1,dummy2=>1,dummy3=>1,dummy10=>1,dummyPitchAnalysis=>1,dummy11=>1,dummy12=>1,dummyIntensityAnalysis=>1,dummyFormantAnalysis=>1,},
 );
-Readonly my @KEYS = qw/ notHidden leftToRight numberOfStates numberOfObservationSymbols numberOfMixtureComponents componentDimension componentStorage transitionProbs states observationSymbols class name minimumActivity maximumActivity dummyActivitySpreadingRule shunting activityClippingRule spreadingRate activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate instar outstar weightLeak number xmin xmax phonation sound pulses pitch flutter voicingAmplitude doublePulsing openPhase collisionPhase power1 power2 spectralTilt aspirationAmplitude breathinessAmplitude vocalTract oral_formants nasal_formants nasal_antiformants coupling tracheal_formants tracheal_antiformants delta_formants frication fricationAmplitude frication_formants bypass intervals points text nx dx x1 samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients maxnFormants frames nCoefficients numberOfCoefficients coefficients degree numberOfKnots knots c0 c ymin ymax numberOfNodes nodes numberOfConnections connections nodeFrom nodeTo string1 string2 weight plasticity x y r a gain clamped activity ny dx1 dx2 dy y1 z ceiling maxnCandidates frequency bandwidth strength frame intensity nFormants formant nCandidates candidate tiers size item number value mark nt t fweights numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType outputCategories nWeights w string label red green blue transparency voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension eigenvalues eigenvectors numberOfObservations labels centroid relativeSize cord lowerCord upperCord shunt velum palate radius tip neutralBodyDistance alveoli teethCavity lowerTeeth upperTeeth lowerLip upperLip nose numberOfMasses length thickness mass k1 Dx Dy Dz weq numberOfStrings strings numberOfElements p min max v vocalTracts formants bandwidths oral_formants_amplitudes nasal_formants_amplitudes tracheal_formants_amplitudes frication_formants_amplitudes pairs nInstances input ouput dummyIntensity duration dummySpectrogram dummyFormantTier dummy1 dummy2 dummy3 dummy10 dummyPitchAnalysis dummy11 dummy12 dummyIntensityAnalysis dummyFormantAnalysis dummy4 dummy5 dummy6 dummy7 dummy8 dummy9 /; 
-my %setup;
+Readonly my @KEYS = qw/ notHidden leftToRight numberOfStates numberOfObservationSymbols numberOfMixtureComponents componentDimension componentStorage transitionProbs states observationSymbols class name minimumActivity maximumActivity dummyActivitySpreadingRule shunting activityClippingRule spreadingRate activityLeak minimumWeight maximumWeight dummyWeightUpdateRule learningRate instar outstar weightLeak number xmin xmax phonation sound pulses pitch flutter voicingAmplitude doublePulsing openPhase collisionPhase power1 power2 spectralTilt aspirationAmplitude breathinessAmplitude vocalTract oral_formants nasal_formants nasal_antiformants coupling tracheal_formants tracheal_antiformants delta_formants frication fricationAmplitude frication_formants bypass intervals points text nx dx x1 samplingPeriod fmin fmax maximumNumberOfCoefficients maxnCoefficients maxnFormants frames nCoefficients numberOfCoefficients coefficients degree numberOfKnots knots c0 c ymin ymax numberOfNodes nodes numberOfConnections connections nodeFrom nodeTo string1 string2 weight plasticity x y r a gain clamped activity ny dx1 dx2 dy y1 z ceiling maxnCandidates frequency bandwidth strength frame intensity nFormants formant nCandidates candidate tiers size item number value mark nt t fweights numberOfColumns cells columnLabels columnHeaders numberOfRows rows row metric nLayers nUnitsInLayer outputsAreLinear nonLinearityType costFunctionType outputCategories nWeights w string label red green blue transparency voiceLanguageName voiceVariantName wordsPerMinute inputTextFormat inputPhonemeCoding samplingFrequency wordgap pitchAdjustment pitchRange outputPhonemeCoding estimateWordsPerMinute numberOfEigenvalues dimension eigenvalues eigenvectors numberOfObservations labels centroid relativeSize cord lowerCord upperCord shunt velum palate radius tip neutralBodyDistance alveoli teethCavity lowerTeeth upperTeeth lowerLip upperLip nose numberOfMasses length thickness mass k1 Dx Dy Dz weq numberOfStrings strings numberOfElements p min max v vocalTracts formants bandwidths oral_formants_amplitudes nasal_formants_amplitudes tracheal_formants_amplitudes frication_formants_amplitudes pairs nInstances input ouput dummyIntensity duration dummySpectrogram dummyFormantTier dummy1 dummy2 dummy3 dummy10 dummyPitchAnalysis dummy11 dummy12 dummyIntensityAnalysis dummyFormantAnalysis dummy4 dummy5 dummy6 dummy7 dummy8 dummy9 /;
+my %setup = ( input => $YAML );
 my $TAB = '    ';
 my $INDENT;
 my $LEVEL = 0;
@@ -132,6 +133,11 @@ GetOptions (
     shift;
     my $val = shift;
     $TAB = $val if $val =~ /^\s*$/;
+  },
+  'outfile=s'  => sub {
+    shift;
+    open OUTPUT, '>', $_[0] or die $!;
+    STDOUT->fdopen( \*OUTPUT, 'w' ) or die $!;
   },
 ) or pod2usage(2);
 
@@ -153,14 +159,15 @@ foreach (@ARGV) {
     }
 
     $input =~ s/(~|null)/{}/g;
-    
+
     my $object;
-    eval {
+    try {
       $object = Load(encode($setup{encoding}, $input, Encode::FB_CROAK));
-    };
-    if ($@) {
-      die "Could not parse: $@\n";
     }
+    catch {
+      warn "Could not parse: $_\n";
+      exit 0;
+    };
 
     if ($setup{'debug'}) {
       print Dumper($object) ;
@@ -173,8 +180,10 @@ foreach (@ARGV) {
       $object = collectionise($object);
     }
 
-    (exists $object->{'Object class'})
-      or die "Improper object:\n" . Dumper $object;
+    unless (exists $object->{'Object class'}) {
+      warn "Improperly formatted object; cannot deserialize\n";
+      exit 0;
+    }
 
     my $class = $object->{'Object class'};
     print "File type = \"ooTextFile\"\n";
