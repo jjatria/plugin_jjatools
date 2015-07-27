@@ -5,7 +5,7 @@ JJATools
 > **changes. It has been broken down into a multiplicity of individual plugins**
 > **which are currently being distributed via CPrAN at the following URL:**
 >
-> https://gitlab.com/cpran
+> https://cpran.net
 >
 > **This repository will remain as is for archival purposes, but please consider**
 > **using those plugins instead, which are under active development.**
